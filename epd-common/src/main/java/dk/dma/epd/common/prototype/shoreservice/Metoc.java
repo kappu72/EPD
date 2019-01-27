@@ -15,6 +15,8 @@
 package dk.dma.epd.common.prototype.shoreservice;
 
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.epd.common.prototype.communication.webservice.ShoreServiceErrorCode;
@@ -27,6 +29,7 @@ import dk.dma.epd.common.prototype.sensor.pnt.PntTime;
 import dk.frv.enav.common.xml.metoc.MetocDataTypes;
 import dk.frv.enav.common.xml.metoc.request.MetocForecastRequest;
 import dk.frv.enav.common.xml.metoc.request.MetocForecastRequestWp;
+import dk.frv.enav.common.xml.metoc.MetocForecastPoint;
 /**
  * Metoc shore service request generator 
  */
@@ -70,6 +73,7 @@ public class Metoc {
             reqWp.setLat(pos.getLatitude());
             reqWp.setLon(pos.getLongitude());
 
+            
             req.getWaypoints().add(reqWp);
             //System.out.println("First     wp: " + reqWp);
 
@@ -90,6 +94,7 @@ public class Metoc {
             }
             
             // If not last waypoint and eta in past, leave out if next also in the past.
+            // why it consider the past point just for calc it need to eval dt point
             if (i < route.getWaypoints().size() - 1) {
                 Date nextEta = route.getWpEta(i + 1);
                 if (eta.before(now) && nextEta.before(now)) {

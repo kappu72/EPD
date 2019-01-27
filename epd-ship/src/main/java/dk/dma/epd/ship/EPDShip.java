@@ -95,6 +95,7 @@ import dk.dma.epd.ship.service.shore.ShoreServices;
 import dk.dma.epd.ship.service.voct.VOCTManager;
 import dk.dma.epd.ship.settings.EPDSensorSettings;
 import dk.dma.epd.ship.settings.EPDSettings;
+import it.toscana.rete.lamma.prototype.grib.GribServices;
 
 /**
  * Main class with main method.
@@ -125,6 +126,8 @@ public final class EPDShip extends EPD implements IOwnShipListener {
     
     private DynamicPredictor dynamicPredictor;
     private DynamicPredictorSentenceParser dynamicPredictorParser;
+    
+    private GribServices gribServices;
 
     // Maritime Cloud services
     private IntendedRouteHandler intendedRouteHandler;
@@ -302,6 +305,11 @@ public final class EPDShip extends EPD implements IOwnShipListener {
         // Create FAL Handler
         falHandler = new FALHandler();
         mapHandler.add(falHandler);
+        
+        
+     // Create grib local services
+        gribServices = new GribServices(getSettings().getGribSettings());
+        mapHandler.add(gribServices);
 
         // Start sensors
         startSensors();
@@ -789,7 +797,7 @@ public final class EPDShip extends EPD implements IOwnShipListener {
         chatServiceHandler.shutdown();
         msiNmHandler.shutdown();
         maritimeCloudService.stop();
-
+        gribServices.stop();
         // Stop the system tray
         systemTray.shutdown();
 

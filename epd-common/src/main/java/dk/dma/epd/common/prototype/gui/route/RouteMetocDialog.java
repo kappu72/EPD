@@ -155,7 +155,7 @@ public class RouteMetocDialog extends JDialog implements ActionListener, FocusLi
                 
                 m.marshal(req, st);
                 
-                new XMLDialog(st.toString(), "RAW XML Request").setVisible(true);
+                new XMLDialog(st.toString(), "RAW XML Request").setAlwaysOnTop(true);
                 
             } catch (ShoreServiceException | JAXBException e) {
                 // TODO Auto-generated catch block
@@ -301,11 +301,12 @@ public class RouteMetocDialog extends JDialog implements ActionListener, FocusLi
         providerBox = new JComboBox<String>();
         providerBox.addItem("dmi");
         providerBox.addItem("fco");
+        providerBox.addItem("lamma");
         providerBox.addActionListener(this);
         providerBox.addFocusListener(this);
       
         
-        providerBox.setMaximumRowCount(2);
+        providerBox.setMaximumRowCount(3);
         GroupLayout gl_providerPanel = new GroupLayout(providerPanel);
         gl_providerPanel.setHorizontalGroup(
             gl_providerPanel.createParallelGroup(Alignment.LEADING)

@@ -14,6 +14,7 @@
  */
 package dk.dma.epd.common.prototype.event.mouse;
 
+import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -152,4 +153,9 @@ public class AbstractCoordMouseMode extends AbstractMouseMode implements Propert
     public void propertyChange(PropertyChangeEvent evt) {
         
     }
+
+	public void listenerPaint(Graphics g) {
+		// TODO Auto-generated method stub
+		
+	}
 }

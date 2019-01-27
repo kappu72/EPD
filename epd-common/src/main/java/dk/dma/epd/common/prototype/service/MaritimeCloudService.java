@@ -208,7 +208,6 @@ public class MaritimeCloudService extends MapHandlerChild implements Runnable, I
                 }
             }
 
-            @Override
             public void connected(URI host) {
                 cloudStatus.markCloudReception();
                 if (LOG_MARITIME_CLOUD_ACTIVITY) {

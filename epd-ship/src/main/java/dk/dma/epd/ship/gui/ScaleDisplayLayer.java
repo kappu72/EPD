@@ -164,7 +164,7 @@ public class ScaleDisplayLayer extends EPDLayerCommon implements
         // Therefore, The following code correctly obtains the proper
         // Length object.
 
-        Length[] choices = Length.getAvailable();
+        Length[] choices = Length.values();
         uom = null;
         for (int i = 0; i < choices.length; i++) {
             if (unitOfMeasure.equalsIgnoreCase(choices[i].toString())
@@ -210,7 +210,7 @@ public class ScaleDisplayLayer extends EPDLayerCommon implements
                 }
             };
 
-            for (Length lengthType : Length.getAvailable()) {
+            for (Length lengthType : Length.values()) {
                 JRadioButton jrb = new JRadioButton();
                 jrb.setText(lengthType.getAbbr());
                 jrb.setToolTipText(lengthType.toString());

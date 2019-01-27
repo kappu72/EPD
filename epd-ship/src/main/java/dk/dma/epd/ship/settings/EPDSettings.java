@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.Properties;
 
 import dk.dma.epd.common.prototype.settings.Settings;
+import it.toscana.rete.lamma.prototype.grib.GribSettings;
 
 
 /**
@@ -38,7 +39,7 @@ public class EPDSettings extends Settings implements Serializable {
     private final EPDEnavSettings enavSettings = new EPDEnavSettings();
     private final EPDS57LayerSettings s57Settings = new EPDS57LayerSettings();
     private final EPDCloudSettings cloudSettings = new EPDCloudSettings();
-
+    private final GribSettings gribSettings = new GribSettings();
     public EPDSettings() {
         super();
     }
@@ -59,8 +60,9 @@ public class EPDSettings extends Settings implements Serializable {
         navSettings.readProperties(props);
         sensorSettings.readProperties(props);
         cloudSettings.readProperties(props);
-        
+        gribSettings.readProperties(props);
         s57Settings.readSettings(resolve("s57Props.properties").toString());
+        
     }
 
     /**
@@ -124,5 +126,8 @@ public class EPDSettings extends Settings implements Serializable {
     
     public String getSettingsFile() {
         return settingsFile;
+    }
+    public GribSettings getGribSettings() {
+        return gribSettings;
     }
 }

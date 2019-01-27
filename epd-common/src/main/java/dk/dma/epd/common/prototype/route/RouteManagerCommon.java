@@ -44,6 +44,7 @@ import dk.dma.epd.common.prototype.settings.EnavSettings;
 import dk.dma.epd.common.prototype.shoreservice.ShoreServicesCommon;
 import dk.dma.epd.common.util.Util;
 import dk.frv.enav.common.xml.metoc.MetocForecast;
+import it.toscana.rete.lamma.prototype.grib.GribServices;
 
 /**
  * Base class for route managers, which handles a collection of routes and active route.
@@ -59,13 +60,14 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     private CopyOnWriteArrayList<IRoutesUpdateListener> listeners = new CopyOnWriteArrayList<>();
     protected EnavSettings enavSettings;
     protected ShoreServicesCommon shoreServices;
-
+    protected GribServices gribServices;
     @GuardedBy("this")
     protected List<Route> routes = new LinkedList<>();
     @GuardedBy("this")
     protected ActiveRoute activeRoute;
     @GuardedBy("this")
     protected int activeRouteIndex = -1;
+	
 
     /**
      * Constructor
@@ -419,7 +421,14 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
      */
     public void requestRouteMetoc(Route route) throws ShoreServiceException {
         // Request METOC from shore
-        MetocForecast metocForecast = shoreServices.routeMetoc(route);
+    	MetocForecast metocForecast;
+    	if(route.getRouteMetocSettings().getProvider() == "lamma") {
+    		System.out.println("TODO:: Extractmetoc from lamma grib file");
+    		metocForecast = gribServices.routeMetoc(route);
+    		// metocForecast = shoreServices.routeMetoc(route);
+    	}else {
+    		metocForecast = shoreServices.routeMetoc(route);
+        }
         // Add the METOC to route
         route.setMetocForecast(metocForecast);
         // Set show to true
@@ -638,6 +647,8 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
 
         if (shoreServices == null && obj instanceof ShoreServicesCommon) {
             shoreServices = (ShoreServicesCommon) obj;
+        } else if (gribServices == null && obj instanceof GribServices) {
+        	gribServices = (GribServices) obj;
         }
     }
 
@@ -648,6 +659,8 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     public void findAndUndo(Object obj) {
         if (shoreServices == obj) {
             shoreServices = null;
+        } else if (gribServices == obj) {
+            gribServices = null;
         }
         super.findAndUndo(obj);
     }
