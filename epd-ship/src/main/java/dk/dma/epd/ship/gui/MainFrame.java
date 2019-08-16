@@ -52,6 +52,7 @@ import dk.dma.epd.ship.gui.component_panels.SafeHavenComponentPanel;
 import dk.dma.epd.ship.gui.component_panels.ScaleComponentPanel;
 import dk.dma.epd.ship.gui.route.strategic.SendStrategicRouteDialog;
 import dk.dma.epd.ship.settings.EPDGuiSettings;
+import it.toscana.rete.lamma.gui.ShipDataDialog;
 
 /**
  * The main frame containing map and panels
@@ -282,6 +283,16 @@ public class MainFrame extends MainFrameCommon implements IMapFrame {
         setupDialog.loadSettings(EPD.getInstance().getSettings());
         setupDialog.setVisible(true);
         return setupDialog;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public ShipDataDialog openShipsDataDialog() {
+    	ShipDataDialog shipsDataDialog = new ShipDataDialog(this);
+    	// setupDialog.loadSettings(EPD.getInstance().getSettings());
+    	shipsDataDialog.setVisible(true);
+        return shipsDataDialog;
     }
 
     /**

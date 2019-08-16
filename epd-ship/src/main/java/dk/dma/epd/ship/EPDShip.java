@@ -95,7 +95,7 @@ import dk.dma.epd.ship.service.shore.ShoreServices;
 import dk.dma.epd.ship.service.voct.VOCTManager;
 import dk.dma.epd.ship.settings.EPDSensorSettings;
 import dk.dma.epd.ship.settings.EPDSettings;
-
+import it.toscana.rete.lamma.prototype.FuelService;
 /**
  * Main class with main method.
  * 
@@ -122,9 +122,10 @@ public final class EPDShip extends EPD implements IOwnShipListener {
     private NogoHandler nogoHandler;
     private TransponderFrame transponderFrame;
     private VoyageEventDispatcher voyageEventDispatcher;
-    
+
     private DynamicPredictor dynamicPredictor;
     private DynamicPredictorSentenceParser dynamicPredictorParser;
+    private FuelService fuelService;
 
     // Maritime Cloud services
     private IntendedRouteHandler intendedRouteHandler;
@@ -166,7 +167,7 @@ public final class EPDShip extends EPD implements IOwnShipListener {
         } else {
             homePath = determineHomePath(Paths.get(System.getProperty("user.home"), ".epd-ship"));
         }
-
+        // Copia le directories ed i files nella home utente
         new Bootstrap().run(this, new String[] { "epd-ship.properties", "enc_navicon.properties", "settings.properties",
                 "transponder.xml" }, new String[] { "routes", "layout/static", "shape/GSHHS_shp", "identities" });
 
@@ -240,6 +241,10 @@ public final class EPDShip extends EPD implements IOwnShipListener {
             mapHandler.add(dynamicPredictor);
         }
 
+        fuelService = new FuelService();
+        mapHandler.add(fuelService);
+        
+        
         // Load routeManager and register as GPS data listener
         routeManager = RouteManager.loadRouteManager();
         mapHandler.add(routeManager);

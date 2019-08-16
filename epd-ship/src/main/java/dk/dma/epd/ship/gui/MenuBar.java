@@ -125,13 +125,22 @@ public class MenuBar extends JMenuBar implements PropertyConsumer, BeanContextCh
 
         JMenuItem transponder = new JMenuItem("Transponder");
         file.add(transponder);
-        // transponder.setIcon(toolbarIcon("images/toolbar/transponder.png"));
+        //transponder.setIcon(toolbarIcon("images/toolbar/transponder.png"));
         transponder.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (transponderFrame != null) {
                     transponderFrame.setVisible(true);
                 }
+            }
+        });
+        JMenuItem shipsdata = new JMenuItem("Ships Data");
+        file.add(shipsdata);
+        //transponder.setIcon(toolbarIcon("images/toolbar/transponder.png"));
+        shipsdata.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainFrame.openShipsDataDialog();
             }
         });
 

@@ -82,11 +82,12 @@ public class RouteManagerPanel extends JPanel implements ActionListener,
     private JButton exportAllBtn = new JButton("Export All");
     private JButton importBtn = new JButton("Import");
     private JButton metocBtn = new JButton("METOC");
+    private JButton fuelConsumptioBtn = new JButton("Fuel Consumption");
     private JButton closeBtn = new JButton("Close");
     
     private JButton[] buttons = {
             propertiesBtn, activateBtn, zoomToBtn, copyBtn, reverseCopyBtn,
-            deleteBtn, exportBtn, exportAllBtn, importBtn, metocBtn, closeBtn };
+            deleteBtn, exportBtn, exportAllBtn, importBtn, metocBtn,fuelConsumptioBtn, closeBtn };
 
     private JTable routeTable = new JTable();
     private JScrollPane routeScrollPane = new JScrollPane(routeTable);
@@ -220,6 +221,7 @@ public class RouteManagerPanel extends JPanel implements ActionListener,
         copyBtn.setEnabled(singleSelected);
         deleteBtn.setEnabled(routeSelected && !activeSelected);
         metocBtn.setEnabled(singleSelected);
+        fuelConsumptioBtn.setEnabled(singleSelected);
         exportBtn.setEnabled(singleSelected);
     }
 
