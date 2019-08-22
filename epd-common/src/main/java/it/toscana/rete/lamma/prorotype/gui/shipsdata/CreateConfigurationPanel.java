@@ -22,19 +22,19 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.awt.event.ActionEvent;
 
-public class CreateConditionPanel extends JPanel implements ActionListener, KeyListener {
+public class CreateConfigurationPanel extends JPanel implements ActionListener, KeyListener {
 		
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 244123912635184313L;
-	private static final Logger LOG = LoggerFactory.getLogger(CreateConditionPanel.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CreateConfigurationPanel.class);
 	
 	private JButton btnCreate = new JButton("Create");
 	private JFormattedTextField name = new JFormattedTextField();
 	private ShipData ship;
-	CreateConditionPanel(ShipData ship) {
+	CreateConfigurationPanel(ShipData ship) {
 		super();
 		this.ship = ship;
 		setBounds(6, 6, 438, 26);
@@ -44,7 +44,7 @@ public class CreateConditionPanel extends JPanel implements ActionListener, KeyL
 		name.addKeyListener(this);
         add(name);
         
-        JLabel lblName = new JLabel("Condition Name*");
+        JLabel lblName = new JLabel("Configuration Name*");
         lblName.setBounds(0, 6, 113, 16);
         lblName.setLabelFor(name);
         add(lblName);
@@ -64,8 +64,8 @@ public class CreateConditionPanel extends JPanel implements ActionListener, KeyL
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == btnCreate){
-			ship.addCondition(name.getText());
-			fireShipUpdated(new ShipDataEvent(this, "condition-created", ship));
+			ship.addConfiguration(name.getText());
+			fireShipUpdated(new ShipDataEvent(this, "configuration-created", ship));
 			this.setVisible(false);
 		}
 		

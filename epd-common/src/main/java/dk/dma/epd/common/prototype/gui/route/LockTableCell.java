@@ -35,7 +35,7 @@ import dk.dma.epd.common.prototype.EPD;
  * a {@code CustomBooleanCellEditor} editor that may be applied to
  * the relevant lock table column.
  */
-class LockTableCell extends JCheckBox {
+public class LockTableCell extends JCheckBox {
     private static final long serialVersionUID = 1L;
 
     public static ImageIcon unlockedIcon = EPD.res().getCachedImageIcon("images/toolbar/lock-unlock.png");

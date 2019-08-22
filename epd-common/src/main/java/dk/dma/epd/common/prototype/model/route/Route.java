@@ -30,7 +30,7 @@ import dk.frv.enav.common.xml.metoc.MetocForecast;
 import dma.route.HeadingType;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import net.maritimecloud.util.Timestamp;
-
+import it.toscana.rete.lamma.prorotype.model.RouteFuelConsumptionSettings;
 /**
  * Route class
  */
@@ -109,7 +109,9 @@ public class Route implements Serializable {
 
     protected EtaCalculationType etaCalculationType = EtaCalculationType.DYNAMIC_SPEED;
 
-    public Route() {
+    protected RouteFuelConsumptionSettings routeFCSettings;
+    
+	public Route() {
 
     }
 
@@ -135,6 +137,7 @@ public class Route implements Serializable {
         this.metocEta = orig.metocEta;
         this.routeMetocSettings = orig.routeMetocSettings;
         this.strategicRouteId = orig.strategicRouteId;
+        this.routeFCSettings = orig.routeFCSettings;
     }
 
     public Route(dk.dma.enav.model.voyage.Route cloudRouteData) {
@@ -440,7 +443,7 @@ public class Route implements Serializable {
         this.metocStarttime = getStarttime();
         this.metocEta = getEta();
     }
-
+    
     /**
      * Returns true if not drifted to far from plan
      * 
@@ -491,6 +494,13 @@ public class Route implements Serializable {
         this.routeMetocSettings = routeMetocSettings;
     }
 
+    public RouteFuelConsumptionSettings getRouteFCSettings() {
+		return routeFCSettings;
+	}
+
+	public void setRouteFCSettings(RouteFuelConsumptionSettings routeFCSettings) {
+		this.routeFCSettings = routeFCSettings;
+	}
     public Long getRouteTtg() {
         calcValues();
         return totalTtg;

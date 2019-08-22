@@ -25,7 +25,7 @@ public class ShipsSelector extends JComboBox<String> {
 	private static final long serialVersionUID = 1L;
 	private List<ShipData>  shipsList;
 
-	ShipsSelector (List<ShipData> ships) {
+	public ShipsSelector (List<ShipData> ships) {
 		super();
 		setRenderer(new ShipRenderer());
 		model = new DefaultComboBoxModel(ships.toArray());
@@ -68,7 +68,7 @@ public class ShipsSelector extends JComboBox<String> {
         		return this;
         }
     }
-	public void selectByName(String name) {
+	public ShipData selectByName(String name) {
 		ShipData d = shipsList.stream()
 				  .filter(data -> data.getShipName().equals(name))
 				  .findAny()
@@ -76,6 +76,7 @@ public class ShipsSelector extends JComboBox<String> {
 		if(d != null) {
 			this.setSelectedItem(d);
 		}
+		return d;
 	}
 
 }

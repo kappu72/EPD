@@ -14,6 +14,7 @@
  */
 package dk.dma.epd.common.text;
 
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -24,6 +25,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import dk.dma.epd.common.Heading;
+import it.toscana.rete.lamma.utils.Utils;
 
 /**
  * Utility class for doing different formatting
@@ -65,7 +67,15 @@ public class Formatter {
         }
         return longDateTime.format(date) + "(" + getTzNumber(date) + ")";
     }
+    
+    public static String formatLongDateTimeNoTz(Date date) {
+        if (date == null) {
+            return "N/A";
+        }
+        return longDateTime.format(date);
+    }
 
+    
     public static String formatYodaTime(DateTime time) {
         DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MMMM, HH:mm");
 
@@ -208,6 +218,9 @@ public class Formatter {
     }
 
     public static String formatDistNM(Double dist) {
+    	if (dist == null) {
+            return "N/A";
+        }
         return formatDistNM(dist, 2);
     }
 
@@ -292,7 +305,12 @@ public class Formatter {
         }
 
     }
-
+    public static String formatPropulsion(String p) {
+    	if(p == null) {
+    		return null;
+    	}
+    	return Utils.stripFileExt(Paths.get(p).toFile());
+    }
     /**
      * A very simple and crude conversion of plain text into HTML.
      * 

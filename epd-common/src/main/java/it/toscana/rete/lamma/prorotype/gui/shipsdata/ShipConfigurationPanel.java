@@ -33,7 +33,7 @@ import dk.dma.epd.common.prototype.model.route.RouteLoadException;
 import it.toscana.rete.lamma.prorotype.model.ShipData;
 import it.toscana.rete.lamma.prorotype.event.ShipDataEvent;
 import it.toscana.rete.lamma.prorotype.listener.ShipDataListener;
-import it.toscana.rete.lamma.prorotype.model.ShipCondition;
+import it.toscana.rete.lamma.prorotype.model.ShipConfiguration;
 import it.toscana.rete.lamma.utils.Utils;
 import javax.swing.JFormattedTextField;
 import java.awt.Component;
@@ -44,7 +44,7 @@ import javax.swing.SwingConstants;
 import javax.swing.JTextField;
 
 
-public class ShipConditionPanel extends JPanel implements ActionListener, ShipDataListener, KeyListener {
+public class ShipConfigurationPanel extends JPanel implements ActionListener, ShipDataListener, KeyListener {
 
 	/**
 	 * Manage the import of tables needed to calculate fuel consumption
@@ -55,63 +55,63 @@ public class ShipConditionPanel extends JPanel implements ActionListener, ShipDa
 	 */
 	 
 	private static final long serialVersionUID = -5763833385898569850L;
-	private static final Logger LOG = LoggerFactory.getLogger(ShipConditionPanel.class);
-	private ShipConditionsSelector conditionSelector;
-	private JButton btnAddCondition = new JButton("New Condition");
-	private CreateConditionPanel createCondition;
+	private static final Logger LOG = LoggerFactory.getLogger(ShipConfigurationPanel.class);
+	private ShipConfigurationsSelector configurationSelector;
+	private JButton btnAddConfiguration = new JButton("New Configuration");
+	private CreateConfigurationPanel createConfiguration;
 	private ShipData ship;
 	private JPanel filesPanel = new JPanel();
 	JButton wiBtn = new JButton("Import");
-	private ConditionFileSelector windres = new ConditionFileSelector("Windres*");
-	private ConditionFileSelector waveres = new ConditionFileSelector("Waveres Generic*");
-	private ConditionFileSelector waveres_sw = new ConditionFileSelector("Waveres Swell");
-	private ConditionFileSelector waveres_se = new ConditionFileSelector("Waveres Sea");
+	private ConfigurationsFileSelector windres = new ConfigurationsFileSelector("Windres*");
+	private ConfigurationsFileSelector waveres = new ConfigurationsFileSelector("Waveres Generic*");
+	private ConfigurationsFileSelector waveres_sw = new ConfigurationsFileSelector("Waveres Swell");
+	private ConfigurationsFileSelector waveres_se = new ConfigurationsFileSelector("Waveres Sea");
 	private JTextField propName = new JFormattedTextField();
 	private final JLabel lblNewConfigName = new JLabel("New Config. Name");
 	private JList propConfigs = new JList();
 	private JButton importProp = new JButton("Import");
 	private JFileChooser fc = new JFileChooser();
 	
-	ShipConditionPanel() {
+	ShipConfigurationPanel() {
 		this(null);
 
 	}
 	
-	ShipConditionPanel (ShipData ship) {
+	ShipConfigurationPanel (ShipData ship) {
 		super();
-		setBorder(new TitledBorder(null, "Sail Conditions", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		setBorder(new TitledBorder(null, "SaiConfiguration", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         setBounds(8, 43, 444, 455);
         setLayout(null);
 		if(ship != null) {
-			conditionSelector = new ShipConditionsSelector(ship.getShipConditions());
+			configurationSelector = new ShipConfigurationsSelector(ship.getShipConfigurations());
 		}else {
-			conditionSelector = new ShipConditionsSelector(new ArrayList<ShipCondition>());
+			configurationSelector = new ShipConfigurationsSelector(new ArrayList<ShipConfiguration>());
 		}
         
-        conditionSelector.setBounds(119, 31, 180, 20);
-        conditionSelector.addActionListener(this);
+        configurationSelector.setBounds(119, 31, 180, 20);
+        configurationSelector.addActionListener(this);
         
         /**
-         * Setting add condition btn	
+         * Setting add configuration btn	
          */
-        btnAddCondition.setBounds(337, 32, 99, 20);
-        btnAddCondition.addActionListener(this);
+        btnAddConfiguration.setBounds(337, 32, 99, 20);
+        btnAddConfiguration.addActionListener(this);
         
-        JLabel lblSelectCondition = new JLabel("Select Condition");
-        lblSelectCondition.setFont(new Font("Lucida Grande", Font.PLAIN, 13));
-        lblSelectCondition.setBounds(6, 33, 113, 16);
-        add(lblSelectCondition);
-        lblSelectCondition.setLabelFor(conditionSelector);
+        JLabel lblSelectConfiguration = new JLabel("Select Configuration");
+        lblSelectConfiguration.setFont(new Font("Lucida Grande", Font.PLAIN, 13));
+        lblSelectConfiguration.setBounds(6, 33, 113, 16);
+        add(lblSelectConfiguration);
+        lblSelectConfiguration.setLabelFor(configurationSelector);
         
-        add(conditionSelector);
-        add(btnAddCondition);
+        add(configurationSelector);
+        add(btnAddConfiguration);
         
-        createCondition = new CreateConditionPanel(ship);
-        createCondition.addShipDataListener(this);
-        createCondition.setSize(430, 27);
-        createCondition.setLocation(6, 73);
-        createCondition.setVisible(false);
-        add(createCondition);
+        createConfiguration = new CreateConfigurationPanel(ship);
+        createConfiguration.addShipDataListener(this);
+        createConfiguration.setSize(430, 27);
+        createConfiguration.setLocation(6, 73);
+        createConfiguration.setVisible(false);
+        add(createConfiguration);
         
         // Panel for files editing
         filesPanel.setBorder(new TitledBorder(null, "Files configuration", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -131,12 +131,12 @@ public class ShipConditionPanel extends JPanel implements ActionListener, ShipDa
         filesPanel.add(waveres_se);
         
         propConfigs.setBounds(26, 178, 211, 99);
-        propConfigs.setCellRenderer(new PropulsorListRenderer());
+        propConfigs.setCellRenderer(new PropulsionListRenderer());
         JScrollPane listScroller = new JScrollPane(propConfigs);
         listScroller.setBounds(26, 178, 139, 99);
         filesPanel.add(listScroller);
         
-        JLabel lblNewLabel = new JLabel("Propulsor Configurations*");
+        JLabel lblNewLabel = new JLabel("Propulsion Configurations*");
         lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
         lblNewLabel.setBounds(6, 162, 178, 16);
         filesPanel.add(lblNewLabel);
@@ -166,11 +166,11 @@ public class ShipConditionPanel extends JPanel implements ActionListener, ShipDa
 	}
 	public void setShip(ShipData ship) {
 		this.ship = ship;
-		addConditions(ship.getShipConditions());
-		createCondition.setShip(ship);
+		addConfigurations(ship.getShipConfigurations());
+		createConfiguration.setShip(ship);
 	}
-	public void addConditions (List<ShipCondition> conditions) {
-		conditionSelector.addConditions(conditions);
+	public void addConfigurations (List<ShipConfiguration> configurations) {
+		configurationSelector.addConfigurations(configurations);
 	}
 	
 	@Override
@@ -178,16 +178,15 @@ public class ShipConditionPanel extends JPanel implements ActionListener, ShipDa
 		// TODO Auto-generated method stub
 		LOG.info(e.toString());
 		Object source = e.getSource();
-		if(source == btnAddCondition) {
+		if(source == btnAddConfiguration) {
 			if(filesPanel.isVisible())
 				filesPanel.setVisible(false);
-			createCondition.reset();
-			createCondition.setVisible(true);
-		}else if(source == conditionSelector) {
-			// TODO condition configuration selected hide creation panel if visible and enable editing of files
-			if(createCondition.isVisible())
-				createCondition.setVisible(false);
-			if(conditionSelector.getSelectedItem() != null) {
+			createConfiguration.reset();
+			createConfiguration.setVisible(true);
+		}else if(source == configurationSelector) {
+			if(createConfiguration.isVisible())
+				createConfiguration.setVisible(false);
+			if(configurationSelector.getSelectedItem() != null) {
 				resetFilesPanel();
 				filesPanel.setVisible(true);
 			}else 
@@ -218,26 +217,26 @@ public class ShipConditionPanel extends JPanel implements ActionListener, ShipDa
 	@Override
 	public void shipDataChanged(ShipDataEvent e) {
 		Object source = e.getSource();
-		if (source == createCondition) {
-			ShipCondition c = ship.getShipConditions().get(ship.getShipConditions().size()- 1);
-			conditionSelector.addCondition(c , true);
+		if (source == createConfiguration) {
+			ShipConfiguration c = ship.getShipConfigurations().get(ship.getShipConfigurations().size()- 1);
+			configurationSelector.addConfiguration(c , true);
 		}
 		
 	}
 	public void resetFilesPanel() {
-		 ShipCondition condition = (ShipCondition) conditionSelector.getSelectedItem();
-		 windres.setName(condition.getWindresName());
-		 waveres_sw.setName(condition.getWaveresSwName());
-		 waveres_se.setName(condition.getWaveresName());
-		 waveres.setName(condition.getWaveresName());
-		 propConfigs.setListData(condition.getPropulsors().toArray());
+		 ShipConfiguration configuration = (ShipConfiguration) configurationSelector.getSelectedItem();
+		 windres.setName(configuration.getWindresName());
+		 waveres_sw.setName(configuration.getWaveresSwName());
+		 waveres_se.setName(configuration.getWaveresName());
+		 waveres.setName(configuration.getWaveresName());
+		 propConfigs.setListData(configuration.getPropulsions().toArray());
 	}
 	private String importFile(String type) {
 		return importFile(type, null);
 	}
 	private String importFile(String type, String name) {
         // Get filename from dialog
-        ShipCondition condition = (ShipCondition) conditionSelector.getSelectedItem();
+        ShipConfiguration configuration = (ShipConfiguration) configurationSelector.getSelectedItem();
         
        
 
@@ -256,15 +255,15 @@ public class ShipConditionPanel extends JPanel implements ActionListener, ShipDa
         	LOG.info(file.getName());
         	try {
         		if(type == "windres")
-        			return condition.setWindres(file);
+        			return configuration.importWindres(file);
         		if(type == "waveres")
-        			return condition.setWaveres(file);
+        			return configuration.importWaveres(file);
         		if(type == "waveres_sw")	
-            		return condition.setWaveresSw(file);
+            		return configuration.importWaveresSw(file);
         		if(type == "waveres_se")	
-            		return condition.setWaveresSe(file);
+            		return configuration.importWaveresSe(file);
         		if(type == "ps")	
-            		return condition.setPropulsor(file, name);
+            		return configuration.importPropulsion(file, name);
         	} catch (IOException e) {
         		JOptionPane.showMessageDialog(this, e.getMessage() + ": "
                       + file.getName(), "Import file error",
@@ -299,7 +298,7 @@ public class ShipConditionPanel extends JPanel implements ActionListener, ShipDa
 
 		
 	}
-	protected class PropulsorListRenderer extends DefaultListCellRenderer  {
+	protected class PropulsionListRenderer extends DefaultListCellRenderer  {
         public Component getListCellRendererComponent(JList list, Object value, int index,
                                                       boolean isSelected, boolean cellHasFocus) {
 

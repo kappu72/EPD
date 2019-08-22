@@ -60,6 +60,7 @@ import dk.dma.epd.common.prototype.model.route.RouteLoader;
 import dk.dma.epd.common.prototype.model.route.RoutesUpdateEvent;
 import dk.dma.epd.ship.EPDShip;
 import dk.dma.epd.ship.route.RouteManager;
+import it.toscana.rete.lamma.prorotype.gui.route.RouteFuelConsumptionPropertiesDialogCommon;
 
 /**
  * Main panel of the route manager dialog
@@ -303,6 +304,16 @@ public class RouteManagerPanel extends JPanel implements ActionListener,
                     .notifyListeners(RoutesUpdateEvent.METOC_SETTINGS_CHANGED);
         }
     }
+    private void fuelConsumption() {
+        int i = routeTable.getSelectedRow();
+        if (i >= 0) {
+            RouteFuelConsumptionPropertiesDialogCommon routeFCDialog = new RouteFuelConsumptionPropertiesDialogCommon(
+                    routeManagerDialog, 
+                    EPDShip.getInstance().getMainFrame().getChartPanel(),
+                    i);
+            routeFCDialog.setVisible(true);
+        }
+    }
 
     private void delete() {
         int row = routeTable.getSelectedRow();
@@ -437,7 +448,10 @@ public class RouteManagerPanel extends JPanel implements ActionListener,
             exportAllToFile();
         } else if (e.getSource() == importBtn) {
             importFromFile();
+        } else if (e.getSource() == fuelConsumptioBtn) {
+        	fuelConsumption();
         }
+        
     }
 
     /**

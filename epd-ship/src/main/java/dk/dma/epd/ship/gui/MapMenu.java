@@ -451,6 +451,9 @@ public class MapMenu extends MapMenuCommon {
         routeProperties.setChartPanel(EPDShip.getInstance().getMainFrame().getChartPanel());
         add(routeProperties);
 
+        routeFCProperties.setRouteIndex(routeIndex);
+        routeFCProperties.setChartPanel(EPDShip.getInstance().getMainFrame().getChartPanel());
+        add(routeFCProperties);
         // generalMenu(false); //TODO: is this supposed to be commented out?
         revalidate();
     }

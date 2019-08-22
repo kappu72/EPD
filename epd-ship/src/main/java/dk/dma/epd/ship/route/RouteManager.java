@@ -233,6 +233,7 @@ public class RouteManager extends RouteManagerCommon implements
             // Not an error
         } catch (Exception e) {
             LOG.error("Failed to load routes file: " + e.getMessage());
+            e.printStackTrace();
             // Delete possible corrupted or old file
             new File(ROUTES_FILE).delete();
         }
@@ -251,6 +252,7 @@ public class RouteManager extends RouteManagerCommon implements
             objectOut.writeObject(routeStore);
         } catch (IOException e) {
             LOG.error("Failed to save routes file: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

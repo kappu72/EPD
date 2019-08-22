@@ -53,6 +53,7 @@ import dk.dma.epd.common.prototype.model.route.RouteLeg;
 import dk.dma.epd.common.prototype.notification.MsiNmNotification;
 import dk.dma.epd.common.prototype.service.IntendedRouteHandlerCommon;
 import dk.dma.epd.common.prototype.service.MsiNmServiceHandlerCommon;
+import it.toscana.rete.lamma.prorotype.gui.menuitems.RouteFuelConsumptionProperties;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -102,6 +103,7 @@ public abstract class MapMenuCommon extends JPopupMenu implements ActionListener
     protected RouteProperties routeProperties;
     protected RouteRequestMetoc routeRequestMetoc;
     protected RouteMetocProperties routeMetocProperties;
+    protected RouteFuelConsumptionProperties routeFCProperties;
     protected RouteShowMetocToggle routeShowMetocToggle;
     protected RouteLegInsertWaypoint routeLegInsertWaypoint;
     protected RouteWaypointActivateToggle routeWaypointActivateToggle;
@@ -190,6 +192,8 @@ public abstract class MapMenuCommon extends JPopupMenu implements ActionListener
         routeWaypointDelete.addActionListener(this);
         routeWaypointEditEta = new RouteWaypointEditEta("Set waypoint ETA...");
         routeWaypointEditEta.addActionListener(this);
+        routeFCProperties = new RouteFuelConsumptionProperties("Fuel Consumption Properties");
+        routeFCProperties.addActionListener(this);
         
         // MSI menu items
         msiNmAcknowledge = new MsiNmAcknowledge("Acknowledge MSI-NM");

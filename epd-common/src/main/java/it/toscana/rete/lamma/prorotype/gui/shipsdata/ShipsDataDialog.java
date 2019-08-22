@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import dk.dma.epd.common.prototype.EPD;
 import it.toscana.rete.lamma.prorotype.event.ShipDataEvent;
 import it.toscana.rete.lamma.prorotype.listener.ShipDataListener;
-import it.toscana.rete.lamma.prorotype.model.ShipCondition;
+import it.toscana.rete.lamma.prorotype.model.ShipConfiguration;
 import it.toscana.rete.lamma.prorotype.model.ShipData;
 import it.toscana.rete.lamma.utils.Utils;
 
@@ -40,7 +40,7 @@ public class ShipsDataDialog extends JDialog implements ActionListener, ShipData
 	private CreateShip createShipPanel;
 	private JButton btnAddShip = new JButton("Add Ship");
 	protected ShipsSelector shipsSelector;
-	private ShipConditionPanel shipConditionPanel;
+	private ShipConfigurationPanel shipConfigurationPanel;
 	private ShipData selectedShip;
 	
 	public ShipsDataDialog (JFrame parent) {
@@ -89,10 +89,10 @@ public class ShipsDataDialog extends JDialog implements ActionListener, ShipData
         createShipPanel.setVisible(false);
         getContentPane().add(createShipPanel);
         
-        shipConditionPanel = new ShipConditionPanel();
-        shipConditionPanel.setBounds(8, 43, 444, 449);
-        shipConditionPanel.setVisible(false);
-        getContentPane().add(shipConditionPanel);
+        shipConfigurationPanel = new ShipConfigurationPanel();
+        shipConfigurationPanel.setBounds(8, 43, 444, 449);
+        shipConfigurationPanel.setVisible(false);
+        getContentPane().add(shipConfigurationPanel);
         
         try {
         	shipsSelector.setSelectedIndex(0);
@@ -110,13 +110,13 @@ public class ShipsDataDialog extends JDialog implements ActionListener, ShipData
 				createShipPanel.setVisible(false);
 			
 			selectedShip = (ShipData) shipsSelector.getSelectedItem();
-			shipConditionPanel.setShip(selectedShip);
-			shipConditionPanel.setVisible(true);
+			shipConfigurationPanel.setShip(selectedShip);
+			shipConfigurationPanel.setVisible(true);
 			
 			
 		}else if (source == btnAddShip) {
-			if(shipConditionPanel.isVisible())
-				shipConditionPanel.setVisible(false);
+			if(shipConfigurationPanel.isVisible())
+				shipConfigurationPanel.setVisible(false);
 			createShipPanel.setVisible(true);
         	btnAddShip.setEnabled(false);
 		}

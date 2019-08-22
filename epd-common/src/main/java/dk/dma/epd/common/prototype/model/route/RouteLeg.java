@@ -34,7 +34,7 @@ public class RouteLeg implements Serializable {
 
     private static final int R = 6371; // earths radius in km
     private static final long serialVersionUID = 1L;
-
+    
     /**
      * Planned leg speed
      */
@@ -61,8 +61,10 @@ public class RouteLeg implements Serializable {
     protected RouteWaypoint endWp;
 
     protected double SFLen = 1000;
+    // Path isn't Serializable use string instead
+    protected String propulsionConfig;
 
-    public RouteLeg() {
+	public RouteLeg() {
 
     }
 
@@ -199,6 +201,13 @@ public class RouteLeg implements Serializable {
         this.endWp = endWp;
     }
 
+    public String getPropulsionConfig() {
+		return propulsionConfig;
+	}
+
+	public void setPropulsionConfig(String propulsionConfig) {
+		this.propulsionConfig = propulsionConfig;
+	}
     public double calcRng() {
 
         return Calculator.range(startWp.getPos(), endWp.getPos(), heading);

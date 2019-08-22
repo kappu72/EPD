@@ -14,7 +14,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-public class ConditionFileSelector extends JPanel {
+public class ConfigurationsFileSelector extends JPanel {
 		
 	
 	/**
@@ -25,7 +25,7 @@ public class ConditionFileSelector extends JPanel {
 	private JButton importBtn = new JButton("Import");
 	private JLabel  name = new JLabel("Not Available");
 	private JLabel lab;
-	ConditionFileSelector(String label) {
+	ConfigurationsFileSelector(String label) {
 		
 		lab = new JLabel(label);
 		GroupLayout groupLayout = new GroupLayout(this);
@@ -62,7 +62,7 @@ public class ConditionFileSelector extends JPanel {
 	public void addActionListener(ActionListener a) {
 		importBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				a.actionPerformed(new ActionEvent(ConditionFileSelector.this, e.getID(), e.getActionCommand()));
+				a.actionPerformed(new ActionEvent(ConfigurationsFileSelector.this, e.getID(), e.getActionCommand()));
 			}
 		});
 	}
