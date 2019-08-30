@@ -60,7 +60,7 @@ import dk.dma.epd.common.prototype.model.route.RouteLoader;
 import dk.dma.epd.common.prototype.model.route.RoutesUpdateEvent;
 import dk.dma.epd.ship.EPDShip;
 import dk.dma.epd.ship.route.RouteManager;
-import it.toscana.rete.lamma.prorotype.gui.route.RouteFuelConsumptionPropertiesDialogCommon;
+import it.toscana.rete.lamma.prototype.gui.route.RouteFuelConsumptionPropertiesDialogCommon;
 
 /**
  * Main panel of the route manager dialog

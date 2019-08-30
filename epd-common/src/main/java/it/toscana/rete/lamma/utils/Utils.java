@@ -21,8 +21,8 @@ import com.google.common.base.CharMatcher;
 
 
 import dk.dma.epd.common.prototype.EPD;
-import it.toscana.rete.lamma.prorotype.event.ShipDataEvent;
-import it.toscana.rete.lamma.prorotype.model.ShipData;
+import it.toscana.rete.lamma.prototype.event.ShipDataEvent;
+import it.toscana.rete.lamma.prototype.model.ShipData;
 
 public class Utils {
 	private static final Logger LOG = LoggerFactory.getLogger(Utils.class);

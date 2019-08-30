@@ -29,8 +29,8 @@ import dk.dma.epd.common.util.Converter;
 import dk.frv.enav.common.xml.metoc.MetocForecast;
 import dma.route.HeadingType;
 import edu.emory.mathcs.backport.java.util.Arrays;
+import it.toscana.rete.lamma.prototype.model.RouteFuelConsumptionSettings;
 import net.maritimecloud.util.Timestamp;
-import it.toscana.rete.lamma.prorotype.model.RouteFuelConsumptionSettings;
 /**
  * Route class
  */

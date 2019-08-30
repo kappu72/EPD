@@ -53,7 +53,7 @@ import dk.dma.epd.common.prototype.model.route.RouteLeg;
 import dk.dma.epd.common.prototype.notification.MsiNmNotification;
 import dk.dma.epd.common.prototype.service.IntendedRouteHandlerCommon;
 import dk.dma.epd.common.prototype.service.MsiNmServiceHandlerCommon;
-import it.toscana.rete.lamma.prorotype.gui.menuitems.RouteFuelConsumptionProperties;
+import it.toscana.rete.lamma.prototype.gui.menuitems.RouteFuelConsumptionProperties;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;

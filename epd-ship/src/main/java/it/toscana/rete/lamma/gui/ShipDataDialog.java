@@ -10,7 +10,7 @@ import dk.dma.epd.common.prototype.ais.VesselTarget;
 import dk.dma.epd.ship.EPDShip;
 
 import dk.dma.epd.ship.ownship.OwnShipHandler;
-import it.toscana.rete.lamma.prorotype.gui.shipsdata.ShipsDataDialog;
+import it.toscana.rete.lamma.prototype.gui.shipsdata.ShipsDataDialog;
 
 public class ShipDataDialog extends ShipsDataDialog {
 	/**
