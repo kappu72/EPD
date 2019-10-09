@@ -2,6 +2,9 @@ package it.toscana.rete.lamma.prototype.model;
 
 import java.io.Serializable;
 
+import dk.frv.enav.common.xml.metoc.MetocForecast;
+import dk.frv.enav.common.xml.metoc.MetocForecastPoint;
+
 public class FuelConsumption implements Serializable {
 		
 	/**
@@ -16,6 +19,10 @@ public class FuelConsumption implements Serializable {
 	double wave_resistance;
 	double wind_resistance;
 	double total_added_resistance;
+	double fuel_rate;
+	double fuel;
+	MetocPointForecast metoc;
+	
 	
 	public FuelConsumption() {
 		super();
@@ -23,7 +30,8 @@ public class FuelConsumption implements Serializable {
 	}
 
 	public FuelConsumption(ThetaUDimension current_rel, ThetaUDimension wind_rel, double heading, double wave_polar,
-			double wind_polar, double wave_resistance, double wind_resistance, double total_resistance) {
+			double wind_polar, double wave_resistance, double wind_resistance, double total_added_resistance,
+			double fuel_rate, double fuel, MetocPointForecast metoc) {
 		super();
 		this.current_rel = current_rel;
 		this.wind_rel = wind_rel;
@@ -32,9 +40,18 @@ public class FuelConsumption implements Serializable {
 		this.wind_polar = wind_polar;
 		this.wave_resistance = wave_resistance;
 		this.wind_resistance = wind_resistance;
-		this.total_added_resistance = total_resistance;
+		this.total_added_resistance = total_added_resistance;
+		this.fuel_rate = fuel_rate;
+		this.fuel = fuel;
+		this.metoc = metoc;
+
 	}
-	
+	public FuelConsumption clone() {
+		return new FuelConsumption(current_rel,
+				wind_rel, heading, wave_polar, wind_polar,
+				wave_resistance, wind_resistance, total_added_resistance, fuel_rate, fuel, metoc);
+		
+	}
 	public ThetaUDimension getCurrent_rel() {
 		return current_rel;
 	}
@@ -91,13 +108,31 @@ public class FuelConsumption implements Serializable {
 		this.wind_resistance = wind_resistance;
 	}
 
-	public double getTotal_resistance() {
+	public double getTotalAddedResistance() {
 		return total_added_resistance;
 	}
 
-	public void setTotal_resistance(double total_resistance) {
+	public void setTotalresistance(double total_resistance) {
 		this.total_added_resistance = total_resistance;
 	}
 	
+	public void setFuelRate(double fuel_rate) {
+		this.fuel_rate = fuel_rate;
+	}
 	
+	public void setFuel(double fuel) {
+		this.fuel = fuel;
+	}
+	public double getFuelRate() {
+		return fuel_rate;
+	}
+	public double getFuel() {
+		 return fuel;
+	}
+	public void setMetoc(MetocPointForecast metoc) {
+		this.metoc = metoc;
+	}
+	public MetocPointForecast getMetoc() {
+		 return metoc;
+	}
 }

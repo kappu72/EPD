@@ -36,6 +36,15 @@ public class FuelConsumptionCalculatorTest {
         return 	file.toPath();
     }
 	@Test
+	public final void testReverseAngle() {
+		
+		assertEquals(180.0, FuelConsumptionCalculator.reverseAngle(0.0), 0.0001);
+		assertEquals(90.0, FuelConsumptionCalculator.reverseAngle(270), 0.0001);
+		assertEquals(45., FuelConsumptionCalculator.reverseAngle(225.), 0.0001);
+	}
+	
+	
+	@Test
 	public final void testWrapTo360() {
 		
 		assertEquals(2.0, FuelConsumptionCalculator.wrapTo360(-358), 0.0001);
@@ -163,8 +172,9 @@ public class FuelConsumptionCalculatorTest {
 		ThetaUDimension SOG = new ThetaUDimension(20, 180);
 		UVDimension CUR_SOG = new UVDimension(2, 1);
 		
-		FuelConsumption c = FuelConsumptionCalculator.CalculateResistance(SOG, CUR_SOG, WIND_SOG, waveD, 4.50, waveTm, cxRes, cawRes, 850, true);
-		double fuelRate = fr.getFuelRate((float) c.getCurrent_rel().getU(), (float) c.getTotal_resistance());
+		FuelConsumption c = FuelConsumptionCalculator.CalculateAllKinematical(SOG, CUR_SOG, WIND_SOG, waveD, true);
+		FuelConsumption r = FuelConsumptionCalculator.CalculateResistance(c, waveH, waveTm, cxRes, cawRes, 850);
+		double fuelRate = fr.getFuelRate((float) r.getCurrent_rel().getU(), (float) r.getTotalAddedResistance());
 		
 	 }
 	 

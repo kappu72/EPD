@@ -11,24 +11,24 @@ public class WavePeriods {
 		 * @param optionalT
 		 * @param pdsComp
 		 */
-		public WavePeriods(Parameter mainT, Parameter pdsComp ) {
+		public WavePeriods(Parameter mainT, Parameter cawComp ) {
 			super();
 			this.mainT = mainT;
-			this.cawComp= pdsComp;
-			cawValues = new OneDimTable<OneDimDouble>((int) (mainT.getMin() * 10), (int) (mainT.getMax() * 10), (int) (mainT.getDelta() * 10), mainT.getSize(), OneDimDouble.class);
-			optionalTValues = new OneDimDouble((int) (mainT.getMin() * 10), (int) (mainT.getMax() * 10), (int) (mainT.getDelta() * 10), mainT.getSize(), Double.class);
+			this.cawComp= cawComp;
+			cawValues = new OneDimTable<OneDimDouble>(mainT.getMin() * 10, mainT.getMax() * 10, mainT.getDelta() * 10, mainT.getSize(), OneDimDouble.class);
+			optionalTValues = new OneDimDouble(mainT.getMin() * 10, mainT.getMax() * 10, mainT.getDelta() * 10, mainT.getSize(), Double.class);
 		}
 
-		public void addCawValues( OneDimDouble[] pdsValues){
-			cawValues.setValues(pdsValues);
+		public void addCawValues( OneDimDouble[] cawValues){
+			this.cawValues.setValues(cawValues);
 		}
-		public void addCawValue(OneDimTable<Double> pdsValue, int idx) {
-			cawValues.setValue((OneDimDouble) pdsValue, idx);
+		public void addCawValue(OneDimTable<Double> cawValue, int idx) {
+			this.cawValues.setValue((OneDimDouble) cawValue, idx);
 		}
 		public void addOptionalTValues( Double[] optTValues){
 			optionalTValues.setValues(optTValues);
 		}
-		public void addOptionalTValue( Double optTValue, int idx){
+		public void addOptionalTValue( double optTValue, int idx){
 			optionalTValues.setValue(optTValue, idx);
 		}
 		/**
@@ -37,7 +37,7 @@ public class WavePeriods {
 		 * @param angle Domain -180 180
 		 * @return
 		 */
-		public double getCawValue(float period, float angle) {
+		public double getCawValue(double period, double angle) {
 			return cawValues.getValue(period * 10).getWeightedValue(Math.abs(angle));
 		}
 		
@@ -46,7 +46,7 @@ public class WavePeriods {
 		 * @param period
 		 * @return
 		 */
-		public double getOptTValue(float period) {
+		public double getOptTValue(double period) {
 			return (double) optionalTValues.getValue(period* 10);
 		}
 

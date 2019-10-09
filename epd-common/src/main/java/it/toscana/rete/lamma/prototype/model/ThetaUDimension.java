@@ -1,35 +1,27 @@
 package it.toscana.rete.lamma.prototype.model;
 
+import java.io.Serializable;
+
 /**
  * Model a Metoc param using speed (U) direction (Theta) form
  * @author kappu
  *
  */
-public class ThetaUDimension {
-	private double U;
+public class ThetaUDimension extends ParamDimension implements Serializable{
 	private double Theta;
 	
 	public ThetaUDimension(double u, double theta) {
-		super();
-		U = u;
+		super(u);
 		Theta = theta;
 	}
 	public ThetaUDimension(ThetaUDimension v) {
-		super();
-		U = v.getU();
+		super(v.getU());
 		Theta = v.getTheta();
 	}
 	public ThetaUDimension clone() {
 		return new ThetaUDimension(U, Theta);
 	}
-	public double getU() {
-		return U;
-	}
-
-	public void setU(double u) {
-		U = u;
-	}
-
+	
 	public double getTheta() {
 		return Theta;
 	}

@@ -25,6 +25,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import dk.dma.epd.common.Heading;
+import it.toscana.rete.lamma.prototype.model.ThetaUDimension;
 import it.toscana.rete.lamma.utils.Utils;
 
 /**
@@ -327,5 +328,19 @@ public class Formatter {
         str = StringEscapeUtils.escapeHtml(str);
         str = str.replaceAll("\n", "<br/>");
         return str;
+    }
+    public static String formatCurrent( ThetaUDimension cur) {
+        if (cur == null) {
+            return "N/A";
+        }
+        String sign = cur.getTheta() < 0 ? " -" : " ";
+        return formatCurrentSpeed(cur.getU(), 1);
+    }
+    public static String formatWind( ThetaUDimension wind) {
+        if (wind == null) {
+            return "N/A";
+        }
+        String sign = wind.getTheta() < 0 ? " -" : " ";
+        return formatSpeed(wind.getU())  + sign + formatDegrees(Math.abs(wind.getTheta()), 0);
     }
 }

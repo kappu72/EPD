@@ -8,7 +8,7 @@ import com.bbn.openmap.corba.CSpecialist.ForceArrowOperations;
 
 import it.toscana.rete.lamma.prototype.model.tables.OneDimTable;
 
-public class PolarParamTest {
+public class OneDimTableTest {
 
 	/**
 	 * 

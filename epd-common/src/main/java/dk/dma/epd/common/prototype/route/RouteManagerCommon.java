@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ import dk.dma.epd.common.prototype.settings.EnavSettings;
 import dk.dma.epd.common.prototype.shoreservice.ShoreServicesCommon;
 import dk.dma.epd.common.util.Util;
 import dk.frv.enav.common.xml.metoc.MetocForecast;
+import it.toscana.rete.lamma.prototype.model.MetocPointForecast;
 
 /**
  * Base class for route managers, which handles a collection of routes and active route.
@@ -420,7 +422,11 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     public void requestRouteMetoc(Route route) throws ShoreServiceException {
         // Request METOC from shore
         MetocForecast metocForecast = shoreServices.routeMetoc(route);
-        // Add the METOC to route
+
+        // Convert the metoc to lamma metoc point
+        // Attenzione al vento unita di misura e provenienza unita di misura!!
+        // Usi il nuovo modello e converti
+        metocForecast.setForecasts(metocForecast.getForecasts().stream().map(fp -> new MetocPointForecast(fp)).collect(Collectors.toList()));
         route.setMetocForecast(metocForecast);
         // Set show to true
         route.getRouteMetocSettings().setShowRouteMetoc(true);

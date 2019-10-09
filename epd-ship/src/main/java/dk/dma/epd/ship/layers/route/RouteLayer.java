@@ -19,6 +19,8 @@ import java.awt.Color;
 import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 
+import org.apache.commons.logging.Log;
+
 import com.bbn.openmap.omGraphics.OMGraphic;
 
 import dk.dma.epd.common.prototype.EPD;
@@ -113,7 +115,9 @@ public class RouteLayer extends RouteLayerCommon implements IOwnShipListener,
         if (e == RoutesUpdateEvent.ROUTE_MSI_UPDATE) {
             return;
         }
-
+        if(e != null) {
+        	System.out.println(e.name());
+        }
         // if (e == null) {
         updateSafeHaven();
         doPrepare();

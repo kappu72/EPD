@@ -9,24 +9,23 @@ import java.lang.reflect.Array;
  *
  */
 public class OneDimTable<E> {
-	protected int minIdx;
-	protected int maxIdx;
-	private int delta;
+	protected double minIdx;
+	protected double maxIdx;
+	private double delta;
 	private  E[] values;
 	
-	
-	
+
 	public OneDimTable() {
 		super();
 	}
 	
-	public OneDimTable(int minIdx, int maxIdx, int delta) {
+	public OneDimTable(double minIdx, double maxIdx, double delta) {
 		super();
 		this.minIdx = minIdx;
 		this.maxIdx = maxIdx;
 		this.delta	= delta;
 	}
-	public OneDimTable(int minIdx, int maxIdx, int delta, int size, Class<E> c) {
+	public OneDimTable(double minIdx, double maxIdx, double delta, int size, Class<E> c) {
 		super();
 		this.minIdx = minIdx;
 		this.maxIdx = maxIdx;
@@ -35,7 +34,7 @@ public class OneDimTable<E> {
 		final E[] values = (E[]) Array.newInstance(c, size);
         this.values = values;
 	}
-	public OneDimTable(int minIdx, int maxIdx, int delta, E[] values) {
+	public OneDimTable(double minIdx, double maxIdx, double delta, E[] values) {
 		super();
 		this.values = values;
 		this.minIdx = minIdx;
@@ -50,36 +49,35 @@ public class OneDimTable<E> {
 		return value;
 	}
 	/**
-	 * Return the parm value for an angle -180 _ 180
+	 * Return the parm value
 	 * @param idx
 	 * @return
 	 */
-	public E getValue(float idx) throws IllegalArgumentException {
-		
-		normalizeIdex(idx);
-		int index = (int) Math.round(normalizeIdex(idx) / delta);
+	public E getValue(double idx) throws IllegalArgumentException {
+		int index = Math.toIntExact(Math.round(normalizeIdex(idx) / delta));
 		return values[index];
 		
 	}
 	/**
-	 * Return the weighted average of param value don't use if T isn't a double
+	 * Return the weighted average of param value don't use if E isn't a double
 	 * @param idx
 	 * @return
 	 */
-	public double getWeightedValue(float idx) throws IllegalArgumentException{
-		float nIdex = normalizeIdex(idx);
+	public double getWeightedValue(double idx) throws IllegalArgumentException{
+		double nIdex = normalizeIdex(idx);
 		double rest = nIdex%delta;
 		
 		if(rest == 0.0) {
-			return (double) values[(int) nIdex/delta];
+			return (double) getValue(idx);
 		}
+		
 		double up = (double) values[(int) Math.ceil(nIdex/delta)];
 		double down = (double) values[(int) Math.floor(nIdex/delta)];
 		double upD = delta-rest;
 		double downD = rest;
 		return  (up * upD + down * downD) / (upD + downD);
 	}
-	private float normalizeIdex(float idx) throws IllegalArgumentException{
+	private double normalizeIdex(double idx) throws IllegalArgumentException{
 		if(idx > maxIdx || idx < minIdx) {
 			throw new IllegalArgumentException("Value outside range " + maxIdx + " " + minIdx);
 		}

@@ -8,17 +8,16 @@ import java.lang.Number;
  *
  */
 public class WindresTable {
-	public static String TYPE = "windres";
 	protected OneDimTable<Double> windres;
 	protected Parameter paramInfo;
 	
 	public WindresTable(Parameter paramInfo, Double[] values) {
 		super();
 		this.paramInfo = paramInfo;
-		windres = new OneDimTable<Double>((int) paramInfo.getMin(), (int) paramInfo.getMax(), (int) paramInfo.getDelta(), values);
+		windres = new OneDimTable<Double>( paramInfo.getMin(), paramInfo.getMax(), paramInfo.getDelta(), values);
 	}
 	public WindresTable(Parameter paramInfo) {
-		windres = new OneDimTable<Double>((int) paramInfo.getMin(), (int) paramInfo.getMax(), (int) paramInfo.getDelta());
+		windres = new OneDimTable<Double>( paramInfo.getMin(), paramInfo.getMax(),  paramInfo.getDelta());
 		this.paramInfo = paramInfo;
 	}
 	public OneDimTable<Double> getWindres() {
@@ -29,7 +28,7 @@ public class WindresTable {
 	 * @param angle Domain -180 180
 	 * @return
 	 */
-	public Double getCx(float angle) {
+	public double getCx(double angle) {
 		return windres.getWeightedValue(Math.abs(angle));
 	}
 	public Parameter getWindresInfo() {

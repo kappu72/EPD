@@ -8,15 +8,15 @@ public class WaveresGenericTable {
 	public WaveresGenericTable(Parameter spd) {
 		super();
 		this.spd=spd;
-		waveGeneric = new OneDimTable<WavePeriods>((int) spd.getMin(), (int) spd.getMax(), (int) spd.getDelta(), spd.getSize(), WavePeriods.class);	
+		waveGeneric = new OneDimTable<WavePeriods>( spd.getMin(), spd.getMax(), spd.getDelta(), spd.getSize(), WavePeriods.class);	
 	}
 	public void setWaveGeneric(WavePeriods[] waveGenericValues) {
 		waveGeneric.setValues(waveGenericValues);
 	}
-	public double getCawValue(float speed, float period, float angle) {
+	public double getCawValue(double speed, double period, double angle) {
 		return waveGeneric.getValue(speed).getCawValue(period, angle);
 	}
-	public double getTpValue(float speed, float period) {
+	public double getTpValue(double speed, double period) {
 		return waveGeneric.getValue(speed).getOptTValue(period);
 	}
 	public Parameter getTmInfo() {
@@ -30,5 +30,9 @@ public class WaveresGenericTable {
 	}
 	public WavePeriods addWavePeriods(WavePeriods value, int idx) {
 		return waveGeneric.setValue(value, idx);
+	}
+	public Boolean isValidTm(double period) {
+		Parameter tm = getTmInfo();
+		return period >= tm.getMin() && period <= tm.getMax();
 	}
 }

@@ -8,26 +8,16 @@ import java.io.Serializable;
  * @author kappu
  *
  */
-public class UVDimension implements Serializable{
+public class UVDimension extends ParamDimension implements Serializable{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	protected double U;
 	protected double V;
 	
 	public UVDimension(double u, double v) {
-		super();
-		U = u;
+		super(u);
 		V = v;
-	}
-
-	public double getU() {
-		return U;
-	}
-
-	public void setU(double u) {
-		U = u;
 	}
 
 	public double getV() {

@@ -7,20 +7,20 @@ public class OneDimDouble extends OneDimTable<Double> {
 		// TODO Auto-generated constructor stub
 	}
 
-	public OneDimDouble(int minIdx, int maxIdx, int delta, Double[] values) {
+	public OneDimDouble(double minIdx, double maxIdx, double delta, Double[] values) {
 		super(minIdx, maxIdx, delta, values);
 		// TODO Auto-generated constructor stub
 	}
 
-	public OneDimDouble(int minIdx, int maxIdx, int delta, int size, Class<Double> c) {
+	public OneDimDouble(double minIdx, double maxIdx, double delta, int size, Class<Double> c) {
 		super(minIdx, maxIdx, delta, size, c);
 		// TODO Auto-generated constructor stub
 	}
 
-	public OneDimDouble(int minIdx, int maxIdx, int delta) {
+	public OneDimDouble(double minIdx, double maxIdx, double delta) {
 		super(minIdx, maxIdx, delta);
 		// TODO Auto-generated constructor stub
 	}
-
+	
 	
 }

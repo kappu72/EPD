@@ -26,6 +26,7 @@ import dk.dma.epd.common.util.TypedValue.Speed;
 import dk.dma.epd.common.util.TypedValue.SpeedType;
 import dk.dma.epd.common.util.TypedValue.Time;
 import dk.dma.epd.common.util.TypedValue.TimeType;
+import it.toscana.rete.lamma.prototype.model.FuelConsumption;
 
 /**
  * Route leg class
@@ -62,8 +63,11 @@ public class RouteLeg implements Serializable {
 
     protected double SFLen = 1000;
     // Path isn't Serializable use string instead
-    protected String propulsionConfig;
+    protected String propulsionConfig = null;
 
+    // Path isn't Serializable use string instead
+    protected FuelConsumption fuelConsumption;
+    
 	public RouteLeg() {
 
     }
@@ -207,6 +211,14 @@ public class RouteLeg implements Serializable {
 
 	public void setPropulsionConfig(String propulsionConfig) {
 		this.propulsionConfig = propulsionConfig;
+    }
+    
+    public FuelConsumption getFuelConsumption() {
+		return fuelConsumption;
+	}
+
+	public void setFuelConsumption(FuelConsumption fuelConsumption) {
+		this.fuelConsumption = fuelConsumption;
 	}
     public double calcRng() {
 
