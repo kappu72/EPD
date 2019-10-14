@@ -24,7 +24,7 @@ public class ShipConfiguration implements Serializable {
 	/**
 	 * The minimal valid configuration should have: windres file waveres file and
 	 * one propulsion_configuration Wave configuration lookup tables swell and active
-	 * see waves are optional as more then one propulsion setting
+	 * see waves are optional as more then one propulsion setting as is optional the hull resistance table
 	 */
 
 	private static final long serialVersionUID = 1L;
@@ -34,6 +34,7 @@ public class ShipConfiguration implements Serializable {
 	private Path waveres = null;
 	private Path waveres_sw = null;
 	private Path waveres_se = null;
+	private Path hullres = null;
 	private List<Path> propulsions = new ArrayList<Path>();
 
 	public ShipConfiguration() {
@@ -90,6 +91,14 @@ public class ShipConfiguration implements Serializable {
 	public void setWaveres_se(Path waveres_se) {
 		this.waveres_se = waveres_se;
 	}
+	
+	public Path getHullres() {
+		return hullres;
+	}
+
+	public void setHullres(Path hullres) {
+		this.hullres = hullres;
+	}
 
 	public void setPath(Path path) {
 		this.path = path;
@@ -139,7 +148,14 @@ public class ShipConfiguration implements Serializable {
 		windres = newPath;
 		return Utils.stripFileExt(file);
 	}
-
+	public String importHullres(File file) throws IOException {
+		Path newHullres = importFile(file, FilesFilters.HULLRES);
+		if (hullres != null) {
+			Files.delete(newHullres);
+		}
+		hullres = newHullres;
+		return Utils.stripFileExt(file);
+	}
 	public String importPropulsion(File file, String propName) throws IOException {
 		String cleanedName = Utils.cleanConditionName(propName);
 		Path dest = Paths.get(path.toString(), cleanedName + "." + FilesFilters.PROPULSION);
@@ -175,6 +191,12 @@ public class ShipConfiguration implements Serializable {
 		return Utils.stripFileExt(waveres_se.getFileName().toFile());
 	}
 
+	public String getHullresName() {
+		if (hullres == null)
+			return null;
+		return Utils.stripFileExt(hullres.getFileName().toFile());
+	}
+
 	private Path importFile(File f, String ext) throws IOException {
 		String name = changeFileExt(f, ext);
 		Path dest = Paths.get(path.toString(), name);
@@ -206,6 +228,10 @@ public class ShipConfiguration implements Serializable {
 		f = path.toFile().listFiles(FilesFilters.waveres_sw);
 		if (f.length > 0) {
 			waveres_sw = f[0].toPath();
+		}
+		f = path.toFile().listFiles(FilesFilters.hullres);
+		if (f.length > 0) {
+			hullres = f[0].toPath();
 		}
 		f = path.toFile().listFiles(FilesFilters.propulsion);
 		for (File ff : f) {
@@ -256,4 +282,5 @@ public class ShipConfiguration implements Serializable {
 		aOutputStream.writeUTF(name);
 		aOutputStream.writeUTF(path.toString());
     }
+
 }

@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.swing.DefaultCellEditor;
@@ -51,11 +50,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 
-import com.sun.xml.bind.v2.TODO;
-
-import org.antlr.v4.parse.ANTLRParser.throwsSpec_return;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +59,6 @@ import dk.dma.enav.model.geometry.Position;
 import dk.dma.epd.common.FormatException;
 import dk.dma.epd.common.Heading;
 import dk.dma.epd.common.prototype.EPD;
-import dk.dma.epd.common.prototype.gui.route.LockTableCell;
 import dk.dma.epd.common.prototype.gui.views.ChartPanelCommon;
 import dk.dma.epd.common.prototype.model.route.IRoutesUpdateListener;
 import dk.dma.epd.common.prototype.model.route.Route;
@@ -90,6 +84,7 @@ import it.toscana.rete.lamma.prototype.model.ShipData;
 import it.toscana.rete.lamma.prototype.model.ThetaUDimension;
 import it.toscana.rete.lamma.prototype.model.Wave;
 import it.toscana.rete.lamma.prototype.model.tables.FuelRateTable;
+import it.toscana.rete.lamma.prototype.model.tables.HullresTable;
 import it.toscana.rete.lamma.prototype.model.tables.TableLoader;
 import it.toscana.rete.lamma.prototype.model.tables.WaveresGenericTable;
 import it.toscana.rete.lamma.prototype.model.tables.WindresTable;
@@ -469,16 +464,16 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog implemen
 	               case  7: return isLastRow? "N/A" : wp.getHeading(); // Tipo di rotta
 	               case  8: return Formatter.formatSpeed(isLastRow ? null : ol.getSpeed()); // Speed over ground kn
                    case 9: return isLastRow? "N/A" : Formatter.formatPropulsion(ol.getPropulsionConfig()); //  propulsion configuration
-                   case 10: return (isLastRow || fc == null)? "N/A" : Formatter.formatCurrent(fc.getCurrent_rel()); // Relative current only speed 
-                   case 11: return (isLastRow || fc == null)? "N/A" : Formatter.formatDegrees(fc.getHeading(), 2); // Heading considering current
-                   case 12: return (isLastRow || fc == null)? "N/A" : Formatter.formatWind(fc.getWind_rel()); // Wind relative
-                   case 13: return (isLastRow || fc == null)? "N/A" : "TODO" ; // Mean Wave component;
-                   case 14: return (isLastRow || fc == null)? "N/A" : Formatter.formatDouble(fc.getFuel(), 3) + " t"; // Total fuel consumption for the leg
-                   case 15: return (isLastRow || fc == null)? "N/A" : Formatter.formatTime(ol.calcTtg()) ; // durata del tratto è la durata del tratto successivo a questo 
-                   case 16: return (isLastRow || fc == null)? "N/A" : Formatter.formatDouble(fc.getFuelRate(), 2) + " t/h"; // Fuel rate for the leg in t/h
-                   case 17: return "TODO: T R"; // Total resistance, (Added wave wind) + carena
-                   case 18: return (isLastRow || fc == null)? "N/A" : Formatter.formatDouble(fc.getWave_resistance(), 2) + " %"; // Wave added resustance in percentuale del totale
-                   case 19: return (isLastRow || fc == null)? "N/A" : Formatter.formatDouble(fc.getWind_resistance(), 2) + " %"; // Wind added resustance in percentuale del totale
+                   case 10: return (fc == null)? "N/A" : Formatter.formatCurrent(fc.getCurrent_rel()); // Relative current only speed 
+                   case 11: return (fc == null)? "N/A" : Formatter.formatDegrees(fc.getHeading(), 2); // Heading considering current
+                   case 12: return (fc == null)? "N/A" : Formatter.formatWind(fc.getWind_rel(), fc.getHeading()); // Wind relative
+                   case 13: return (fc == null)? "N/A" : Formatter.formatWave(fc); // Mean Wave component;
+                   case 14: return (fc == null)? "N/A" : Formatter.formatDouble(fc.getFuel(), 3) + " t"; // Total fuel consumption for the leg
+                   case 15: return (fc == null)? "N/A" : Formatter.formatTime(ol.calcTtg()) ; // durata del tratto è la durata del tratto successivo a questo 
+                   case 16: return (fc == null)? "N/A" : Formatter.formatDouble(fc.getFuelRate(), 2) + " t/h"; // Fuel rate for the leg in t/h
+                   case 17: return (fc == null)? "N/A" : Formatter.formatDouble(fc.getTotalResistance(), 2) + "kN";// Total resistance, (Added wave wind) + carena
+                   case 18: return (fc == null)? "N/A" : Formatter.formatDouble((fc.getWave_resistance() / fc.getTotalResistance()) * 100, 2) + " %"; // Wave added resustance in percentuale del totale
+                   case 19: return (fc == null)? "N/A" : Formatter.formatDouble((fc.getWind_resistance() / fc.getTotalResistance()) * 100, 2) + " %"; // Wind added resustance in percentuale del totale
                    
                    default: return null;
                }
@@ -781,7 +776,14 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog implemen
      // qui andrebbe fatta prima distinzione nel caso che fossero disponibili dati meteo con swell e wind sea!!
      try {
         WindresTable cxRes = TableLoader.laodWindres(config.getWindres()); 
-        WaveresGenericTable cawRes = TableLoader.laodWaveGenericTable(config.getWaveres());     
+        WaveresGenericTable cawRes = TableLoader.laodWaveGenericTable(config.getWaveres());
+        
+        // If hullresistance table is configured load it
+        HullresTable hullResTable = null; 
+        if(config.getHullres() != null) {
+            hullResTable = TableLoader.laodHullres(config.getHullres());
+        }
+        
         HashMap<String, FuelRateTable> propulsionTables = ( HashMap<String, FuelRateTable> ) config.getPropulsions().stream().map( p -> {
                         try {
                             return TableLoader.laodFuelRateTable(p);
@@ -810,7 +812,10 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog implemen
                     try {
                         Wave mwave = m.getMeanWave();
                         FuelConsumption c = FuelConsumptionCalculator.CalculateAllKinematical(SOG, m.getCurrent(), m.getWind(), mwave.getDirection(), true);
-                        FuelConsumption r = FuelConsumptionCalculator.CalculateResistance(c, mwave.getHeigth(), mwave.getPeriod(), cxRes, cawRes, 850); // occhi a 850 è fisso
+                        FuelConsumption r = FuelConsumptionCalculator.CalculateResistance(c, mwave.getHeight(), mwave.getPeriod(), cxRes, cawRes, 850); // occhi a 850 è fisso
+                        if(hullResTable != null) {
+                            r.setHull_resistance(hullResTable.getRes(r.getCurrent_rel().getU()));
+                        }
                         double fuelRate = fuelRateTable.getFuelRate((float) r.getCurrent_rel().getU(), (float) r.getTotalAddedResistance());
                         r.setFuelRate(fuelRate);
                         r.setMetoc(m);

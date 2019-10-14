@@ -8,6 +8,7 @@ public class FilesFilters {
 	static final String WAVERES = "wares";
 	static final String WAVERES_SW = "wares_sw";
 	static final String WAVERES_SE = "wares_se";
+	static final String HULLRES = "hullres";
 	static final String PROPULSION = "ps";
 	
 	public static FilenameFilter windres = new FilenameFilter() {
@@ -15,7 +16,7 @@ public class FilesFilters {
 	    public boolean accept(File dir, String name) {
 	        return name.endsWith("." + WINDRES);
 	    }
-	    };
+		};
     public static FilenameFilter waveres = new FilenameFilter() {
 	    @Override
 	    public boolean accept(File dir, String name) {
@@ -39,5 +40,12 @@ public class FilesFilters {
 	    public boolean accept(File dir, String name) {
 	        return name.endsWith("." + PROPULSION);
 	    }
-	    };
+		};
+	public static FilenameFilter hullres = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			return name.endsWith("." + HULLRES);
+		}
+	};	
+	
 }

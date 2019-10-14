@@ -25,7 +25,10 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import dk.dma.epd.common.Heading;
+import it.toscana.rete.lamma.prototype.model.FuelConsumption;
 import it.toscana.rete.lamma.prototype.model.ThetaUDimension;
+import it.toscana.rete.lamma.prototype.model.Wave;
+import it.toscana.rete.lamma.utils.FuelConsumptionCalculator;
 import it.toscana.rete.lamma.utils.Utils;
 
 /**
@@ -342,5 +345,21 @@ public class Formatter {
         }
         String sign = wind.getTheta() < 0 ? " -" : " ";
         return formatSpeed(wind.getU())  + sign + formatDegrees(Math.abs(wind.getTheta()), 0);
+    }
+    public static String formatWind( ThetaUDimension wind, double heading) {
+        if (wind == null) {
+            return "N/A";
+        }
+        String sign = wind.getTheta() < 0 ? " -" : " ";
+        double nWind = FuelConsumptionCalculator.wrapTo360(heading + wind.getTheta());
+        return formatSpeed(wind.getU())  + sign + formatDegrees(Math.abs(wind.getTheta()), 0) + " " + formatDegrees(nWind, 0);
+    }
+    public static String formatWave( FuelConsumption fc) {
+        if (fc == null) {
+            return "N/A";
+        }
+        Wave w = fc.getMetoc().getMeanWave();
+        double nWave = FuelConsumptionCalculator.wrapTo360(fc.getHeading() + fc.getWave_polar());
+        return formatDouble(w.getHeight(),2) + "m " + formatDouble(w.getPeriod(), 0) + "s " + formatDegrees(nWave, 0);
     }
 }

@@ -2,8 +2,6 @@ package it.toscana.rete.lamma.prototype.model;
 
 import java.io.Serializable;
 
-import dk.frv.enav.common.xml.metoc.MetocForecast;
-import dk.frv.enav.common.xml.metoc.MetocForecastPoint;
 
 public class FuelConsumption implements Serializable {
 		
@@ -19,6 +17,7 @@ public class FuelConsumption implements Serializable {
 	double wave_resistance;
 	double wind_resistance;
 	double total_added_resistance;
+	double hull_resistance = 1000.0; //Default value is 1000 [kN] normally it Should be read in hullrestable
 	double fuel_rate;
 	double fuel;
 	MetocPointForecast metoc;
@@ -31,7 +30,7 @@ public class FuelConsumption implements Serializable {
 
 	public FuelConsumption(ThetaUDimension current_rel, ThetaUDimension wind_rel, double heading, double wave_polar,
 			double wind_polar, double wave_resistance, double wind_resistance, double total_added_resistance,
-			double fuel_rate, double fuel, MetocPointForecast metoc) {
+			double fuel_rate, double fuel, MetocPointForecast metoc, double hull_resistance) {
 		super();
 		this.current_rel = current_rel;
 		this.wind_rel = wind_rel;
@@ -44,12 +43,13 @@ public class FuelConsumption implements Serializable {
 		this.fuel_rate = fuel_rate;
 		this.fuel = fuel;
 		this.metoc = metoc;
+		this.hull_resistance = hull_resistance;
 
 	}
 	public FuelConsumption clone() {
 		return new FuelConsumption(current_rel,
 				wind_rel, heading, wave_polar, wind_polar,
-				wave_resistance, wind_resistance, total_added_resistance, fuel_rate, fuel, metoc);
+				wave_resistance, wind_resistance, total_added_resistance, fuel_rate, fuel, metoc, hull_resistance);
 		
 	}
 	public ThetaUDimension getCurrent_rel() {
@@ -135,4 +135,17 @@ public class FuelConsumption implements Serializable {
 	public MetocPointForecast getMetoc() {
 		 return metoc;
 	}
+
+	public double getHull_resistance() {
+		return hull_resistance;
+	}
+
+	public void setHull_resistance(double hull_resistance) {
+		this.hull_resistance = hull_resistance;
+	}
+
+	public double getTotalResistance() {
+		return hull_resistance + wind_resistance + wave_resistance;
+	}
+
 }

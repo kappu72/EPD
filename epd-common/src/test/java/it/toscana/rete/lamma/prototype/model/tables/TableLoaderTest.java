@@ -1,6 +1,5 @@
 package it.toscana.rete.lamma.prototype.model.tables;
 
-import static org.junit.Assert.*;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -30,11 +29,11 @@ public class TableLoaderTest {
 	 * @throws URISyntaxException
 	 */
 	@Test
-	public final void testLaodWindres() throws RouteLoadException, URISyntaxException {
+	public final void testLoadWindres() throws RouteLoadException, URISyntaxException {
 		WindresTable wind = TableLoader.laodWindres(getResourcePath("MEII_ldcnd01_windres_FjwrCrs.dat"));
 		Assert.assertNotNull(wind);
-		assertEquals(-0.063,  wind.getWindres().getValue(50), 0.0001);
-		assertEquals(-0.1645, wind.getWindres().getWeightedValue(55), 0.00001);
+		Assert.assertEquals(-0.063,  wind.getWindres().getValue(50), 0.0001);
+		Assert.assertEquals(-0.1645, wind.getWindres().getWeightedValue(55), 0.00001);
 	}
 	/**
 	 * Test method {@link it.toscana.rete.lamma.prototype.model.tables.TableLoader#laodWaveGenericTable(Path)}
@@ -42,14 +41,14 @@ public class TableLoaderTest {
 	 * @throws URISyntaxException
 	 */
 	@Test
-	public final void testLaodWaveResGen() throws RouteLoadException, URISyntaxException {
+	public final void testLoadWaveResGen() throws RouteLoadException, URISyntaxException {
 		WaveresGenericTable wave = TableLoader.laodWaveGenericTable(getResourcePath("MEII_ldcnd01_waveres_Genrc.dat"));
 		Assert.assertNotNull(wave);
 		
 		// Testing values
-		assertEquals(12.136,  wave.getCawValue(28, 6, 160), 0.0001);
+		Assert.assertEquals(12.136,  wave.getCawValue(28, 6, 160), 0.0001);
 		
-		assertEquals(14.647,  wave.getCawValue( 27.3F, 5.6F, 145), 0.0001);
+		Assert.assertEquals(14.647,  wave.getCawValue( 27.3F, 5.6F, 145), 0.0001);
 
 	}
 	/**
@@ -58,14 +57,14 @@ public class TableLoaderTest {
 	 * @throws URISyntaxException
 	 */
 	@Test
-	public final void testLaodWaveResComp() throws RouteLoadException, URISyntaxException {
+	public final void testLoadWaveResComp() throws RouteLoadException, URISyntaxException {
 		WaveresCompTable wave = TableLoader.laodWaveCompTable(getResourcePath("MEII_ldcnd01_waveres_Swell.dat"));
 		Assert.assertNotNull(wave);
 		
 		// Testing values
-		assertEquals(10.433,  wave.getCawValue(28, 6, 160), 0.0001);
+		Assert.assertEquals(10.433,  wave.getCawValue(28, 6, 160), 0.0001);
 		
-		assertEquals(13.6675,  wave.getCawValue( 27.3F, 5.6F, 145), 0.0001);
+		Assert.assertEquals(13.6675,  wave.getCawValue( 27.3F, 5.6F, 145), 0.0001);
 
 	}
 	/**
@@ -74,14 +73,26 @@ public class TableLoaderTest {
 	 * @throws URISyntaxException
 	 */
 	@Test
-	public final void testLaodFuelRate() throws RouteLoadException, URISyntaxException {
+	public final void testLoadFuelRate() throws RouteLoadException, URISyntaxException {
 		FuelRateTable fr = TableLoader.laodFuelRateTable(getResourcePath("MEII_ldcnd01_fuelrate_Ns2Nel1.dat"));
 		Assert.assertNotNull(fr);
 		
 		// Testing values
-		assertEquals(2.8708,  fr.getFuelRate(20, -70), 0.0001);
+		Assert.assertEquals(2.8708,  fr.getFuelRate(20, -70), 0.0001);
 		
-		assertEquals(1.3307,  fr.getFuelRate(11.8F, -100F), 0.0001);
+		Assert.assertEquals(1.3307,  fr.getFuelRate(11.8F, -100F), 0.0001);
 
+	}
+	/**
+	 * Test method {@link it.toscana.rete.lamma.prototype.model.tables.TableLoader#laodHullres(Path)}
+	 * @throws RouteLoadException
+	 * @throws URISyntaxException
+	 */
+	@Test()
+	public final void testLoadHullres() throws RouteLoadException, URISyntaxException {
+		HullresTable hullres = TableLoader.laodHullres(getResourcePath("MEII-ldcnd01-hullres.dat"));
+		Assert.assertNotNull(hullres);
+		Assert.assertEquals(729.24,  hullres.getRes(10.0), 0.0001);
+		Assert.assertEquals(911.07, hullres.getRes(18.5), 0.00001);
 	}
 }

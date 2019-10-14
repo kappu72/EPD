@@ -18,42 +18,42 @@ import java.io.Serializable;
 public class Wave implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private double heigth;
+    private double height;
     private double direction;
     private double period;
 
 
 	public Wave() {
         super();
-        heigth=0;
+        height=0;
         direction=0;
         period=0;
     }
 
     /**
-     * @param heigth
+     * @param height
      * @param direction
      * @param period
      */
 
-    public Wave(double heigth, double direction, double period) {
-        this.heigth = heigth;
+    public Wave(double height, double direction, double period) {
+        this.height = height;
         this.direction = direction;
         this.period = period;
     }
 
     /**
-     * @return the heigth
+     * @return the height
      */
-    public double getHeigth() {
-        return heigth;
+    public double getHeight() {
+        return height;
     }
 
     /**
-     * @param heigth the heigth to set
+     * @param height the height to set
      */
-    public void setHeigth(double heigth) {
-        this.heigth = heigth;
+    public void setHeight(double height) {
+        this.height = height;
     }
 
     /**

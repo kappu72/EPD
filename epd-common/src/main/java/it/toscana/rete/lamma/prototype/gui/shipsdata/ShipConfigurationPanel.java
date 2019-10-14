@@ -65,6 +65,7 @@ public class ShipConfigurationPanel extends JPanel implements ActionListener, Sh
 	private ConfigurationsFileSelector waveres = new ConfigurationsFileSelector("Waveres Generic*");
 	private ConfigurationsFileSelector waveres_sw = new ConfigurationsFileSelector("Waveres Swell");
 	private ConfigurationsFileSelector waveres_se = new ConfigurationsFileSelector("Waveres Sea");
+	private ConfigurationsFileSelector hullres = new ConfigurationsFileSelector("Hull Resitance");
 	private JTextField propName = new JFormattedTextField();
 	private final JLabel lblNewConfigName = new JLabel("New Config. Name");
 	private JList propConfigs = new JList();
@@ -122,36 +123,38 @@ public class ShipConfigurationPanel extends JPanel implements ActionListener, Sh
         windres.setBounds(6, 24, 420, 30);
         waveres.setBounds(6, 54, 420, 30);
         waveres_sw.setBounds(6, 84, 420, 30);
-        waveres_se.setBounds(6, 114, 420, 30);
+		waveres_se.setBounds(6, 114, 420, 30);
+		hullres.setBounds(6, 144, 420, 30);
         
         filesPanel.add(windres);
         filesPanel.add(waveres);
         filesPanel.add(waveres_sw);
-        filesPanel.add(waveres_se);
+		filesPanel.add(waveres_se);
+		filesPanel.add(hullres);
         
-        propConfigs.setBounds(26, 178, 211, 99);
+        propConfigs.setBounds(26, 208, 211, 99);
         propConfigs.setCellRenderer(new PropulsionListRenderer());
         JScrollPane listScroller = new JScrollPane(propConfigs);
-        listScroller.setBounds(26, 178, 139, 99);
+        listScroller.setBounds(26, 208, 139, 99);
         filesPanel.add(listScroller);
         
         JLabel lblNewLabel = new JLabel("Propulsion Configurations*");
         lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        lblNewLabel.setBounds(6, 162, 178, 16);
+        lblNewLabel.setBounds(6, 192, 178, 16);
         filesPanel.add(lblNewLabel);
         
         
-        propName.setBounds(177, 197, 130, 26);
+        propName.setBounds(177, 227, 130, 26);
         filesPanel.add(propName);
         propName.setColumns(10);
         propName.addKeyListener(this);
         
         lblNewConfigName.setHorizontalAlignment(SwingConstants.CENTER);
-        lblNewConfigName.setBounds(177, 178, 130, 16);
+        lblNewConfigName.setBounds(177, 208, 130, 16);
         
         filesPanel.add(lblNewConfigName);
         
-        importProp.setBounds(326, 201, 100, 20);
+        importProp.setBounds(326, 231, 100, 20);
         importProp.setEnabled(false);
         importProp.addActionListener(this);
         
@@ -160,7 +163,8 @@ public class ShipConfigurationPanel extends JPanel implements ActionListener, Sh
         windres.addActionListener(this);
         waveres.addActionListener(this);
         waveres_sw.addActionListener(this);
-        waveres_se.addActionListener(this);
+		waveres_se.addActionListener(this);
+		hullres.addActionListener(this);
         
 	}
 	public void setShip(ShipData ship) {
@@ -198,6 +202,8 @@ public class ShipConfigurationPanel extends JPanel implements ActionListener, Sh
 			waveres_se.setName(importFile("waveres_se"));
 		}else if(source == waveres_sw) {
 			waveres_sw.setName(importFile("waveres_sw"));
+		}else if(source == hullres) {
+			hullres.setName(importFile("hullres"));
 		}else if(source == importProp) {
 			String newProp = importFile("ps", propName.getText());
 			if(newProp != null) {
@@ -228,6 +234,8 @@ public class ShipConfigurationPanel extends JPanel implements ActionListener, Sh
 		 waveres_sw.setName(configuration.getWaveresSwName());
 		 waveres_se.setName(configuration.getWaveresName());
 		 waveres.setName(configuration.getWaveresName());
+		 hullres.setName(configuration.getHullresName());
+		 
 		 propConfigs.setListData(configuration.getPropulsions().toArray());
 	}
 	private String importFile(String type) {
@@ -260,7 +268,9 @@ public class ShipConfigurationPanel extends JPanel implements ActionListener, Sh
         		if(type == "waveres_sw")	
             		return configuration.importWaveresSw(file);
         		if(type == "waveres_se")	
-            		return configuration.importWaveresSe(file);
+					return configuration.importWaveresSe(file);
+				if(type == "hullres")	
+            		return configuration.importHullres(file);
         		if(type == "ps")	
             		return configuration.importPropulsion(file, name);
         	} catch (IOException e) {

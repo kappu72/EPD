@@ -219,6 +219,45 @@ public class TableLoader {
 	}
 
 
+	// Load data from windres
+	public static HullresTable laodHullres(Path path) throws RouteLoadException {
+		BufferedReader reader = null;
+		HullresTable hullres = null;
+		try {
+			reader = new BufferedReader(new FileReader(path.toFile()));
+			String line = null;
+			boolean dimension = false;
+			while ((line = reader.readLine()) != null) {
+				// Ignore empty lines and comments
+				String l = line.trim();
+				if (l.length() == 0 || l.startsWith("//") || l.startsWith("#")) {
+					continue;
+				}
+				if(l.startsWith("$1:spd")) {
+					if( dimension)
+						throw new RouteLoadException(FORMAT_ERROR_MESSAGE);
+					dimension = true;
+					hullres = new HullresTable(parseDimension(l));
+				}else if(l.startsWith("1")) {
+					hullres.getHullres().setValues(parseValues(l));
+					break;
+				}
+			}
+		}
+		catch (IOException e) {
+			LOG.error("Failed to load hullres table file: " + e.getMessage());
+			throw new RouteLoadException("Error reading wondres file");
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+		return hullres;
+	}
+
 	private static El parseDimensionEl(String f) throws RouteLoadException {
 		try {
 
