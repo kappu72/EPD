@@ -32,7 +32,9 @@ public class RouteMetocSettings implements Serializable {
     private Double windWarnLimit;
     private Double currentWarnLimit;
     private Double waveWarnLimit;
-    
+    private String localMetocFile;
+    private Boolean uvDim = true;
+    private Boolean to = true;
     private String provider = "dmi";
     
     public String getProvider() {
@@ -95,6 +97,48 @@ public class RouteMetocSettings implements Serializable {
 
     public void setCurrentWarnLimit(Double currentWarnLimit) {
         this.currentWarnLimit = currentWarnLimit;
+    }
+
+    /**
+     * @return the localMetocFile
+     */
+    public String getLocalMetocFile() {
+        return localMetocFile;
+    }
+
+    /**
+     * @param localMetocFile the localMetocFile to set
+     */
+    public void setLocalMetocFile(String localMetocFile) {
+        this.localMetocFile = localMetocFile;
+    }
+
+    /**
+     * @return the uvDim
+     */
+    public Boolean getUvDim() {
+        return uvDim;
+    }
+
+    /**
+     * @param uvDim the uvDim to set
+     */
+    public void setUvDim(Boolean uvDim) {
+        this.uvDim = uvDim;
+    }
+
+    /**
+     * @return the to
+     */
+    public Boolean getTo() {
+        return to;
+    }
+
+    /**
+     * @param to the to to set
+     */
+    public void setTo(Boolean to) {
+        this.to = to;
     }
 
 }

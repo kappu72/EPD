@@ -25,7 +25,7 @@ public class ConfigurationsFileSelector extends JPanel {
 	private JButton importBtn = new JButton("Import");
 	private JLabel  name = new JLabel("Not Available");
 	private JLabel lab;
-	ConfigurationsFileSelector(String label) {
+	public ConfigurationsFileSelector(String label) {
 		
 		lab = new JLabel(label);
 		GroupLayout groupLayout = new GroupLayout(this);

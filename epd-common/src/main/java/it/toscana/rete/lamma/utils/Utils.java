@@ -118,7 +118,7 @@ public class Utils {
 		return CharMatcher.is('_').trimFrom(Joiner.on('_').skipNulls().join( mmsi, name));
 		
 	}
-	
+	// Strip file name from path return dir
 	public static String parseName (String dir) {
 		String name, mmsi;
 		List<String> els =  Splitter.on("_").splitToList(dir);

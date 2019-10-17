@@ -16,10 +16,10 @@ package dk.dma.epd.ship.gui;
 
 import java.awt.Point;
 
+import com.bbn.openmap.MouseDelegator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.bbn.openmap.MouseDelegator;
 
 import dk.dma.epd.common.prototype.ais.SarTarget;
 import dk.dma.epd.common.prototype.ais.VesselTarget;
@@ -33,6 +33,7 @@ import dk.dma.epd.common.prototype.layers.ais.VesselGraphicComponentSelector;
 import dk.dma.epd.common.prototype.layers.routeedit.NewRouteContainerLayer;
 import dk.dma.epd.common.prototype.model.route.Route;
 import dk.dma.epd.common.prototype.model.route.RouteLeg;
+import dk.dma.epd.common.prototype.model.route.RouteMetocSettings;
 import dk.dma.epd.common.prototype.model.route.RouteSuggestionData;
 import dk.dma.epd.common.prototype.sensor.pnt.PntHandler;
 import dk.dma.epd.common.prototype.status.ComponentStatus;
@@ -426,6 +427,17 @@ public class MapMenu extends MapMenuCommon {
         monaLisaRouteRequest.setOwnShipHandler(ownShipHandler);
         add(monaLisaRouteRequest);
 
+        
+        // Get metocSettings and check that if local provider the file is present
+        if (route.getRouteMetocSettings() == null) {
+            route.setRouteMetocSettings(routeManager.getDefaultRouteMetocSettings());
+        }
+        RouteMetocSettings metocSettings = route.getRouteMetocSettings();
+        if(metocSettings.getProvider().indexOf("Local") != -1 && metocSettings.getLocalMetocFile() == null) {
+            routeRequestMetoc.setEnabled(false);
+        }else {
+            routeRequestMetoc.setEnabled(true);
+        }
         routeRequestMetoc.setRouteIndex(routeIndex);
         add(routeRequestMetoc);
 
