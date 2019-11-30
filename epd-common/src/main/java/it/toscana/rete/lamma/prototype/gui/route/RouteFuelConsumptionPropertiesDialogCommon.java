@@ -28,10 +28,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
@@ -73,6 +76,7 @@ import dk.dma.epd.common.util.TypedValue.Time;
 import dk.dma.epd.common.util.TypedValue.TimeType;
 import dk.frv.enav.common.xml.metoc.MetocForecast;
 import dk.frv.enav.common.xml.metoc.MetocForecastPoint;
+import dk.frv.enav.common.xml.metoc.MetocForecastTriplet;
 import it.toscana.rete.lamma.prototype.gui.shipsdata.ShipConfigurationsSelector;
 import it.toscana.rete.lamma.prototype.gui.shipsdata.ShipPropulsionConfigurationsSelector;
 import it.toscana.rete.lamma.prototype.gui.shipsdata.ShipsSelector;
@@ -82,6 +86,7 @@ import it.toscana.rete.lamma.prototype.model.RouteFuelConsumptionSettings;
 import it.toscana.rete.lamma.prototype.model.ShipConfiguration;
 import it.toscana.rete.lamma.prototype.model.ShipData;
 import it.toscana.rete.lamma.prototype.model.ThetaUDimension;
+import it.toscana.rete.lamma.prototype.model.UVDimension;
 import it.toscana.rete.lamma.prototype.model.Wave;
 import it.toscana.rete.lamma.prototype.model.tables.FuelRateTable;
 import it.toscana.rete.lamma.prototype.model.tables.HullresTable;
@@ -556,7 +561,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog implemen
        }
        
        updateButtonEnabledState();
-       
+        
        // Done
        quiescent = false;
    }
@@ -750,9 +755,10 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog implemen
    private void cleanFuelConsumption(Boolean forceTable) {
     
     route.getWaypoints().forEach(wp -> {
-         if (wp.getOutLeg() != null) {
+        if (wp.getOutLeg() != null) {
              wp.getOutLeg().setFuelConsumption(null);
-         }
+             wp.getOutLeg().setInnerPointsConsumption(new ArrayList<FuelConsumption>());
+        }
     });
     if(forceTable){
         routeTableModel.fireTableDataChanged();
@@ -792,35 +798,71 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog implemen
                         }
                         return null;
                     }).collect(Collectors.toMap(FuelRateTable::getId, t -> t));
-        // al momento attuale lavoro solo sopra i waypoint e non oltre anche se i metoc sono più fitti
-        // Squash i metoc nei waypoints
-        HashMap<Long, MetocForecastPoint> metocPoints = (HashMap<Long, MetocForecastPoint>) metoc.getForecasts().stream().collect(Collectors.toMap(t -> t.getTime().getTime(), t -> t));
+       
+        // Squash i metoc nei waypoints    
+        Iterator<MetocForecastPoint> iter = metoc.getForecasts().iterator();
+        
+
         List<Date> etas = route.getEtas();
-        // vanno messi dei check per i metoc e le tabelle
+    
+        LinkedList<RouteWaypoint> wps = route.getWaypoints();
         double totalConsumption = 0;
-        for (int i=0; i < route.getWaypoints().size() - 1 ; i++) { // ultimo punto non ha outleg
-             RouteWaypoint wp = route.getWaypoints().get(i);
-             MetocPointForecast m = (MetocPointForecast) metocPoints.get(etas.get(i).getTime());
-             RouteLeg outleg = wp.getOutLeg(); 
-             if(m != null && outleg != null) { 
-                 // se trovo i metoc eseguo il calcolo, anche questa logica non è il massimo
-                 // posso calcolare per quel pezzo di rotta
+        
+        if(!iter.hasNext()) {
+            JOptionPane.showMessageDialog(null,
+                        "Impossibile calcolare il consumo, nessun metoc presente",
+                        "Fuel Consumption Calculator error",
+                        JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        // I don't like this code is to difficult to read!!
+        // I have to group the metoc point by leg. It uses time as predicate
+        MetocPointForecast me = (MetocPointForecast) iter.next();
+        Date meDate = etas.get(0);
+
+        long timeStep = 60000L * route.getRouteMetocSettings().getInterval(); // comes in minutes to ms
+
+
+         // vanno messi dei check per i metoc e le tabelle
+        
+        for (int i=0; i < route.getWaypoints().size() - 1 ; i++) {
+            RouteWaypoint wp = wps.get(i);
+            RouteLeg outleg = wp.getOutLeg(); 
+            Date nextEta = etas.get(i + 1);
+            Date eta = etas.get(i);
+            
+            // Genera fc e metoc per il leg con media pesata dei singoli pezzi
+            FuelConsumption legFc = new FuelConsumption();
+            MetocPointForecast legMetoc = this.getEmptyMetoc();
+            while (me.getTime().getTime() >= eta.getTime() && me.getTime().getTime() < nextEta.getTime()) {
+                // Sono metoc validi per questo leg
+                long distance = i == 0 ? timeStep :  me.getTime().getTime() - meDate.getTime();
+                meDate = me.getTime();
+                // Calcola il peso del singolo tratto
+                double weight = ((double) distance) / timeStep;
                 
+                if(outleg != null) {
+                    
+                    // Sommatoria metoc
+                    this.weightedSumMetocPoints(legMetoc, me, weight);
                     FuelRateTable fuelRateTable = propulsionTables.get(outleg.getPropulsionConfig());    
-		            ThetaUDimension SOG = new ThetaUDimension(outleg.getSpeed(), outleg.calcBrg());
-		            
+		            ThetaUDimension SOG = new ThetaUDimension(outleg.getSpeed(), outleg.calcBrg());    
                     try {
-                        Wave mwave = m.getMeanWave();
-                        FuelConsumption c = FuelConsumptionCalculator.CalculateAllKinematical(SOG, m.getCurrent(), m.getWind(), mwave.getDirection(), true);
+                        Wave mwave = me.getMeanWave();
+                        FuelConsumption c = FuelConsumptionCalculator.CalculateAllKinematical(SOG, me.getCurrent(), me.getWind(), mwave.getDirection(), true);
                         FuelConsumption r = FuelConsumptionCalculator.CalculateResistance(c, mwave.getHeight(), mwave.getPeriod(), cxRes, cawRes, 850); // occhi a 850 è fisso
                         if(hullResTable != null) {
                             r.setHull_resistance(hullResTable.getRes(r.getCurrent_rel().getU()));
                         }
-                        double fuelRate = fuelRateTable.getFuelRate((float) r.getCurrent_rel().getU(), (float) r.getTotalAddedResistance());
+                        
+                        r.setWeight(weight);
+                        double fuelRate = fuelRateTable.getFuelRate((float) r.getCurrent_rel().getU(), (float) r.getTotalAddedResistance());                        
                         r.setFuelRate(fuelRate);
-                        r.setMetoc(m);
+                        r.setMetoc(me);
+                        
                         if(fuelRate != -1) {
-                            r.setFuel(fuelRate * (outleg.calcTtg()  / 3600000.0));
+                            double fuel = fuelRate * (distance  / 3600000.0);
+                            r.setFuel(fuel);
                             totalConsumption += r.getFuel();
                         }else {
                             JOptionPane.showMessageDialog(null,
@@ -828,18 +870,39 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog implemen
                         "Spedd error",
                         JOptionPane.WARNING_MESSAGE);
                         }
-                        outleg.setFuelConsumption(r);
+                        outleg.getInnerPointsConsumption().add(r);
+                        // Setting vaules on fuel consumption of the outer leg
+                        
+                        this.weightdSumConsumption(legFc, r, weight);
+                        
                     }catch (Exception e) {
                         JOptionPane.showMessageDialog(null,
                          e.getMessage() ,
                         "Error: " + wp.getName(),
                         JOptionPane.WARNING_MESSAGE);
                     }
-                    
-             }
-         }
-         totalFuel.setText(Formatter.formatDouble(totalConsumption, 2));
-         routeTableModel.fireTableDataChanged();
+                
+                }
+                // TODO METTICI TUTTI I CALCOLI CHE VUOI
+                if(!iter.hasNext()) {
+                    break;
+                }
+                me = (MetocPointForecast) iter.next();
+            }
+            // end outelg calculation 
+            int size = outleg.getInnerPointsConsumption().size();
+            if( size > 0) {  
+                this.averageLegFuelConsumptionValue(legFc, legMetoc, size);
+                outleg.setFuelConsumption(legFc);
+            }
+
+
+
+        };
+       
+        
+        totalFuel.setText(Formatter.formatDouble(totalConsumption, 2));
+        routeTableModel.fireTableDataChanged();
      } catch ( Exception e ) {
         JOptionPane.showMessageDialog(null,
             e.getMessage() ,
@@ -848,7 +911,101 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog implemen
      }
     
     }
-    
+    /**
+     * Wighted sum of inner metoc fuel consumpiton values
+     * 
+     */
+
+    private void weightdSumConsumption(FuelConsumption acc, FuelConsumption val, double weight) {
+        
+        acc.setFuelRate(acc.getFuelRate() + (val.getFuelRate() / weight));
+        acc.setFuel(acc.getFuel() + val.getFuel());
+        acc.setWave_resistance(acc.getWave_resistance() + (val.getWave_resistance() / weight));
+        acc.setWind_resistance(acc.getWind_resistance() + (val.getWind_resistance() / weight));
+        acc.setHull_resistance(acc.getHull_resistance() + (val.getHull_resistance() / weight));
+        acc.setWave_polar(acc.getWave_polar() + (val.getWave_polar() / weight));
+        acc.setWind_polar(acc.getWind_polar() + (val.getWind_polar() / weight));
+        acc.setHeading(acc.getHeading() + (val.getHeading() / weight));
+        
+        UVDimension current = acc.getCurrent_rel_uv();
+        UVDimension newCurrent = val.getCurrent_rel_uv();
+        current.setV(current.getV() + newCurrent.getV() / weight);
+        current.setU(current.getU() + newCurrent.getU() / weight);
+        UVDimension wind = acc.getWind_rel_uv();
+        UVDimension newWind = val.getWind_rel_uv();
+        wind.setV(wind.getV() + newWind.getV() / weight);
+        wind.setU(wind.getU() + newWind.getU() / weight);
+    }
+    /**
+     * Weighted sum of inner metoc MetocPointForecast values
+     */
+    private void weightedSumMetocPoints(MetocPointForecast acc , MetocPointForecast val, double weight) {
+        
+        UVDimension wind = acc.getWind();
+        wind.setU(wind.getU() + val.getWind().getU() / weight);
+        wind.setV(wind.getV() + val.getWind().getV() / weight);
+        
+        UVDimension current = acc.getCurrent();
+        current.setU(current.getU() + val.getCurrent().getU() / weight);
+        current.setV(current.getV() + val.getCurrent().getV() / weight);
+
+        Wave wave = acc.getMeanWave();
+        wave.setHeight(wave.getHeight() + val.getMeanWave().getHeight() / weight);
+        wave.setPeriod(wave.getPeriod() + val.getMeanWave().getPeriod() / weight);
+        wave.setDirection(wave.getDirection() + val.getMeanWave().getDirection() / weight);
+    }
+    /**
+     * Calculate the average value of FuelConsumption and MetopointForecas summetions
+     */
+    private void averageLegFuelConsumptionValue (FuelConsumption legFc, MetocPointForecast legMetoc, int size ) {
+         // Media pesata metoc per visualizzazione
+         UVDimension wind = legMetoc.getWind();
+         wind.setU(wind.getU() / size);
+         wind.setV(wind.getV() / size);
+         legMetoc.setWind(wind);
+
+         UVDimension current = legMetoc.getCurrent();
+         current.setU(current.getU() / size);
+         current.setV(current.getV() / size);
+         legMetoc.setCurrent(current);
+
+         Wave wave = legMetoc.getMeanWave();
+         wave.setHeight(wave.getHeight() / size);
+         wave.setPeriod(wave.getPeriod() / size);
+         wave.setDirection(wave.getDirection() / size);
+         legMetoc.setMeanWave(wave);
+
+         legFc.setMetoc(legMetoc);
+         //Media pesata fuel consumption values
+         
+        legFc.setFuelRate(legFc.getFuelRate() / size);
+        legFc.setFuel(legFc.getFuel());
+        legFc.setWave_resistance(legFc.getWave_resistance() / size);
+        legFc.setWind_resistance(legFc.getWind_resistance() / size);
+        legFc.setHull_resistance(legFc.getHull_resistance() / size);
+        legFc.setWave_polar(legFc.getWave_polar() / size);
+        legFc.setWind_polar(legFc.getWind_polar() / size);
+        legFc.setHeading(legFc.getHeading() / size);
+        legFc.getCurrent_rel_uv().setV(legFc.getCurrent_rel_uv().getV() / size);
+        legFc.getCurrent_rel_uv().setU(legFc.getCurrent_rel_uv().getU() / size);
+        legFc.getWind_rel_uv().setV(legFc.getWind_rel_uv().getV() / size);
+        legFc.getWind_rel_uv().setU(legFc.getWind_rel_uv().getU() / size);
+        legFc.currentThetaFromUV();
+        legFc.windThetaFromUV();
+
+    }
+    private MetocPointForecast getEmptyMetoc() {
+        MetocPointForecast empty = new MetocPointForecast();
+        empty.setCurrentDirection(new MetocForecastTriplet(0.));
+        empty.setCurrentSpeed(new MetocForecastTriplet(0.));
+        empty.setWindDirection(new MetocForecastTriplet(0.));
+        empty.setWindSpeed(new MetocForecastTriplet(0.));
+        empty.setMeanWaveDirection(new MetocForecastTriplet(0.));
+        empty.setMeanWaveHeight(new MetocForecastTriplet(0.));
+        empty.setMeanWavePeriod(new MetocForecastTriplet(0.));
+        return empty;
+
+    }
    
    /**
     * Called when route values changes and the fields should be refreshed

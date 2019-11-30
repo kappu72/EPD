@@ -1,0 +1,43 @@
+WW3_Mediterraneo_2019080200-whole.grb
+=====================================
+
+WIND (at 10 m height) DATA:
+37:1638032:d=19080200:WIND:kpds5=32:kpds6=1:kpds7=1:TR=0:P1=4:P2=0:TimeU=1:sfc:4hr fcst:NAve=0  ---> 10m Wind Speed
+38:1681438:d=19080200:WDIR:kpds5=31:kpds6=1:kpds7=1:TR=0:P1=4:P2=0:TimeU=1:sfc:4hr fcst:NAve=0  ---> 10m Wind Direction
+39:1740562:d=19080200:UGRD:kpds5=33:kpds6=1:kpds7=1:TR=0:P1=4:P2=0:TimeU=1:sfc:4hr fcst:NAve=0  ---> 10m Wind u-component
+40:1783968:d=19080200:VGRD:kpds5=34:kpds6=1:kpds7=1:TR=0:P1=4:P2=0:TimeU=1:sfc:4hr fcst:NAve=0  ---> 10m Wind v-component
+
+WAVE (whole spectrum averages) DATA:
+41:1827374:d=19080200:HTSGW:kpds5=100:kpds6=1:kpds7=1:TR=0:P1=4:P2=0:TimeU=1:sfc:4hr fcst:NAve=0  ---> Sign. Wave Height
+
+42:1861348:d=19080200:WVPER:kpds5=103:kpds6=1:kpds7=1:TR=0:P1=4:P2=0:TimeU=1:sfc:4hr fcst:NAve=0  ---> Average Wave Period (T_m01)
+43:1898466:d=19080200:PERPW:kpds5=108:kpds6=1:kpds7=1:TR=0:P1=4:P2=0:TimeU=1:sfc:4hr fcst:NAve=0  ---> Main Peak Period
+
+44:1935578:d=19080200:WVDIR:kpds5=101:kpds6=1:kpds7=1:TR=0:P1=4:P2=0:TimeU=1:sfc:4hr fcst:NAve=0  ---> Average Wave Direction
+45:1994702:d=19080200:DIRPW:kpds5=107:kpds6=1:kpds7=1:TR=0:P1=4:P2=0:TimeU=1:sfc:4hr fcst:NAve=0  ---> Main Peak Direction
+
+
+
+WW3_Mediterraneo_2019080200-part.grb
+====================================
+
+SIGNIFICANT WAVE HEIGHT OF EACH PARTITION (Wind Sea and first four Swell Components, these labelled in order by kpds7=1,2,3,4):
+43:755804:d=19080200:WVHGT:kpds5=102:kpds6=1:kpds7=1:TR=0:P1=4:P2=0:TimeU=1:sfc:4hr fcst:NAve=0  ---> Wind Sea
+44:785804:d=19080200:SWELL:kpds5=105:kpds6=241:kpds7=1:TR=0:P1=4:P2=0:TimeU=1:ordered sequence of data:4hr fcst:NAve=0  ---> 1st Swell Partition
+45:797688:d=19080200:SWELL:kpds5=105:kpds6=241:kpds7=2:TR=0:P1=4:P2=0:TimeU=1:ordered sequence of data:4hr fcst:NAve=0  ---> 2nd Swell Partition
+46:806720:d=19080200:SWELL:kpds5=105:kpds6=241:kpds7=3:TR=0:P1=4:P2=0:TimeU=1:ordered sequence of data:4hr fcst:NAve=0  ---> 3rd Swell Partition
+47:815544:d=19080200:SWELL:kpds5=105:kpds6=241:kpds7=4:TR=0:P1=4:P2=0:TimeU=1:ordered sequence of data:4hr fcst:NAve=0  ---> 4th Swell Partition
+
+PEAK PERIOD OF EACH PARTITION:
+48:824368:d=19080200:PERSW:kpds5=110:kpds6=1:kpds7=1:TR=0:P1=4:P2=0:TimeU=1:sfc:4hr fcst:NAve=0  ---> Wind Sea
+49:857014:d=19080200:SWPER:kpds5=106:kpds6=241:kpds7=1:TR=0:P1=4:P2=0:TimeU=1:ordered sequence of data:4hr fcst:NAve=0  ---> 1st Swell Partition
+50:870430:d=19080200:SWPER:kpds5=106:kpds6=241:kpds7=2:TR=0:P1=4:P2=0:TimeU=1:ordered sequence of data:4hr fcst:NAve=0  ---> 2nd Swell Partition
+51:879530:d=19080200:SWPER:kpds5=106:kpds6=241:kpds7=3:TR=0:P1=4:P2=0:TimeU=1:ordered sequence of data:4hr fcst:NAve=0  ---> 3rd Swell Partition
+52:888358:d=19080200:SWPER:kpds5=106:kpds6=241:kpds7=4:TR=0:P1=4:P2=0:TimeU=1:ordered sequence of data:4hr fcst:NAve=0  ---> 4th Swell Partition
+
+PEAK DIRECTION OF EACH PARTITION:
+53:897182:d=19080200:DIRSW:kpds5=109:kpds6=1:kpds7=1:TR=0:P1=4:P2=0:TimeU=1:sfc:4hr fcst:NAve=0  ---> Wind Sea
+54:948358:d=19080200:SWDIR:kpds5=104:kpds6=241:kpds7=1:TR=0:P1=4:P2=0:TimeU=1:ordered sequence of data:4hr fcst:NAve=0  ---> 1st Swell Partition
+55:965344:d=19080200:SWDIR:kpds5=104:kpds6=241:kpds7=2:TR=0:P1=4:P2=0:TimeU=1:ordered sequence of data:4hr fcst:NAve=0  ---> 2nd Swell Partition
+56:974722:d=19080200:SWDIR:kpds5=104:kpds6=241:kpds7=3:TR=0:P1=4:P2=0:TimeU=1:ordered sequence of data:4hr fcst:NAve=0  ---> 3rd Swell Partition
+57:983556:d=19080200:SWDIR:kpds5=104:kpds6=241:kpds7=4:TR=0:P1=4:P2=0:TimeU=1:ordered sequence of data:4hr fcst:NAve=0  ---> 4th Swell Partition

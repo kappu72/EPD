@@ -15,6 +15,7 @@
 package dk.dma.epd.common.prototype.route;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,13 +24,10 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+import com.bbn.openmap.MapHandlerChild;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.jcip.annotations.GuardedBy;
-import net.jcip.annotations.ThreadSafe;
-
-import com.bbn.openmap.MapHandlerChild;
 
 import dk.dma.epd.common.prototype.EPD;
 import dk.dma.epd.common.prototype.communication.webservice.ShoreServiceException;
@@ -45,10 +43,15 @@ import dk.dma.epd.common.prototype.settings.EnavSettings;
 import dk.dma.epd.common.prototype.shoreservice.ShoreServicesCommon;
 import dk.dma.epd.common.util.Util;
 import dk.frv.enav.common.xml.metoc.MetocForecast;
+import it.toscana.rete.lamma.prototype.metocservices.LocalMetocService;
+import it.toscana.rete.lamma.prototype.metocservices.MetocProviders;
 import it.toscana.rete.lamma.prototype.model.MetocPointForecast;
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
 
 /**
- * Base class for route managers, which handles a collection of routes and active route.
+ * Base class for route managers, which handles a collection of routes and
+ * active route.
  * <p>
  * The default implementation does not support active routes.
  */
@@ -61,6 +64,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     private CopyOnWriteArrayList<IRoutesUpdateListener> listeners = new CopyOnWriteArrayList<>();
     protected EnavSettings enavSettings;
     protected ShoreServicesCommon shoreServices;
+    protected LocalMetocService localMetocService;
 
     @GuardedBy("this")
     protected List<Route> routes = new LinkedList<>();
@@ -84,8 +88,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     /**
      * Adds the given route
      * 
-     * @param route
-     *            the route to add
+     * @param route the route to add
      */
     public void addRoute(Route route) {
         synchronized (this) {
@@ -97,8 +100,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     /**
      * Removes the given route
      * 
-     * @param route
-     *            the route to remove
+     * @param route the route to remove
      */
     public void removeRoute(Route route) {
         synchronized (this) {
@@ -118,8 +120,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     /**
      * Removes the route with the given index
      * 
-     * @param routeIndex
-     *            index of the route to remove
+     * @param routeIndex index of the route to remove
      */
     public void removeRoute(int index) {
         synchronized (this) {
@@ -143,8 +144,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     /**
      * Copy the route with the given index
      * 
-     * @param index
-     *            the index of the route to copy
+     * @param index the index of the route to copy
      */
     public void routeCopy(int index) {
         Route selectedRoute = getRoute(index);
@@ -161,8 +161,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     /**
      * Reverts the route with the given index
      * 
-     * @param index
-     *            the index of the route to revert
+     * @param index the index of the route to revert
      */
     public void routeReverse(int index) {
         Route selectedRoute = getRoute(index);
@@ -205,8 +204,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     /**
      * Sets the given routes as the current list of routes
      * 
-     * @param routes
-     *            the routes to set
+     * @param routes the routes to set
      */
     protected void setRoutes(List<Route> routes) {
         if (routes != null) {
@@ -228,8 +226,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     /**
      * Returns the route with the given index
      * 
-     * @param index
-     *            the index of the route to return
+     * @param index the index of the route to return
      * @return the route with the given index
      */
     public synchronized Route getRoute(int index) {
@@ -240,10 +237,10 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     }
 
     /**
-     * Returns the index of the given route in the current list of routes. returns -1 if the route is not found.
+     * Returns the index of the given route in the current list of routes. returns
+     * -1 if the route is not found.
      * 
-     * @param route
-     *            the route to find the index for
+     * @param route the route to find the index for
      * @return the index or -1 if not found
      */
     public synchronized int getRouteIndex(Route route) {
@@ -258,8 +255,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     /**
      * Hides the route with the given index
      * 
-     * @param routeIndex
-     *            the route to hide
+     * @param routeIndex the route to hide
      */
     public void hideRoute(int routeIndex) {
         Route route = getRoute(routeIndex);
@@ -314,8 +310,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     /**
      * Returns whether the route with the given index is the active route
      * 
-     * @param index
-     *            the index of the route to check
+     * @param index the index of the route to check
      * @return if route with the given index is the active route
      */
     public synchronized boolean isActiveRoute(int index) {
@@ -332,10 +327,10 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     }
 
     /**
-     * Sets the active way point of the active route to be the one with the give index
+     * Sets the active way point of the active route to be the one with the give
+     * index
      * 
-     * @param index
-     *            the index of the active way point
+     * @param index the index of the active way point
      */
     public void changeActiveWp(int index) {
         synchronized (this) {
@@ -355,8 +350,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     /**
      * Notifies the listeners that the route has updated
      * 
-     * @param e
-     *            the route update event
+     * @param e the route update event
      */
     public void notifyListeners(RoutesUpdateEvent e) {
         for (IRoutesUpdateListener listener : listeners) {
@@ -369,8 +363,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     /**
      * Adds a new listener
      * 
-     * @param listener
-     *            the listener to add
+     * @param listener the listener to add
      */
     public void addListener(IRoutesUpdateListener listener) {
         listeners.add(listener);
@@ -379,8 +372,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     /**
      * Removes a listener
      * 
-     * @param listener
-     *            the listener to remove
+     * @param listener the listener to remove
      */
     public void removeListener(IRoutesUpdateListener listener) {
         listeners.remove(listener);
@@ -395,8 +387,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
      * If not METOC is removed.<br>
      * Not for active route
      * 
-     * @param route
-     *            the route to validate METOC for
+     * @param route the route to validate METOC for
      * @return if the route has valid METOC data
      */
     public boolean validateMetoc(Route route) {
@@ -416,17 +407,39 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     /**
      * Get METOC data for the route
      * 
-     * @param route
-     *            the route to get METOC data for
+     * @param route the route to get METOC data for
      */
     public void requestRouteMetoc(Route route) throws ShoreServiceException {
         // Request METOC from shore
-        MetocForecast metocForecast = shoreServices.routeMetoc(route);
+        MetocForecast metocForecast = null;
+        MetocProviders p = MetocProviders.get(route.getRouteMetocSettings().getProvider());
+        switch (p) {
+        case DMI:
+        case FCO:
+            metocForecast = shoreServices.routeMetoc(route);
+            // Convert the metoc to lamma metoc point
+            // Attenzione al vento unita di misura e provenienza unita di misura!!
+            // Usi il nuovo modello e converti
+            metocForecast.setForecasts(metocForecast.getForecasts().stream().map(fp -> new MetocPointForecast(fp))
+                    .collect(Collectors.toList()));
+            break;
+        case LOCAL:
+            try {
+                metocForecast = localMetocService.routeMetoc(route);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+                break;
+            case LAMMA:
+                // TODO implement lamma opendap provider
+                break;
+            default:
+                break;
+        }
+        
 
-        // Convert the metoc to lamma metoc point
-        // Attenzione al vento unita di misura e provenienza unita di misura!!
-        // Usi il nuovo modello e converti
-        metocForecast.setForecasts(metocForecast.getForecasts().stream().map(fp -> new MetocPointForecast(fp)).collect(Collectors.toList()));
+        
         route.setMetocForecast(metocForecast);
         // Set show to true
         route.getRouteMetocSettings().setShowRouteMetoc(true);
@@ -645,6 +658,9 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
         if (shoreServices == null && obj instanceof ShoreServicesCommon) {
             shoreServices = (ShoreServicesCommon) obj;
         }
+        if(localMetocService == null && obj instanceof LocalMetocService) {
+            localMetocService = (LocalMetocService) obj;
+        }
     }
 
     /**
@@ -654,6 +670,9 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     public void findAndUndo(Object obj) {
         if (shoreServices == obj) {
             shoreServices = null;
+        }
+        if (localMetocService == obj) {
+            localMetocService = null;
         }
         super.findAndUndo(obj);
     }

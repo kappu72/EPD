@@ -1,0 +1,13 @@
+{
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    },
+    "java.debug.settings.hotCodeReplace": "auto",
+    "java.codeGeneration.generateComments": true,
+    "cSpell.words": [
+        "Waypoint"
+    ]
+}

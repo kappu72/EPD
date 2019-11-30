@@ -71,6 +71,7 @@ public class MetocRequestDialog extends JDialog implements Runnable, ActionListe
     
     @Override
     public void run() {
+        // Vanno differenziti i servizi qui olo possiamo fare dopo a monte
         ShoreServiceException error = null;
         try {
             routeManager.requestRouteMetoc(route);

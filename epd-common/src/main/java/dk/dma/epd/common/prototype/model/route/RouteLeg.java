@@ -15,6 +15,8 @@
 package dk.dma.epd.common.prototype.model.route;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.epd.common.Heading;
@@ -62,12 +64,13 @@ public class RouteLeg implements Serializable {
     protected RouteWaypoint endWp;
 
     protected double SFLen = 1000;
-    // Path isn't Serializable use string instead
+    
     protected String propulsionConfig = null;
 
-    // Path isn't Serializable use string instead
     protected FuelConsumption fuelConsumption;
     
+    protected List<FuelConsumption> innerPointsConsumption = new ArrayList<FuelConsumption>();
+
 	public RouteLeg() {
 
     }
@@ -80,6 +83,9 @@ public class RouteLeg implements Serializable {
         this.startWp = rll.getStartWp();
         this.endWp = rll.getEndWp();
         this.SFLen = rll.getSFLen();
+        this.propulsionConfig = rll.getPropulsionConfig();
+        this.fuelConsumption = rll.getFuelConsumption();
+        this.innerPointsConsumption = rll.getInnerPointsConsumption();
     }
 
     public RouteLeg(RouteWaypoint startWp, RouteWaypoint endWp) {
@@ -324,6 +330,20 @@ public class RouteLeg implements Serializable {
         newRouteLeg.setSFLen(getSFLen());
 
         return newRouteLeg;
+    }
+
+    /**
+     * @return the innerPointsConsumption
+     */
+    public List<FuelConsumption> getInnerPointsConsumption() {
+        return innerPointsConsumption;
+    }
+
+    /**
+     * @param innerPointsConsumption the innerPointsConsumption to set
+     */
+    public void setInnerPointsConsumption(List<FuelConsumption> innerPointsConsumption) {
+        this.innerPointsConsumption = innerPointsConsumption;
     }
 
 }

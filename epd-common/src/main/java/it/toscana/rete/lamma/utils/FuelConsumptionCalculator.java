@@ -57,7 +57,7 @@ public class FuelConsumptionCalculator {
 	public static ThetaUDimension vectorToSpeedDir(UVDimension v) {
 
 		double U = Math.sqrt(square(v.getU()) + square(v.getV()));
-		double theta = Math.toDegrees(Math.atan2(-v.getU(), -v.getV()));
+		double theta = Math.toDegrees(Math.atan2(v.getU(), v.getV()));
 		if (theta < 0)
 			theta = theta + 360;
 		
@@ -126,7 +126,7 @@ public class FuelConsumptionCalculator {
 	 * @return
 	 */
 	public static FuelConsumption CalculateResistance(FuelConsumption c, double waveH, double waveTm , WindresTable cxTables, WaveresGenericTable cawTables, int aT) {
-		double rAw = 0; // se non valido lo azzero!!
+		double rAw = 0; // se non valido lo va a zero!!
 		if(cawTables.isValidTm(waveTm)) {
 			rAw = square(waveH) * cawTables.getCawValue(c.getCurrent_rel().getU(), waveTm, c.getWave_polar());
 		}
@@ -134,12 +134,11 @@ public class FuelConsumptionCalculator {
 
 		c.setWind_resistance(rWind);
 		c.setWave_resistance(rAw);
-		c.setTotalresistance(rWind+ rAw);
 		
 		return c;
 	}
 
-	// non serve più i dati li ho smepre in uv from
+	// non serve più i dati li ho sempre in uv from
 	public static FuelConsumption CalculateAllKinematical(ThetaUDimension sog, ThetaUDimension cur, ThetaUDimension wind, double wave) {
 		
 		FuelConsumption c = new FuelConsumption();

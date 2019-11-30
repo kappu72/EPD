@@ -11,17 +11,14 @@ import java.util.List;
 
 import javax.swing.text.MaskFormatter;
 
-import org.apache.commons.logging.Log;
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Splitter;
-import com.google.common.base.Joiner;
-import com.google.common.base.CharMatcher;
-
-
 import dk.dma.epd.common.prototype.EPD;
-import it.toscana.rete.lamma.prototype.event.ShipDataEvent;
 import it.toscana.rete.lamma.prototype.model.ShipData;
 
 public class Utils {

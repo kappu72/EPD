@@ -34,6 +34,11 @@ public class ShoreServiceException extends Exception {
         this.errroCode = errorCode;
     }
     
+    public ShoreServiceException(String message) {
+        super(message);
+    
+    }
+
     public int getErrroCode() {
         return errroCode;
     }

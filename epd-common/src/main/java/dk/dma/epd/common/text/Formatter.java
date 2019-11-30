@@ -355,7 +355,7 @@ public class Formatter {
         return formatSpeed(wind.getU())  + sign + formatDegrees(Math.abs(wind.getTheta()), 0) + " " + formatDegrees(nWind, 0);
     }
     public static String formatWave( FuelConsumption fc) {
-        if (fc == null) {
+        if (fc == null || fc.getMetoc() == null) {
             return "N/A";
         }
         Wave w = fc.getMetoc().getMeanWave();

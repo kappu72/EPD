@@ -179,7 +179,7 @@ public class Route implements Serializable {
         // method) for route legs, but
         // forward referencing a waypoint which has not been created has to be
         // solved in some way...
-        for (int i = 0; i < waypoints.size(); i++) {
+        for (int i = 0; i < waypoints.size() - 1; i++) {
             RouteWaypoint currWaypoint = waypoints.get(i);
 
             RouteWaypoint nextWaypoint = null;

@@ -131,19 +131,30 @@
 			<artifactId>itextpdf</artifactId>
 			<version>5.5.2</version>
 		</dependency>
-		 <dependency>
-                       <groupId>edu.ucar</groupId>
-                       <artifactId>cdm</artifactId>
-                       <version>4.6.11</version>
-                       <scope>compile</scope>
-               </dependency>
-               <dependency>
-                       <groupId>edu.ucar</groupId>
-                       <artifactId>grib</artifactId>
-                       <version>4.6.11</version>
-                       <scope>runtime</scope>
-               </dependency>
-		
+		<dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>cdm</artifactId>
+            <version>5.1.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>grib</artifactId>
+            <version>5.1.0</version>
+            <scope>runtime</scope>
+        </dependency>
+		<dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>netcdf4</artifactId>
+            <version>5.1.0</version>
+            <scope>runtime</scope>
+        </dependency>
+		<dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>opendap</artifactId>
+            <version>5.1.0</version>
+            <scope>runtime</scope>
+        </dependency>
 	</dependencies>
 
 	<build>

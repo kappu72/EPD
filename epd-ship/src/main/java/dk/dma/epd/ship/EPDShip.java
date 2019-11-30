@@ -32,15 +32,12 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import net.maritimecloud.core.id.MaritimeId;
-import net.maritimecloud.core.id.MmsiId;
+import com.bbn.openmap.MapHandler;
+import com.jtattoo.plaf.hifi.HiFiLookAndFeel;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.bbn.openmap.MapHandler;
-import com.jtattoo.plaf.hifi.HiFiLookAndFeel;
 
 import dk.dma.ais.virtualnet.transponder.gui.TransponderFrame;
 import dk.dma.commons.app.OneInstanceGuard;
@@ -96,6 +93,9 @@ import dk.dma.epd.ship.service.voct.VOCTManager;
 import dk.dma.epd.ship.settings.EPDSensorSettings;
 import dk.dma.epd.ship.settings.EPDSettings;
 import it.toscana.rete.lamma.prototype.FuelService;
+import it.toscana.rete.lamma.prototype.metocservices.LocalMetocService;
+import net.maritimecloud.core.id.MaritimeId;
+import net.maritimecloud.core.id.MmsiId;
 /**
  * Main class with main method.
  * 
@@ -134,6 +134,8 @@ public final class EPDShip extends EPD implements IOwnShipListener {
     // private VoctHandler voctHandler;
 
     private PluginLoader pluginLoader;
+
+    private LocalMetocService localMetocService;
 
     /**
      * Starts the program by initializing the various threads and spawning the main GUI
@@ -308,6 +310,9 @@ public final class EPDShip extends EPD implements IOwnShipListener {
         falHandler = new FALHandler();
         mapHandler.add(falHandler);
 
+        // Add LocalMetocService
+        localMetocService = new LocalMetocService();
+         mapHandler.add(localMetocService);
         // Start sensors
         startSensors();
 
@@ -888,6 +893,13 @@ public final class EPDShip extends EPD implements IOwnShipListener {
         return shoreServices;
     }
 
+    /**
+     * @return the localMetocService
+     */
+    public LocalMetocService getLocalMetocService() {
+        return localMetocService;
+    }
+    
     public MonaLisaRouteOptimization getMonaLisaRouteExchange() {
         return monaLisaRouteExchange;
     }
@@ -990,4 +1002,6 @@ public final class EPDShip extends EPD implements IOwnShipListener {
             intendedRouteHandler.broadcastIntendedRoute(getRouteManager().getActiveRoute(), true);
         }
     }
+
+    
 }

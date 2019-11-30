@@ -117,6 +117,9 @@ public class RouteMetocSettings implements Serializable {
      * @return the uvDim
      */
     public Boolean getUvDim() {
+        if(uvDim == null) {
+            uvDim = true;
+        }
         return uvDim;
     }
 
@@ -124,13 +127,16 @@ public class RouteMetocSettings implements Serializable {
      * @param uvDim the uvDim to set
      */
     public void setUvDim(Boolean uvDim) {
-        this.uvDim = uvDim;
+            this.uvDim = uvDim;
     }
 
     /**
      * @return the to
      */
     public Boolean getTo() {
+        if(to == null) {
+            to = true;
+        }
         return to;
     }
 
@@ -138,7 +144,8 @@ public class RouteMetocSettings implements Serializable {
      * @param to the to to set
      */
     public void setTo(Boolean to) {
-        this.to = to;
+        if(to != null)
+            this.to = to;
     }
 
 }

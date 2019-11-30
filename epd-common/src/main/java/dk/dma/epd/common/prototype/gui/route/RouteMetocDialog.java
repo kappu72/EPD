@@ -39,12 +39,14 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -61,8 +63,8 @@ import dk.dma.epd.common.text.Formatter;
 import dk.frv.enav.common.xml.metoc.MetocDataTypes;
 import dk.frv.enav.common.xml.metoc.MetocForecast;
 import dk.frv.enav.common.xml.metoc.request.MetocForecastRequest;
-
-import it.toscana.rete.lamma.utils.Utils;
+import it.toscana.rete.lamma.prototype.metocservices.MetocProviders;
+import java.awt.Component;
 /**
  * Dialog with METOC settings 
  */
@@ -240,11 +242,11 @@ public class RouteMetocDialog extends JDialog implements ActionListener, FocusLi
 
     // Enable disable the btn based on current config
     private void toggleRequestBtn() {
-        boolean isEnabled = localFilePath != null || !providerBox.getSelectedItem().toString().startsWith("Local");
+        boolean isEnabled = localFilePath != null || !(MetocProviders.LOCAL.label() == providerBox.getSelectedItem());
         requestBtn.setEnabled(isEnabled);
     }
     private void toggleLocalPanel() {
-        boolean isEnabled = providerBox.getSelectedItem().toString().startsWith("Local");
+        boolean isEnabled = MetocProviders.LOCAL.label() == providerBox.getSelectedItem();
         
         localMetocPanel.setEnabled(isEnabled);
         uvTuCb.setEnabled(isEnabled);
@@ -387,10 +389,9 @@ public class RouteMetocDialog extends JDialog implements ActionListener, FocusLi
         providerPanel.setBorder(new TitledBorder(null, "METOC provider", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
         
         providerBox = new JComboBox<String>();
-        providerBox.addItem("dmi");
-        providerBox.addItem("fco");
-        providerBox.addItem("Local metoc");
-        providerBox.addItem("Lamma(opendap)");
+         for (MetocProviders p : MetocProviders.values()) {
+            providerBox.addItem(p.label());         
+         }
         providerBox.addActionListener(this);
         providerBox.addFocusListener(this);
       

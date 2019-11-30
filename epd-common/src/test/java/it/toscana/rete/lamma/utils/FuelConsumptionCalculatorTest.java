@@ -83,7 +83,7 @@ public class FuelConsumptionCalculatorTest {
 		 
 		 ThetaUDimension result = FuelConsumptionCalculator.vectorToSpeedDir(val);
 		 assertEquals(2.2361, result.getU(), 0.0001);
-		 assertEquals(243.4349, result.getTheta(), 0.0001);
+		 assertEquals(63.4349, result.getTheta(), 0.0001);
 		 
 	}
 	/**
