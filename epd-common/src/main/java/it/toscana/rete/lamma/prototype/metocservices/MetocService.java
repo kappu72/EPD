@@ -175,7 +175,7 @@ public class MetocService extends MapHandlerChild {
         // Stream over generated waypoints
 
         openMetoc(metocSettings);
-
+        
         GeoGrid v_10_Grid = metocDataset.findGridByShortName(V_WIND_10);
         GeoGrid u_10_Grid = metocDataset.findGridByShortName(U_WIND_10);
         GeoGrid swh_Grid = metocDataset.findGridByShortName(H_WAVE_COMBINED);
