@@ -33,6 +33,8 @@ public class RouteMetocSettings implements Serializable {
     private Double currentWarnLimit;
     private Double waveWarnLimit;
     private String localMetocFile;
+    private String localPartMetocFile;
+    private String lammaMetocFile;
     private Boolean uvDim = true;
     private Boolean to = true;
     private String provider = "dmi";
@@ -146,6 +148,34 @@ public class RouteMetocSettings implements Serializable {
     public void setTo(Boolean to) {
         if(to != null)
             this.to = to;
+    }
+
+    /**
+     * @return the localPartMetocFile
+     */
+    public String getLocalPartMetocFile() {
+        return localPartMetocFile;
+    }
+
+    /**
+     * @param localPartMetocFile the localPartMetocFile to set
+     */
+    public void setLocalPartMetocFile(String localPartMetocFile) {
+        this.localPartMetocFile = localPartMetocFile;
+    }
+
+    /**
+     * @return the lammaMetocFile
+     */
+    public String getLammaMetocFile() {
+        return lammaMetocFile;
+    }
+
+    /**
+     * @param lammaMetocFile the lammaMetocFile to set
+     */
+    public void setLammaMetocFile(String lammaMetocFile) {
+        this.lammaMetocFile = lammaMetocFile;
     }
 
 }

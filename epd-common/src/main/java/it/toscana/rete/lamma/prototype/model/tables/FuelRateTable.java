@@ -34,7 +34,9 @@ public class FuelRateTable {
 		rHullValues.setValue(rHullValue, idx);
 	}
 	public double getFuelRate(double speed, double rAdd) {
-		return fuelRateValues.getValue(speed).getWeightedValue(rAdd);
+		
+		return fuelRateValues.getValue(speed).getWeightedValue(rAdd, true);	
+		
 	}
 	public double getRhull(double speed) {
 		return rHullValues.getValue(speed);

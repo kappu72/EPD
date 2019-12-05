@@ -43,6 +43,7 @@ import dk.dma.epd.common.prototype.settings.EnavSettings;
 import dk.dma.epd.common.prototype.shoreservice.ShoreServicesCommon;
 import dk.dma.epd.common.util.Util;
 import dk.frv.enav.common.xml.metoc.MetocForecast;
+import it.toscana.rete.lamma.prototype.metocservices.LammaMetocService;
 import it.toscana.rete.lamma.prototype.metocservices.LocalMetocService;
 import it.toscana.rete.lamma.prototype.metocservices.MetocProviders;
 import it.toscana.rete.lamma.prototype.model.MetocPointForecast;
@@ -65,6 +66,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
     protected EnavSettings enavSettings;
     protected ShoreServicesCommon shoreServices;
     protected LocalMetocService localMetocService;
+    protected LammaMetocService lammaMetocService;
 
     @GuardedBy("this")
     protected List<Route> routes = new LinkedList<>();
@@ -432,7 +434,12 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
             }
                 break;
             case LAMMA:
-                // TODO implement lamma opendap provider
+                try {
+                    metocForecast = lammaMetocService.routeMetoc(route);
+                } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                }
                 break;
             default:
                 break;
@@ -493,17 +500,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
      * @return if the given route has associated METOC data
      */
     public boolean hasMetoc(Route route) {
-        if (route.getMetocForecast() != null) {
-            // Determine if METOC info is old
-            long metocTtl = enavSettings.getMetocTtl() * 60 * 1000;
-            Date now = PntTime.getDate();
-            Date metocDate = route.getMetocForecast().getCreated();
-            if (now.getTime() - metocDate.getTime() > metocTtl) {
-                return false;
-            }
-            return true;
-        }
-        return false;
+       return !isMetocOld(route); // It it's old it has not!
     }
 
     /**
@@ -661,6 +658,9 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
         if(localMetocService == null && obj instanceof LocalMetocService) {
             localMetocService = (LocalMetocService) obj;
         }
+        if(lammaMetocService == null && obj instanceof LammaMetocService) {
+            lammaMetocService = (LammaMetocService) obj;
+        }
     }
 
     /**
@@ -673,6 +673,9 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
         }
         if (localMetocService == obj) {
             localMetocService = null;
+        }
+        if (lammaMetocService == obj) {
+            lammaMetocService = null;
         }
         super.findAndUndo(obj);
     }
@@ -692,10 +695,19 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
             Util.sleep(10000);
 
             // Active route poll for METOC
-            pollForMetoc();
+     //       pollForMetoc();
 
             // Check validity of METOC for all routes
-            checkValidMetoc();
+   //         checkValidMetoc();
         }
     }
+
+    /**
+     * @return the lammaMetocService
+     */
+    public LammaMetocService getLammaMetocService() {
+        return lammaMetocService;
+    }
+
+
 }

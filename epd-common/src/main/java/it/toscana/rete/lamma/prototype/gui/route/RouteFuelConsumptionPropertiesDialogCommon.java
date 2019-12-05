@@ -850,7 +850,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog implemen
                     try {
                         Wave mwave = me.getMeanWave();
                         FuelConsumption c = FuelConsumptionCalculator.CalculateAllKinematical(SOG, me.getCurrent(), me.getWind(), mwave.getDirection(), true);
-                        FuelConsumption r = FuelConsumptionCalculator.CalculateResistance(c, mwave.getHeight(), mwave.getPeriod(), cxRes, cawRes, 850); // occhi a 850 è fisso
+                        FuelConsumption r = FuelConsumptionCalculator.CalculateResistance(c, mwave.getHeight(), mwave.getPeriod(), cxRes, cawRes, 850); // occhio a 850 è fisso
                         if(hullResTable != null) {
                             r.setHull_resistance(hullResTable.getRes(r.getCurrent_rel().getU()));
                         }
@@ -876,6 +876,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog implemen
                         this.weightdSumConsumption(legFc, r, weight);
                         
                     }catch (Exception e) {
+                        e.printStackTrace();
                         JOptionPane.showMessageDialog(null,
                          e.getMessage() ,
                         "Error: " + wp.getName(),

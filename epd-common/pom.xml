@@ -57,9 +57,10 @@
 			<version>1.2.3</version>
 		</dependency>
 		<dependency>
-			<groupId>dk.dma.3rdparty</groupId>
+		
+			<groupId>com.bbn</groupId>
 			<artifactId>openmap</artifactId>
-			<version>5.0.3</version>
+			<version>5.1.15</version>
 		</dependency>
 		<dependency>
 			<groupId>dk.dma.3rdparty</groupId>
@@ -133,30 +134,36 @@
 		</dependency>
 		<dependency>
             <groupId>edu.ucar</groupId>
-            <artifactId>cdm</artifactId>
-            <version>5.1.0</version>
+            <artifactId>cdm-core</artifactId>
+            <version>5.2.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+		<dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>cdm-misc</artifactId>
+            <version>5.2.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>grib</artifactId>
-            <version>5.1.0</version>
-            <scope>runtime</scope>
+            <version>5.2.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 		<dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>netcdf4</artifactId>
-            <version>5.1.0</version>
-            <scope>runtime</scope>
+            <version>5.2.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 		<dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>opendap</artifactId>
-            <version>5.1.0</version>
-            <scope>runtime</scope>
+            <version>5.2.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
-	</dependencies>
 
+	</dependencies>
 	<build>
 
 		<plugins>
@@ -302,12 +309,33 @@
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
+			
 		</repository>
 		<repository>
 			<id>unidata-all</id>
 			<name>Unidata All</name>
+			
 			<url>https://artifacts.unidata.ucar.edu/repository/unidata-all/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+
 		</repository>
+<repository>
+			<id>maven.nuiton</id>
+			<name>nuiton</name>
+			
+			<url>http://maven.nuiton.org/release/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			
+
+		</repository>
+
 	</repositories>
 
 

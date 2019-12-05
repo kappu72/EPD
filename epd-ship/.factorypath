@@ -48,7 +48,7 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/com/google/code/gson/gson/2.2.2/gson-2.2.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/dk/dma/3rdparty/omj3d/1.2.3/omj3d-1.2.3.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/dk/dma/3rdparty/omsvg/1.2.3/omsvg-1.2.3.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/dk/dma/3rdparty/openmap/5.0.3/openmap-5.0.3.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/bbn/openmap/5.1.15/openmap-5.1.15.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/dk/dma/3rdparty/comm/1.2.3/comm-1.2.3.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/dk/dma/3rdparty/omcorba/1.2.3/omcorba-1.2.3.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/dk/dma/3rdparty/milStd2525_png/1.2.3/milStd2525_png-1.2.3.jar" enabled="true" runInBatchMode="false"/>
@@ -80,6 +80,7 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/org/codehaus/plexus/plexus-container-default/1.0-alpha-9-stable-1/plexus-container-default-1.0-alpha-9-stable-1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/classworlds/classworlds/1.1-alpha-2/classworlds-1.1-alpha-2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/fasterxml/jackson/core/jackson-databind/2.2.3/jackson-databind-2.2.3.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/fasterxml/jackson/core/jackson-core/2.2.3/jackson-core-2.2.3.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/joda-time/joda-time/2.0/joda-time-2.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/google/guava/guava/15.0/guava-15.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/intellij/annotations/9.0.4/annotations-9.0.4.jar" enabled="true" runInBatchMode="false"/>
@@ -90,26 +91,23 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sun/xml/bind/jaxb-xjc/2.2/jaxb-xjc-2.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/xmlunit/xmlunit/1.2/xmlunit-1.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/itextpdf/itextpdf/5.5.2/itextpdf-5.5.2.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/edu/ucar/cdm/4.6.11/cdm-4.6.11.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/edu/ucar/udunits/4.6.11/udunits-4.6.11.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/edu/ucar/httpservices/4.6.11/httpservices-4.6.11.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/httpcomponents/httpclient/4.5.1/httpclient-4.5.1.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/httpcomponents/httpmime/4.5.1/httpmime-4.5.1.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/jdom/jdom2/2.0.4/jdom2-2.0.4.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/quartz-scheduler/quartz/2.2.0/quartz-2.2.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/c3p0/c3p0/0.9.1.1/c3p0-0.9.1.1.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/google/protobuf/protobuf-java/3.5.0/protobuf-java-3.5.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/amazonaws/aws-java-sdk-s3/1.11.236/aws-java-sdk-s3-1.11.236.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/amazonaws/aws-java-sdk-kms/1.11.236/aws-java-sdk-kms-1.11.236.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/amazonaws/aws-java-sdk-core/1.11.236/aws-java-sdk-core-1.11.236.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/software/amazon/ion/ion-java/1.0.2/ion-java-1.0.2.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/fasterxml/jackson/dataformat/jackson-dataformat-cbor/2.6.7/jackson-dataformat-cbor-2.6.7.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/amazonaws/jmespath-java/1.11.236/jmespath-java-1.11.236.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/fasterxml/jackson/core/jackson-core/2.7.9/jackson-core-2.7.9.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/edu/ucar/grib/4.6.11/grib-4.6.11.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/jsoup/jsoup/1.11.2/jsoup-1.11.2.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/edu/ucar/jj2000/5.3/jj2000-5.3.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/edu/ucar/cdm-core/5.2.0-SNAPSHOT/cdm-core-5.2.0-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/edu/ucar/udunits/5.2.0-SNAPSHOT/udunits-5.2.0-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/edu/ucar/httpservices/5.2.0-SNAPSHOT/httpservices-5.2.0-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/httpcomponents/httpclient/4.5.9/httpclient-4.5.9.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/httpcomponents/httpmime/4.5.9/httpmime-4.5.9.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/jdom/jdom2/2.0.6/jdom2-2.0.6.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/google/protobuf/protobuf-java/3.9.1/protobuf-java-3.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/httpcomponents/httpcore/4.4.11/httpcore-4.4.11.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/google/re2j/re2j/1.3/re2j-1.3.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/edu/ucar/cdm-misc/5.2.0-SNAPSHOT/cdm-misc-5.2.0-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/edu/ucar/grib/5.2.0-SNAPSHOT/grib-5.2.0-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/edu/ucar/jj2000/5.4/jj2000-5.4.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/edu/ucar/netcdf4/5.2.0-SNAPSHOT/netcdf4-5.2.0-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/net/java/dev/jna/jna/5.4.0/jna-5.4.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/edu/ucar/opendap/5.2.0-SNAPSHOT/opendap-5.2.0-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/coverity/security/coverity-escapers/1.1.1/coverity-escapers-1.1.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/slf4j/slf4j-api/1.7.7/slf4j-api-1.7.7.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/swinglabs/swingx/1.6.1/swingx-1.6.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/jhlabs/filters/2.0.235/filters-2.0.235.jar" enabled="true" runInBatchMode="false"/>
@@ -118,7 +116,6 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/dk/dma/commons/dma-commons-management/0.1/dma-commons-management-0.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/dk/dma/commons/dma-commons-util/0.1/dma-commons-util-0.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/dk/dma/3rdparty/jsr166e/01.10.2013/jsr166e-01.10.2013.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/google/code/findbugs/jsr305/1.3.7/jsr305-1.3.7.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/codahale/metrics/metrics-core/3.0.1/metrics-core-3.0.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/google/inject/guice/3.0/guice-3.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/aopalliance/aopalliance/1.0/aopalliance-1.0.jar" enabled="true" runInBatchMode="false"/>

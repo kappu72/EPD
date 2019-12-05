@@ -130,7 +130,7 @@ public class FuelConsumptionCalculator {
 		if(cawTables.isValidTm(waveTm)) {
 			rAw = square(waveH) * cawTables.getCawValue(c.getCurrent_rel().getU(), waveTm, c.getWave_polar());
 		}
-		double rWind = (0.5 * rhoAir * aT * square(c.getWind_rel().getU()) * cxTables.getCx(c.getWind_polar())) / 1000;
+		double rWind = (0.5 * rhoAir * aT * square(knToms(c.getWind_rel().getU())) * cxTables.getCx(c.getWind_polar())) / 1000;
 
 		c.setWind_resistance(rWind);
 		c.setWave_resistance(rAw);

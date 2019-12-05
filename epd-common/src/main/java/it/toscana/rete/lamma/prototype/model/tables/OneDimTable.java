@@ -54,34 +54,54 @@ public class OneDimTable<E> {
 	 * @return
 	 */
 	public E getValue(double idx) throws IllegalArgumentException {
-		int index = Math.toIntExact(Math.round(normalizeIdex(idx) / delta));
-		return values[index];
-		
+		return getValue(idx, false);
 	}
+	/**
+	 * Return the parm value
+	 * @param idx
+	 * @return
+	 */
+	public E getValue(double idx, boolean force) throws IllegalArgumentException {
+		int index = Math.toIntExact(Math.round(normalizeIdex(idx, force) / delta));
+		return values[index];
+	}
+
+
 	/**
 	 * Return the weighted average of param value don't use if E isn't a double
 	 * @param idx
 	 * @return
 	 */
 	public double getWeightedValue(double idx) throws IllegalArgumentException{
-		double nIdex = normalizeIdex(idx);
+		return  getWeightedValue(idx, false);
+	}
+	/**
+	 * Return the weighted average of param value don't use if E isn't a double
+	 * @param idx
+	 * @param boolean force bound to min max value
+	 * @return
+	 */
+	public double getWeightedValue(double idx, boolean force) throws IllegalArgumentException{
+		double nIdex = normalizeIdex(idx, force);
 		double rest = nIdex%delta;
 		
 		if(rest == 0.0) {
-			return (double) getValue(idx);
+			return (Double) getValue(idx, force);
 		}
-		
-		double up = (double) values[(int) Math.ceil(nIdex/delta)];
-		double down = (double) values[(int) Math.floor(nIdex/delta)];
+		double up = (Double) values[(int) Math.ceil(nIdex/delta)];
+		double down = (Double) values[(int) Math.floor(nIdex/delta)];
 		double upD = delta-rest;
 		double downD = rest;
 		return  (up * upD + down * downD) / (upD + downD);
 	}
-	private double normalizeIdex(double idx) throws IllegalArgumentException{
-		if(idx > maxIdx || idx < minIdx) {
+
+
+
+	private double normalizeIdex(double idx, boolean force) throws IllegalArgumentException{
+		if(!force && (idx > maxIdx || idx < minIdx )) {
 			throw new IllegalArgumentException("Value outside range " + maxIdx + " " + minIdx);
 		}
-		return idx - minIdx;
+		return force ? Math.max(minIdx, Math.min(idx, maxIdx)) - minIdx : idx - minIdx;
 	}
 	public E getFirst() {
 		return values[0];

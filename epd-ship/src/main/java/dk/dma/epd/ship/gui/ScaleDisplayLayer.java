@@ -164,15 +164,15 @@ public class ScaleDisplayLayer extends EPDLayerCommon implements
         // Therefore, The following code correctly obtains the proper
         // Length object.
 
-        Length[] choices = Length.getAvailable();
-        uom = null;
-        for (int i = 0; i < choices.length; i++) {
-            if (unitOfMeasure.equalsIgnoreCase(choices[i].toString())
-                    || unitOfMeasure.equalsIgnoreCase(choices[i].getAbbr())) {
-                uom = choices[i];
-                break;
-            }
-        }
+        // Length[] choices = Length.getAvailable();
+        uom = Length.get(unitOfMeasure);
+        // for (int i = 0; i < choices.length; i++) {
+        //     if (unitOfMeasure.equalsIgnoreCase(choices[i].toString())
+        //             || unitOfMeasure.equalsIgnoreCase(choices[i].getAbbr())) {
+        //         uom = choices[i];
+        //         break;
+        //     }
+        // }
 
         // of no uom is found assign Kilometers as the default.
         if (uom == null) {
@@ -209,8 +209,8 @@ public class ScaleDisplayLayer extends EPDLayerCommon implements
                     setUnitOfMeasure(jrb.getText());
                 }
             };
-
-            for (Length lengthType : Length.getAvailable()) {
+            
+            for (Length lengthType : Length.values()) {
                 JRadioButton jrb = new JRadioButton();
                 jrb.setText(lengthType.getAbbr());
                 jrb.setToolTipText(lengthType.toString());

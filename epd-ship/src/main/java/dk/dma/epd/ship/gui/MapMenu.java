@@ -433,7 +433,10 @@ public class MapMenu extends MapMenuCommon {
             route.setRouteMetocSettings(routeManager.getDefaultRouteMetocSettings());
         }
         RouteMetocSettings metocSettings = route.getRouteMetocSettings();
-        if(metocSettings.getProvider().indexOf("Local") != -1 && metocSettings.getLocalMetocFile() == null) {
+        String provider = metocSettings.getProvider();
+        if((metocSettings.getProvider().indexOf("Local") != -1 && metocSettings.getLocalMetocFile() == null) || 
+           (metocSettings.getProvider().indexOf("Lamma") != -1 && metocSettings.getLammaMetocFile() == null)
+           ) {
             routeRequestMetoc.setEnabled(false);
         }else {
             routeRequestMetoc.setEnabled(true);

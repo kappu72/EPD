@@ -94,6 +94,7 @@ import dk.dma.epd.ship.settings.EPDSensorSettings;
 import dk.dma.epd.ship.settings.EPDSettings;
 import it.toscana.rete.lamma.prototype.FuelService;
 import it.toscana.rete.lamma.prototype.metocservices.LocalMetocService;
+import it.toscana.rete.lamma.prototype.metocservices.LammaMetocService;
 import net.maritimecloud.core.id.MaritimeId;
 import net.maritimecloud.core.id.MmsiId;
 /**
@@ -136,6 +137,7 @@ public final class EPDShip extends EPD implements IOwnShipListener {
     private PluginLoader pluginLoader;
 
     private LocalMetocService localMetocService;
+    private LammaMetocService lammaMetocService;
 
     /**
      * Starts the program by initializing the various threads and spawning the main GUI
@@ -313,6 +315,9 @@ public final class EPDShip extends EPD implements IOwnShipListener {
         // Add LocalMetocService
         localMetocService = new LocalMetocService();
          mapHandler.add(localMetocService);
+         // Add LammaMetocService
+        lammaMetocService = new LammaMetocService();
+        mapHandler.add(lammaMetocService);
         // Start sensors
         startSensors();
 
@@ -898,6 +903,12 @@ public final class EPDShip extends EPD implements IOwnShipListener {
      */
     public LocalMetocService getLocalMetocService() {
         return localMetocService;
+    }
+    /**
+     * @return the lammaMetocService
+     */
+    public LammaMetocService getLammaMetocService() {
+        return lammaMetocService;
     }
     
     public MonaLisaRouteOptimization getMonaLisaRouteExchange() {
