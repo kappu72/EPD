@@ -18,7 +18,7 @@ public class FuelConsumption implements Serializable {
 	double heading = 0;
 	double wave_polar = 0;
 	double wind_polar = 0;
-	double wave_resistance = 0. ;
+	double wave_resistance = 0.;
 	double wind_resistance = 0.;
 	double hull_resistance = 1000.0; //Default value is 1000 [kN] normally it Should be read in hullrestable
 	double fuel_rate = 0.;

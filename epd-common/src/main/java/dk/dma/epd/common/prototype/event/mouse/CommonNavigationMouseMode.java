@@ -447,9 +447,8 @@ public class CommonNavigationMouseMode extends AbstractCoordMouseMode implements
     /**
      * Called by the MapBean when it repaints, to let the MouseMode know when to update itself on the map. PaintListener interface.
      */
-    
+    @Override
     public void listenerPaint(Graphics g) {
-
         if (doZoom) {
             paintRectangle(g, this.point1, this.point2);
         }

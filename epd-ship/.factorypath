@@ -48,7 +48,7 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/com/google/code/gson/gson/2.2.2/gson-2.2.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/dk/dma/3rdparty/omj3d/1.2.3/omj3d-1.2.3.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/dk/dma/3rdparty/omsvg/1.2.3/omsvg-1.2.3.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/bbn/openmap/5.1.15/openmap-5.1.15.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/dk/dma/3rdparty/openmap/5.0.3/openmap-5.0.3.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/dk/dma/3rdparty/comm/1.2.3/comm-1.2.3.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/dk/dma/3rdparty/omcorba/1.2.3/omcorba-1.2.3.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/dk/dma/3rdparty/milStd2525_png/1.2.3/milStd2525_png-1.2.3.jar" enabled="true" runInBatchMode="false"/>

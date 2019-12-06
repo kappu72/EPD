@@ -255,6 +255,9 @@ public class Formatter {
         }
         return Long.toString(l);
     }
+    public static String formatDouble(double d) {
+        return formatDouble(d, 2);
+    }
 
     public static String formatDouble(Double d, int decimals) {
         if (d == null) {
