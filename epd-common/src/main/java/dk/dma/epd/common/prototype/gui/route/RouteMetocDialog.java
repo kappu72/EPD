@@ -14,7 +14,7 @@
  */
 package dk.dma.epd.common.prototype.gui.route;
 
-import java.awt.Color;
+
 import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.Window;
@@ -40,14 +40,12 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -69,7 +67,7 @@ import it.toscana.rete.lamma.prototype.gui.shipsdata.DatasetSelector;
 import it.toscana.rete.lamma.prototype.listener.OpenDapCatalogListener;
 import it.toscana.rete.lamma.prototype.metocservices.MetocProviders;
 import thredds.client.catalog.Dataset;
-import java.awt.Component;
+
 
 /**
  * Dialog with METOC settings
@@ -117,7 +115,7 @@ public class RouteMetocDialog extends JDialog implements ActionListener, FocusLi
         private JLabel lblMetocLocalWavePart;
         private String localPartFilePath;
         private DatasetSelector lammaSelector;
-
+        private JCheckBox checkboxPersistMetoc;
         private JFileChooser fc = new JFileChooser();
 
         public RouteMetocDialog(Window parent, RouteManagerCommon routeManager, int routeId) {
@@ -154,6 +152,7 @@ public class RouteMetocDialog extends JDialog implements ActionListener, FocusLi
                         currentMetocDataLbl.setText(Formatter.formatLongDateTime(metocForecast.getCreated()));
                 }
                 showCheckbox.setSelected(metocSettings.isShowRouteMetoc());
+                checkboxPersistMetoc.setSelected(metocSettings.getIgnoreMetocValidation());
 
                 // Interval
                 intervalDb.getModel().setSelectedItem(Integer.toString(metocSettings.getInterval()));
@@ -224,6 +223,7 @@ public class RouteMetocDialog extends JDialog implements ActionListener, FocusLi
                 metocSettings.setShowRouteMetoc(showCheckbox.isSelected());
                 metocSettings.setInterval(Integer.parseInt((String) intervalDb.getSelectedItem()));
 
+                metocSettings.setIgnoreMetocValidation(checkboxPersistMetoc.isSelected());
                 Set<MetocDataTypes> dataTypes = metocSettings.getDataTypes();
                 dataTypes.clear();
                 if (windCb.isSelected()) {
@@ -455,8 +455,7 @@ public class RouteMetocDialog extends JDialog implements ActionListener, FocusLi
                                 null, null));
 
                 lammaMetocPanel = new JPanel();
-                lammaMetocPanel.setBorder(new TitledBorder(null, "Lamma OPENDAP", TitledBorder.LEADING,
-                                TitledBorder.TOP, null, null));
+                lammaMetocPanel.setBorder(new TitledBorder(null, "Lamma OPENDAP", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
                 providerPanel = new JPanel();
                 providerPanel.setBorder(new TitledBorder(null, "METOC provider", TitledBorder.LEADING, TitledBorder.TOP,
@@ -519,7 +518,7 @@ public class RouteMetocDialog extends JDialog implements ActionListener, FocusLi
                                                 .addGap(3)));
                 groupLayout.setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING).addGroup(groupLayout
                                 .createSequentialGroup().addGap(7)
-                                .addComponent(statusPanel, GroupLayout.PREFERRED_SIZE, 164, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(statusPanel, GroupLayout.PREFERRED_SIZE, 180, GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addComponent(providerPanel, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(ComponentPlacement.RELATED)
@@ -528,7 +527,7 @@ public class RouteMetocDialog extends JDialog implements ActionListener, FocusLi
                                 .addComponent(localMetocPanel, GroupLayout.PREFERRED_SIZE, 85,
                                                 GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(lammaMetocPanel, GroupLayout.PREFERRED_SIZE, 85,
+                                .addComponent(lammaMetocPanel, GroupLayout.PREFERRED_SIZE, 50,
                                                 GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addComponent(warnLimitsPanel, GroupLayout.PREFERRED_SIZE, 111,
@@ -668,14 +667,17 @@ public class RouteMetocDialog extends JDialog implements ActionListener, FocusLi
                 localMetocPanel.setEnabled(false);
 
                 chckbxShowRawRequest = new JCheckBox("Show Raw Request (debug)");
-
+                checkboxPersistMetoc = new JCheckBox("Ignore metoc validation");
                 GroupLayout gl_statusPanel = new GroupLayout(statusPanel);
                 gl_statusPanel.setHorizontalGroup(gl_statusPanel.createParallelGroup(Alignment.LEADING)
                                 .addGroup(gl_statusPanel.createSequentialGroup().addGroup(gl_statusPanel
                                                 .createParallelGroup(Alignment.LEADING)
                                                 .addComponent(chckbxShowRawRequest)
-                                                .addGroup(gl_statusPanel.createSequentialGroup().addGap(63)
-                                                                .addComponent(requestBtn))
+                                                .addGroup(Alignment.CENTER, 
+                                                        gl_statusPanel.createSequentialGroup()
+                                                        .addGap(0,120, Short.MAX_VALUE)
+                                                        .addComponent(requestBtn)
+                                                )
                                                 .addGroup(gl_statusPanel.createSequentialGroup()
                                                                 .addComponent(intervalLbl)
                                                                 .addPreferredGap(ComponentPlacement.RELATED)
@@ -686,11 +688,13 @@ public class RouteMetocDialog extends JDialog implements ActionListener, FocusLi
                                                                 .addComponent(currentLabel)
                                                                 .addPreferredGap(ComponentPlacement.RELATED)
                                                                 .addComponent(currentMetocDataLbl))
-                                                .addComponent(showCheckbox)).addContainerGap(119, Short.MAX_VALUE)));
+                                                .addComponent(showCheckbox)
+                                                .addComponent(checkboxPersistMetoc)).addContainerGap(119, Short.MAX_VALUE)));
                 gl_statusPanel.setVerticalGroup(gl_statusPanel.createParallelGroup(Alignment.LEADING)
                                 .addGroup(gl_statusPanel.createSequentialGroup().addComponent(showCheckbox)
                                                 .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addComponent(chckbxShowRawRequest)
+                                                .addComponent(checkboxPersistMetoc)
                                                 .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addGroup(gl_statusPanel.createParallelGroup(Alignment.BASELINE)
                                                                 .addComponent(intervalLbl).addComponent(intervalDb,

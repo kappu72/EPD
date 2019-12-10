@@ -483,6 +483,9 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
         if (route.getMetocForecast() == null || route.getMetocForecast().getCreated() == null) {
             return true;
         }
+        if(route.getRouteMetocSettings().getIgnoreMetocValidation()) {
+            return false;
+        }
         long metocTtl = enavSettings.getMetocTtl() * 60 * 1000;
         Date now = PntTime.getDate();
         Date metocDate = route.getMetocForecast().getCreated();
@@ -695,10 +698,10 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
             Util.sleep(10000);
 
             // Active route poll for METOC
-     //       pollForMetoc();
+            pollForMetoc();
 
             // Check validity of METOC for all routes
-              checkValidMetoc();
+            checkValidMetoc();
         }
     }
 

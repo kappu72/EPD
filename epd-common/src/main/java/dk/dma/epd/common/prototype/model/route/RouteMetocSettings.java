@@ -38,7 +38,7 @@ public class RouteMetocSettings implements Serializable {
     private Boolean uvDim = true;
     private Boolean to = true;
     private String provider = "dmi";
-    
+    private Boolean ignoreMetocValidation = false;
     public String getProvider() {
         return provider;
     }
@@ -176,6 +176,20 @@ public class RouteMetocSettings implements Serializable {
      */
     public void setLammaMetocFile(String lammaMetocFile) {
         this.lammaMetocFile = lammaMetocFile;
+    }
+
+    /**
+     * @return the ignoreMetocValidation
+     */
+    public Boolean getIgnoreMetocValidation() {
+        return ignoreMetocValidation == null ? false : ignoreMetocValidation;
+    }
+
+    /**
+     * @param ignoreMetocValidation the ignoreMetocValidation to set
+     */
+    public void setIgnoreMetocValidation(Boolean ignoreMetocValidation) {
+        this.ignoreMetocValidation = ignoreMetocValidation;
     }
 
 }

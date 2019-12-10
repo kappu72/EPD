@@ -458,8 +458,14 @@ public class Route implements Serializable {
         Date eta = getEta();
         return isMetocValid(eta, tolerance);
     }
-
+    //It checks if the metoc are not to far in the future. or in the past
     protected boolean isMetocValid(Date eta, long tolerance) {
+        
+        // If ignoreMetocValidation and forecast present return true;
+        if(routeMetocSettings.getIgnoreMetocValidation() && metocForecast != null && metocForecast.getForecasts() != null && metocForecast.getForecasts().size() >0) {
+            return true;
+        }
+
 
         if (metocStarttime == null || metocEta == null || starttime == null || eta == null) {
             System.out.println("Missing fields for isMetocValid");
