@@ -223,7 +223,7 @@ public class MetocService extends MapHandlerChild {
                 double vo = lattice.interpolateValue(vo_Grid);
                 
 
-
+                // Porti tutto a nodi! SOG in nodi wind speed in nodi curren speed in nodi
                 UVDimension wind = new UVDimension(FuelConsumptionCalculator.msTokn(u_10), FuelConsumptionCalculator.msTokn(v_10));
                 
                 UVDimension current = new UVDimension(FuelConsumptionCalculator.msTokn(uo), FuelConsumptionCalculator.msTokn(vo));

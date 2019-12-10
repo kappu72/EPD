@@ -41,7 +41,12 @@ public class Wave implements Serializable {
         this.direction = direction;
         this.period = period;
     }
-
+    /**
+     * Clone
+     */
+    public Wave clone() {
+        return new Wave(height, direction, period);
+    }
     /**
      * @return the height
      */

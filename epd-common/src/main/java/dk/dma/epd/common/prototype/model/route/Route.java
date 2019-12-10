@@ -29,6 +29,7 @@ import dk.dma.epd.common.util.Converter;
 import dk.frv.enav.common.xml.metoc.MetocForecast;
 import dma.route.HeadingType;
 import edu.emory.mathcs.backport.java.util.Arrays;
+import it.toscana.rete.lamma.prototype.model.FuelConsumption;
 import it.toscana.rete.lamma.prototype.model.RouteFuelConsumptionSettings;
 import net.maritimecloud.util.Timestamp;
 /**
@@ -428,10 +429,12 @@ public class Route implements Serializable {
         calcValues(true);
     }
 
-    public void adjustStartTime() {
+    public boolean adjustStartTime() {
         if (starttime == null) {
             setStarttime(PntTime.getDate());
+            return true;
         }
+        return false;
     }
 
     public MetocForecast getMetocForecast() {
@@ -476,7 +479,28 @@ public class Route implements Serializable {
 
         return true;
     }
+    // Consider only first poin
+    public boolean hasFuelConsumption() {
+        return getWaypoints().stream()
+        .map(wp -> wp.getOutLeg())
+        .filter(ol -> ol != null && ol.getFuelConsumption() != null)
+        .findFirst()
+        .orElse(null)!= null;
+    }
+    public void cleanRouteDependencies() {
+        removeMetoc();
+        removeFuelConsumption();
 
+    }
+    public void removeFuelConsumption() {
+
+        getWaypoints().forEach(wp -> {
+            if (wp.getOutLeg() != null) {
+                wp.getOutLeg().setFuelConsumption(null);
+                wp.getOutLeg().setInnerPointsConsumption(new ArrayList<FuelConsumption>());
+            }
+        });
+    }
     public void removeMetoc() {
         this.metocForecast = null;
         if (routeMetocSettings != null) {
@@ -541,7 +565,9 @@ public class Route implements Serializable {
         if (!force && ttgs != null && etas != null) {
             return;
         }
-
+        if(force) {
+            cleanRouteDependencies();
+        }
         totalTtg = 0L;
         totalDtg = 0.0;
 
@@ -704,6 +730,7 @@ public class Route implements Serializable {
                 }
             }
             calcValues(true);
+            cleanRouteDependencies();
             // Update waypoint names to reflect deleted waypoint
             this.renameWayPoints();
         } else {

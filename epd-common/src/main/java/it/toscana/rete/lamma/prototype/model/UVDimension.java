@@ -19,7 +19,13 @@ public class UVDimension extends ParamDimension implements Serializable{
 		super(u);
 		V = v;
 	}
-
+	/**
+	 * Create a copy 
+	 * @return
+	 */
+	public UVDimension clone() {
+		return new UVDimension(U, V);
+	}
 	public double getV() {
 		return V;
 	}

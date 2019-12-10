@@ -698,7 +698,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
      //       pollForMetoc();
 
             // Check validity of METOC for all routes
-   //         checkValidMetoc();
+              checkValidMetoc();
         }
     }
 

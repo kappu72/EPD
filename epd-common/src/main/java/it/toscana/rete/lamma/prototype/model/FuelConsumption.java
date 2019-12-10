@@ -23,7 +23,7 @@ public class FuelConsumption implements Serializable {
 	double hull_resistance = 1000.0; //Default value is 1000 [kN] normally it Should be read in hullrestable
 	double fuel_rate = 0.;
 	double fuel = 0.;
-	double weight = 1.;
+	double weight = 0.;
 	MetocPointForecast metoc;
 	
 	

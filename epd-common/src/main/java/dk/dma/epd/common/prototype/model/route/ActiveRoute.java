@@ -524,9 +524,9 @@ public class ActiveRoute extends Route {
     }
 
     @Override
-    public void adjustStartTime() {
+    public boolean adjustStartTime() {
         // Do not change starttime for active route
-
+        return false;
     }
 
     public synchronized boolean isLastWp() {

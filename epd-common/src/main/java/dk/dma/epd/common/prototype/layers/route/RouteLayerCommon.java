@@ -225,22 +225,18 @@ public abstract class RouteLayerCommon extends EPDLayerCommon implements IRoutes
 
             // Handle non-active route case
             if (routeManager.getActiveRouteIndex() != selectedWp.getRouteIndex()) {
-                RouteWaypoint routeWaypoint = selectedWp.getRoute().getWaypoints().get(selectedWp.getWpIndex());
-                LatLonPoint pos = mapBean.getProjection().inverse(e.getPoint());
-                routeWaypoint.setPos(Position.create(pos.getLatitude(), pos.getLongitude()));
-
-                // Invalidate the STCC approval flag
-                if (selectedWp.getRoute().isStccApproved()) {
-                    selectedWp.getRoute().setStccApproved(false);
-                    try {
-                        selectedWp.getRoute().setName(selectedWp.getRoute().getName().split(":")[1].trim());
-                    } catch (Exception e2) {
-                        LOG.debug("Failed to remove STCC Approved part of name");
+                Route r = selectedWp.getRoute();
+                if(r.hasFuelConsumption()) {
+                    int dialogresult = JOptionPane.showConfirmDialog(EPD.getInstance().getMainFrame(),
+                        "Editing this root will reset metoc and fuel consumption \nDo you wish to make to edit?", "Route Editing",
+                        JOptionPane.YES_OPTION);
+                    if (dialogresult == JOptionPane.YES_OPTION) {
+                        moveWP(e);
                     }
+                }else {
+                    moveWP(e);
                 }
-                routeManager.notifyListeners(RoutesUpdateEvent.ROUTE_WAYPOINT_MOVED);
                 return true;
-
             } else {
                 // Attempting to drag an active route, make a route copy and drag that one.
                 // NB: This case will only ever be reached for EPDShip
@@ -258,6 +254,25 @@ public abstract class RouteLayerCommon extends EPDLayerCommon implements IRoutes
         }
 
         return false;
+    }
+
+    private void moveWP (MouseEvent e) {
+        RouteWaypoint routeWaypoint = selectedWp.getRoute().getWaypoints().get(selectedWp.getWpIndex());
+                LatLonPoint pos = mapBean.getProjection().inverse(e.getPoint());
+                routeWaypoint.setPos(Position.create(pos.getLatitude(), pos.getLongitude()));
+
+                // Invalidate the STCC approval flag
+                if (selectedWp.getRoute().isStccApproved()) {
+                    selectedWp.getRoute().setStccApproved(false);
+                    try {
+                        selectedWp.getRoute().setName(selectedWp.getRoute().getName().split(":")[1].trim());
+                    } catch (Exception e2) {
+                        LOG.debug("Failed to remove STCC Approved part of name");
+                    }
+                }
+                // Force recalc of metoc
+                selectedWp.getRoute().calcValues(true);
+                routeManager.notifyListeners(RoutesUpdateEvent.ROUTE_WAYPOINT_MOVED);
     }
 
     /**

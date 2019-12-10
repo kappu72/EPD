@@ -24,6 +24,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
@@ -65,6 +67,7 @@ import dk.dma.enav.model.geometry.Position;
 import dk.dma.epd.common.FormatException;
 import dk.dma.epd.common.Heading;
 import dk.dma.epd.common.prototype.EPD;
+import dk.dma.epd.common.prototype.gui.route.RoutePropertiesDialogCommon.RouteChangeListener;
 import dk.dma.epd.common.prototype.gui.views.ChartPanelCommon;
 import dk.dma.epd.common.prototype.model.route.IRoutesUpdateListener;
 import dk.dma.epd.common.prototype.model.route.Route;
@@ -72,6 +75,7 @@ import dk.dma.epd.common.prototype.model.route.RouteLeg;
 import dk.dma.epd.common.prototype.model.route.RouteLoadException;
 import dk.dma.epd.common.prototype.model.route.RouteWaypoint;
 import dk.dma.epd.common.prototype.model.route.RoutesUpdateEvent;
+import dk.dma.epd.common.prototype.route.RouteManagerCommon;
 import dk.dma.epd.common.prototype.sensor.pnt.PntTime;
 import dk.dma.epd.common.text.Formatter;
 import dk.dma.epd.common.util.ParseUtils;
@@ -104,7 +108,7 @@ import it.toscana.rete.lamma.utils.Utils;
  * inspired by RoutePropertiedDialogCommon
  */
 public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
-        implements IRoutesUpdateListener, ActionListener, ListSelectionListener, ItemListener {
+        implements ActionListener, ListSelectionListener, ItemListener {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(RouteFuelConsumptionPropertiesDialogCommon.class);
@@ -201,21 +205,28 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
-                // Not needed will be removed
-                EPD.getInstance().getRouteManager()
-                        .validateMetoc(RouteFuelConsumptionPropertiesDialogCommon.this.route);
+                // Rimuovi listeners e altri riferimenti se li hai!!
+                ((RouteFuelConsumptionPropertiesDialogCommon) e.getSource()).clean();
             }
         });
 
         // check if it has metoc and add a listner to now when metoc changes
         // we doesn't consider if are expired
         metoc = this.route.getMetocForecast();
-        EPD.getInstance().getRouteManager().addListener(this);
+
         initGui();
         initValues();
 
         setBounds(100, 100, 1000, 450);
         setLocationRelativeTo(parent);
+    }
+
+    /** Clean object reference */
+    public void clean() {
+        parent = null;
+        chartPanel = null;
+        route = null;
+        metoc = null;   
     }
 
     /***************************************************/
@@ -228,10 +239,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
     private void initGui() {
         Insets insets1 = new Insets(5, 5, 0, 5);
         Insets insets2 = new Insets(5, 25, 0, 5);
-        Insets insets3 = new Insets(5, 5, 0, 0);
-        Insets insets4 = new Insets(5, 0, 0, 5);
         Insets insets5 = new Insets(5, 5, 5, 5);
-        Insets insets6 = new Insets(5, 25, 5, 5);
         Insets insets10 = new Insets(10, 10, 10, 10);
 
         JPanel content = new JPanel(new GridBagLayout());
@@ -662,7 +670,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
 
         } else if (evt.getSource() == btnClose) {
             dispose();
-
+            return;
         } else if (evt.getSource() == cbVisible) {
             route.setVisible(cbVisible.isSelected());
 
@@ -779,7 +787,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
     }
 
 
-    
+
     private void updateLegPropulsionConfig(Path config) {
         String path = config != null ? config.toString() : null;
         route.getWaypoints().forEach(wp -> {
@@ -798,12 +806,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
      */
     private void cleanFuelConsumption(Boolean forceTable) {
 
-        route.getWaypoints().forEach(wp -> {
-            if (wp.getOutLeg() != null) {
-                wp.getOutLeg().setFuelConsumption(null);
-                wp.getOutLeg().setInnerPointsConsumption(new ArrayList<FuelConsumption>());
-            }
-        });
+        route.removeFuelConsumption();
         if (forceTable) {
             routeTableModel.fireTableDataChanged();
         }
@@ -851,9 +854,10 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                         return null;
                     }).collect(Collectors.toMap(FuelRateTable::getId, t -> t));
 
-            // Squash i metoc nei waypoints
-            Iterator<MetocForecastPoint> iter = metoc.getForecasts().iterator();
-
+            LinkedList<MetocForecastPoint> metocList = metoc.getForecasts().stream()
+                    .collect(Collectors.toCollection(LinkedList::new));;
+            ListIterator<MetocForecastPoint> iter = metocList.listIterator();
+            
             List<Date> etas = route.getEtas();
 
             LinkedList<RouteWaypoint> wps = route.getWaypoints();
@@ -863,11 +867,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                 JOptionPane.showMessageDialog(null, "Impossibile calcolare il consumo, nessun metoc presente",
                         "Fuel Consumption Calculator error", JOptionPane.WARNING_MESSAGE);
                 return;
-            }
-            // I don't like this code is to difficult to read!!
-            // I have to group the metoc point by leg. It uses time as predicate
-            MetocPointForecast me = (MetocPointForecast) iter.next();
-            Date meDate = etas.get(0);
+            }            
 
             long timeStep = 60000L * route.getRouteMetocSettings().getInterval(); // comes in minutes to ms
 
@@ -878,18 +878,24 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                 RouteLeg outleg = wp.getOutLeg();
                 Date nextEta = etas.get(i + 1);
                 Date eta = etas.get(i);
-
+                MetocPointForecast me = (MetocPointForecast) iter.next();
                 // Genera fc e metoc per il leg con media pesata dei singoli pezzi
                 FuelConsumption legFc = new FuelConsumption();
                 MetocPointForecast legMetoc = this.getEmptyMetoc();
+                // Does the calcolous on inner metoc 
                 while (me.getTime().getTime() >= eta.getTime() && me.getTime().getTime() < nextEta.getTime()) {
                     // Sono metoc validi per questo leg
-                    long distance = i == 0 ? timeStep : me.getTime().getTime() - meDate.getTime();
-                    meDate = me.getTime();
+                    MetocPointForecast nextMe = (MetocPointForecast) metocList.get(iter.nextIndex());
+                    
+                    long distance =  nextMe.getTime().getTime() - me.getTime().getTime();
+                    // Cast to minutes
+                    distance = (distance / 60000L) * 60000L;
                     // Calcola il peso del singolo tratto
+                    
                     double weight = ((double) distance) / timeStep;
 
                     if (outleg != null) {
+                        
                         MetocPointForecast nMe = normalizeMetoc(me);
                         // Sommatoria metoc
                         this.weightedSumMetocPoints(legMetoc, nMe, weight);
@@ -940,32 +946,46 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                 // end outelg calculation
                 int size = outleg.getInnerPointsConsumption().size();
                 if (size > 0) {
-                    this.averageLegFuelConsumptionValue(legFc, legMetoc, size);
+                    this.averageLegFuelConsumptionValue(legFc, legMetoc);
                     outleg.setFuelConsumption(legFc);
                 }
-
+                // riavvolgi di uno
+                iter.previous();
             }
-            ;
 
             totalFuel.setText(Formatter.formatDouble(totalConsumption, 2));
             routeTableModel.fireTableDataChanged();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Load table error", JOptionPane.WARNING_MESSAGE);
+            showErrorMessage(e.getMessage(), "Load table error");
         }
 
     }
+    private void showErrorMessage(String txt, String title) {
+        JOptionPane.showMessageDialog(null, txt, title, JOptionPane.WARNING_MESSAGE);
+    }
 
     /**
-     * Adjust metoc used in computation on user fleg selection base.
+     * Adjust metoc used in computation, on user fleg selection base.
      */
     private MetocPointForecast normalizeMetoc(MetocPointForecast me) {
-
-            UVDimension wind = skipWind.isSelected() ? new UVDimension(0, 0) : me.getWind();
-            UVDimension current = skipCurrent.isSelected() ? new UVDimension(0, 0) : me.getCurrent();
-
-            Wave meanWave = skipWave.isSelected()? new Wave(0, me.getMeanWave().getDirection(), 0) : me.getMeanWave();
-            return new MetocPointForecast(wind, current, meanWave);
-    
+            if(!skipWind.isSelected() && !skipCurrent.isSelected() && !skipWave.isSelected()) {
+                return me;
+            }
+            MetocPointForecast n = me.clone();
+            if(skipWind.isSelected()) {
+                n.getWind().setU(0);
+                n.getWind().setV(0);
+            }
+            if(skipCurrent.isSelected()) {
+                n.getCurrent().setU(0);
+                n.getCurrent().setV(0);
+            }
+            if(skipWave.isSelected()) {
+                n.getMeanWave().setDirection(0);
+                n.getMeanWave().setHeight(0);
+                n.getMeanWave().setPeriod(1);
+            }
+            return n;
     }
 
 
@@ -975,23 +995,24 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
      */
     private void weightdSumConsumption(FuelConsumption acc, FuelConsumption val, double weight) {
 
-        acc.setFuelRate(acc.getFuelRate() + (val.getFuelRate() / weight));
+        acc.setWeight(acc.getWeight()+ weight);
+        acc.setFuelRate(acc.getFuelRate() + val.getFuelRate() * weight);
         acc.setFuel(acc.getFuel() + val.getFuel());
-        acc.setWave_resistance(acc.getWave_resistance() + (val.getWave_resistance() / weight));
-        acc.setWind_resistance(acc.getWind_resistance() + (val.getWind_resistance() / weight));
-        acc.setHull_resistance(acc.getHull_resistance() + (val.getHull_resistance() / weight));
-        acc.setWave_polar(acc.getWave_polar() + (val.getWave_polar() / weight));
-        acc.setWind_polar(acc.getWind_polar() + (val.getWind_polar() / weight));
-        acc.setHeading(acc.getHeading() + (val.getHeading() / weight));
-
+        acc.setWave_resistance(acc.getWave_resistance() + val.getWave_resistance() * weight);
+        acc.setWind_resistance(acc.getWind_resistance() + val.getWind_resistance() * weight);
+        acc.setHull_resistance(acc.getHull_resistance() + val.getHull_resistance() * weight);
+        acc.setWave_polar(acc.getWave_polar() + val.getWave_polar() * weight);
+        acc.setWind_polar(acc.getWind_polar() + val.getWind_polar() * weight);
+        acc.setHeading(acc.getHeading() + val.getHeading() * weight);
+        
         UVDimension current = acc.getCurrent_rel_uv();
         UVDimension newCurrent = val.getCurrent_rel_uv();
-        current.setV(current.getV() + newCurrent.getV() / weight);
-        current.setU(current.getU() + newCurrent.getU() / weight);
+        current.setV(current.getV() + newCurrent.getV() * weight);
+        current.setU(current.getU() + newCurrent.getU() * weight);
         UVDimension wind = acc.getWind_rel_uv();
         UVDimension newWind = val.getWind_rel_uv();
-        wind.setV(wind.getV() + newWind.getV() / weight);
-        wind.setU(wind.getU() + newWind.getU() / weight);
+        wind.setV(wind.getV() + newWind.getV() * weight);
+        wind.setU(wind.getU() + newWind.getU() * weight);
     }
 
     /**
@@ -1000,25 +1021,26 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
     private void weightedSumMetocPoints(MetocPointForecast acc, MetocPointForecast val, double weight) {
 
         UVDimension wind = acc.getWind();
-        wind.setU(wind.getU() + val.getWind().getU() / weight);
-        wind.setV(wind.getV() + val.getWind().getV() / weight);
+        wind.setU(wind.getU() + val.getWind().getU() * weight);
+        wind.setV(wind.getV() + val.getWind().getV() * weight);
 
         UVDimension current = acc.getCurrent();
-        current.setU(current.getU() + val.getCurrent().getU() / weight);
-        current.setV(current.getV() + val.getCurrent().getV() / weight);
+        current.setU(current.getU() + val.getCurrent().getU() * weight);
+        current.setV(current.getV() + val.getCurrent().getV() * weight);
 
         Wave wave = acc.getMeanWave();
-        wave.setHeight(wave.getHeight() + val.getMeanWave().getHeight() / weight);
-        wave.setPeriod(wave.getPeriod() + val.getMeanWave().getPeriod() / weight);
-        wave.setDirection(wave.getDirection() + val.getMeanWave().getDirection() / weight);
+        wave.setHeight(wave.getHeight() + val.getMeanWave().getHeight() * weight);
+        wave.setPeriod(wave.getPeriod() + val.getMeanWave().getPeriod() * weight);
+        wave.setDirection(wave.getDirection() + val.getMeanWave().getDirection() * weight);
     }
 
     /**
      * Calculate the average value of FuelConsumption and MetopointForecas
      * summetions
      */
-    private void averageLegFuelConsumptionValue(FuelConsumption legFc, MetocPointForecast legMetoc, int size) {
+    private void averageLegFuelConsumptionValue(FuelConsumption legFc, MetocPointForecast legMetoc) {
         // Media pesata metoc per visualizzazione
+        double size = legFc.getWeight();
         UVDimension wind = legMetoc.getWind();
         wind.setU(wind.getU() / size);
         wind.setV(wind.getV() / size);
@@ -1071,20 +1093,6 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
     }
 
     /**
-     * Called when route values changes and the fields should be refreshed here we
-     * should calculate the fuel consumption for each Wp Da vedere come vogliamo
-     * comportarci
-     */
-    private void updateFields() {
-        // if (!readOnlyRoute) {
-        // route.calcValues(true);
-        // route.calcAllWpEta();
-        // }
-
-        routeTableModel.fireTableDataChanged();
-    }
-
-    /**
      * Checks the locked rows. If all rows except the last one are locked, also lock
      * the last row
      * 
@@ -1133,33 +1141,9 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                 .add(new Time(TimeType.SECONDS, Long.valueOf(parts[2]))).in(TimeType.MILLISECONDS).longValue();
     }
 
-  
-
-    /***************************************************/
-    /** Helper classes **/
-    /***************************************************/
-
     /**
-     * Interface to be implemented by clients wishing to be notified about updates
-     * to the route
+     * Export currente fuel consumtion detailed table
      */
-    public interface RouteChangeListener {
-
-        /**
-         * Signal that the route has changed
-         */
-        void routeChanged();
-
-    }
-
-    // Recive a message if metoc changes
-    @Override
-    public void routesChanged(RoutesUpdateEvent e) {
-        if (e.is(RoutesUpdateEvent.ROUTE_METOC_CHANGED)) {
-            metoc = route.getMetocForecast();
-        }
-    }
-
     private void exportToFile() {
 
         JFileChooser fc = new JFileChooser();
@@ -1196,6 +1180,5 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         }
 
     }
-
 
 }

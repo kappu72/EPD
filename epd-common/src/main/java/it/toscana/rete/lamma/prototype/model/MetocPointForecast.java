@@ -2,28 +2,29 @@ package it.toscana.rete.lamma.prototype.model;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Date;
 
 import dk.frv.enav.common.xml.metoc.MetocForecastPoint;
 import dk.frv.enav.common.xml.metoc.MetocForecastTriplet;
 import it.toscana.rete.lamma.utils.FuelConsumptionCalculator;
+
 /**
- * It extends MetocForecastPoint to adapt to fuelconsumption caluclation
+ * It extends MetocForecastPoint to adapt to fuel consumption computation.
  * Metoc comes from different sources in different unit and convention
  * Internal common convention
  * 
  * Wind kn UV components direction to angle °
- * Currnet kn UV components direction to angle °
- * Wave (mean) heigth m direction from angle ° period s
- * Wave partiotions:
+ * WindSpeed in m/s dir direction ° from angle
+ * Current kn UV components direction to angle °
+ * CurrentSpeed in m/s direction to
+ * Wave (mean) height m direction from angle ° period s
+ * Wave partitions:
  * Wave wind dir h p
  * Wave swell 1 to n [dir h p]
  * 
  * @author kappu
- *
  * 
  */
-
-
 
 public class MetocPointForecast extends MetocForecastPoint implements Serializable {
 
@@ -50,8 +51,10 @@ public class MetocPointForecast extends MetocForecastPoint implements Serializab
         if(m.getCurrentSpeed() != null && m.getCurrentSpeed() != null){
             this.setCurrentDirection(m.getCurrentDirection());
             this.setCurrentSpeed(m.getCurrentSpeed());
-            // Current is in kn and to
-            this.current = FuelConsumptionCalculator.speedDirToVector(new ThetaUDimension(m.getCurrentSpeed().getForecast().doubleValue(), m.getCurrentDirection().getForecast().doubleValue()));
+            // Current is in m/s and to
+            double ckn = FuelConsumptionCalculator.msTokn(m.getCurrentSpeed().getForecast().doubleValue());
+            // double cto = FuelConsumptionCalculator.reverseAngle(m.getCurrentDirection().getForecast().doubleValue());
+            this.current = FuelConsumptionCalculator.speedDirToVector(new ThetaUDimension(ckn, m.getCurrentDirection().getForecast().doubleValue()));
         }
         if(m.getWindDirection() != null && m.getWindSpeed()!= null) {
             this.setWindDirection(m.getWindDirection());
@@ -75,7 +78,6 @@ public class MetocPointForecast extends MetocForecastPoint implements Serializab
         this.setLat(m.getLat());
         this.setLon(m.getLon());
         this.setDensity(m.getDensity());
-        this.setExpires(m.getExpires());
         this.setSeaLevel(m.getSeaLevel());
         this.setTime(m.getTime());
     }
@@ -108,16 +110,27 @@ public class MetocPointForecast extends MetocForecastPoint implements Serializab
             this.setCurrentSpeed(new MetocForecastTriplet(csd.getU()));
         }
     }
-
+    public MetocPointForecast clone() {
+        MetocPointForecast t = new MetocPointForecast(wind.clone(), current.clone(), meanWave.clone());
+        t.setLat(getLat());
+        t.setLon(getLon());
+        t.setDensity(getDensity());
+        if(getExpires() != null)
+            t.setExpires((Date) getExpires().clone());
+        t.setSeaLevel(getSeaLevel());
+        if(getTime() != null)
+            this.setTime((Date) getTime().clone());
+        return t;
+    }
     /**
-     * @return the wind
+     * @return the wind in knt and to dir
      */
     public UVDimension getWind() {
         return wind;
     }
 
     /**
-     * @param wind the wind to set
+     * @param wind the wind to set in knt and to dir
      */
     public void setWind(UVDimension wind) {
         this.wind = wind;
@@ -132,21 +145,22 @@ public class MetocPointForecast extends MetocForecastPoint implements Serializab
     }
 
     /**
-     * @return the current
+     * @return the current in knt and to dir
      */
     public UVDimension getCurrent() {
         return current;
     }
 
     /**
-     * @param current the current to set
+     * @param current the current to set in knt and to dir
      */
     public void setCurrent(UVDimension current) {
         this.current = current;
         if(current != null) {
             ThetaUDimension csd = FuelConsumptionCalculator.vectorToSpeedDir(current);
+            double ms = FuelConsumptionCalculator.knToms(csd.getU());
             this.setCurrentDirection(new MetocForecastTriplet(csd.getTheta()));
-            this.setCurrentSpeed(new MetocForecastTriplet(csd.getU()));
+            this.setCurrentSpeed(new MetocForecastTriplet(ms));
         }
     }
 
@@ -158,7 +172,7 @@ public class MetocPointForecast extends MetocForecastPoint implements Serializab
     }
 
     /**
-     * @param meanWave the meanWave to set
+     * @param meanWave the meanWave to set height in m period in sec and from dir
      */
     public void setMeanWave(Wave meanWave) {
         this.meanWave = meanWave;

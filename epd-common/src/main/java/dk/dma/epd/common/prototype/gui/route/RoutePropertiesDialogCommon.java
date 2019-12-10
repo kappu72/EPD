@@ -417,12 +417,12 @@ public class RoutePropertiesDialogCommon extends JDialog implements ActionListen
                         break;
                     case  2: 
                         wp.setPos(Position.create(ParseUtils.parseLatitude(value.toString()), wp.getPos().getLongitude()));
-                        adjustStartTime();
+                        adjustStartTime(true);
                         notifyRouteListeners(RoutesUpdateEvent.ROUTE_CHANGED);
                         break;
                     case  3: 
                         wp.setPos(Position.create(wp.getPos().getLatitude(), ParseUtils.parseLongitude(value.toString()))); 
-                        adjustStartTime();
+                        adjustStartTime(true);
                         notifyRouteListeners(RoutesUpdateEvent.ROUTE_CHANGED);
                         break;
                     case  4: 
@@ -430,7 +430,7 @@ public class RoutePropertiesDialogCommon extends JDialog implements ActionListen
                         break;
                     case 6:
                         wp.getInLeg().setSpeedFromTtg(parseTime(value.toString()));
-                        adjustStartTime();
+                        adjustStartTime(true);
                         break;
                     case 7:
                         if (value == null) {
@@ -442,12 +442,12 @@ public class RoutePropertiesDialogCommon extends JDialog implements ActionListen
                         break;
                     case 10: 
                         wp.getOutLeg().setHeading((Heading)value); 
-                        adjustStartTime();
+                        adjustStartTime(true);
                         notifyRouteListeners(RoutesUpdateEvent.ROUTE_CHANGED);
                         break;
                     case 11: 
                         wp.getOutLeg().setSpeed(parseDouble(value.toString())); 
-                        adjustStartTime(); 
+                        adjustStartTime(true); 
                         break;
                     case 12: 
                         wp.getOutLeg().setXtdStarboard(parseDouble(value.toString()) / 1852.0);
@@ -518,7 +518,7 @@ public class RoutePropertiesDialogCommon extends JDialog implements ActionListen
         etaCalculationTime.setSelectedItem(route.getEtaCalculationType());        
 
         // Update the route start time and the start time-related fields 
-        adjustStartTime();
+       adjustStartTime();
         
         cbVisible.setSelected(route.isVisible());
         
@@ -604,7 +604,7 @@ public class RoutePropertiesDialogCommon extends JDialog implements ActionListen
             
         } else if (evt.getSource() == etaCalculationTime) {
             route.setEtaCalculationType((EtaCalculationType)etaCalculationTime.getSelectedItem());
-            adjustStartTime();
+            adjustStartTime(true);
             routeUpdated();
 
         } else if (evt.getSource() == allSpeedsBtn) {
@@ -622,7 +622,7 @@ public class RoutePropertiesDialogCommon extends JDialog implements ActionListen
                     wp.getOutLeg().setSpeed(speed);
                 }
             }
-            adjustStartTime();
+            adjustStartTime(true);
         }
         
         EPD.getInstance().getRouteManager()
@@ -781,19 +781,22 @@ public class RoutePropertiesDialogCommon extends JDialog implements ActionListen
     private void notifyRouteListeners(RoutesUpdateEvent event) {
         EPD.getInstance().getRouteManager().notifyListeners(event);
     }
-    
+    private void adjustStartTime() {
+        adjustStartTime(false);
+    }
+
     /**
      * Called in order to adjust the route start time and the UI accordingly
      */
-    private void adjustStartTime() {
+    private void adjustStartTime(boolean force) {
         
         // Stop widget listeners
         boolean wasQuiescent = quiescent;
         quiescent = true;
-
+        boolean reCalcRoute = force;
         // Get start time or default now
         if (!readOnlyRoute) {
-            route.adjustStartTime();
+            reCalcRoute = route.adjustStartTime();
         }
         Date starttime = route.getStarttime();
 
@@ -809,11 +812,15 @@ public class RoutePropertiesDialogCommon extends JDialog implements ActionListen
         } else {
             // No GPS data available.
             // Find the default ETA.
+            reCalcRoute = true;
             Date defaultEta = route.getEtas().get(route.getEtas().size() - 1);
             arrivalPicker.setDate(defaultEta);
             arrivalSpinner.setValue(defaultEta);
         }
-        
+        if(reCalcRoute){
+            route.calcValues(true);
+            route.calcAllWpEta();
+        }
         // Recalculate and update route fields
         updateFields();
         
@@ -825,10 +832,6 @@ public class RoutePropertiesDialogCommon extends JDialog implements ActionListen
      * Called when route values changes and the fields should be refreshed
      */
     private void updateFields() {
-        if (!readOnlyRoute) {
-            route.calcValues(true);
-            route.calcAllWpEta();
-        }
         inrouteTxT.setText(Formatter.formatTime(route.getRouteTtg()));
         distanceTxT.setText(Formatter.formatDistNM(route.getRouteDtg()));
         routeTableModel.fireTableDataChanged();        
@@ -886,7 +889,8 @@ public class RoutePropertiesDialogCommon extends JDialog implements ActionListen
                 route.getWaypoints().get(i).setSpeed(speed);
             }
         }
-        
+        route.calcValues(true);
+        route.calcAllWpEta();
         // Update fields
         updateFields();
         
