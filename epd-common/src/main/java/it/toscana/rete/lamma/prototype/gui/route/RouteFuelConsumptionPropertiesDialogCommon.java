@@ -6,9 +6,9 @@ import static java.awt.GridBagConstraints.EAST;
 import static java.awt.GridBagConstraints.HORIZONTAL;
 import static java.awt.GridBagConstraints.NONE;
 import static java.awt.GridBagConstraints.NORTHWEST;
-import static java.awt.GridBagConstraints.WEST;
 import static java.awt.GridBagConstraints.SOUTHEAST;
 import static java.awt.GridBagConstraints.VERTICAL;
+import static java.awt.GridBagConstraints.WEST;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -24,20 +24,16 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
@@ -56,6 +52,8 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
@@ -63,20 +61,16 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.dma.enav.model.geometry.Position;
 import dk.dma.epd.common.FormatException;
 import dk.dma.epd.common.Heading;
 import dk.dma.epd.common.prototype.EPD;
 import dk.dma.epd.common.prototype.gui.route.RoutePropertiesDialogCommon.RouteChangeListener;
 import dk.dma.epd.common.prototype.gui.views.ChartPanelCommon;
-import dk.dma.epd.common.prototype.model.route.IRoutesUpdateListener;
 import dk.dma.epd.common.prototype.model.route.Route;
 import dk.dma.epd.common.prototype.model.route.RouteLeg;
 import dk.dma.epd.common.prototype.model.route.RouteLoadException;
 import dk.dma.epd.common.prototype.model.route.RouteWaypoint;
 import dk.dma.epd.common.prototype.model.route.RoutesUpdateEvent;
-import dk.dma.epd.common.prototype.route.RouteManagerCommon;
-import dk.dma.epd.common.prototype.sensor.pnt.PntTime;
 import dk.dma.epd.common.text.Formatter;
 import dk.dma.epd.common.util.ParseUtils;
 import dk.dma.epd.common.util.TypedValue.Time;
@@ -108,19 +102,10 @@ import it.toscana.rete.lamma.utils.Utils;
  * inspired by RoutePropertiedDialogCommon
  */
 public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
-        implements ActionListener, ListSelectionListener, ItemListener {
+        implements ActionListener, ListSelectionListener, ItemListener, TableModelListener {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(RouteFuelConsumptionPropertiesDialogCommon.class);
-
-    private static final String[] COL_NAMES = {
-            // Info rotta
-            "Name", "Latutide", "Longtitude", "TTG", "ETA", "RNG", "BRG", "Head.", "SOG",
-            // Dati fuel consumption
-            "P.C.", "R.Cur", "Heading", "R.Wind", "MWave", "Fuel", "Time", "F.Rate", "Tot.R,", "R.wa %", "R .wi %" };
-
-    private static final int[] COL_MIN_WIDTHS = { 60, 70, 70, 50, 70, 50, 50, 20, 50, 50, 50, 80, 80, 60, 60, 60, 60,
-            60, 60, 60 };
 
     private Window parent;
     private ChartPanelCommon chartPanel;
@@ -144,6 +129,8 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
     protected ShipsSelector shipsSelector = new ShipsSelector(new ArrayList<ShipData>());
     protected ShipConfigurationsSelector configurationsSelector = new ShipConfigurationsSelector(new ArrayList());
     protected ShipPropulsionConfigurationsSelector propConfigsSelector = new ShipPropulsionConfigurationsSelector(
+            new ArrayList());
+    protected ShipPropulsionConfigurationsSelector propConfigsColumn = new ShipPropulsionConfigurationsSelector(
             new ArrayList());
     protected JCheckBox waveComponents = new JCheckBox("Wave Components");
     protected JCheckBox fromToMetoc = new JCheckBox("From/To Metoc");
@@ -226,7 +213,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         parent = null;
         chartPanel = null;
         route = null;
-        metoc = null;   
+        metoc = null;
     }
 
     /***************************************************/
@@ -341,7 +328,8 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         // ********************************
         JTextField defaultCellEditor = new JTextField();
 
-        routeTableModel = createRouteTableModel();
+        routeTableModel = new FuelConsumptionTableModel(route);
+        routeTableModel.addTableModelListener(this);
         routeDetailTable = new JTable(routeTableModel);
         routeDetailTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         routeDetailTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
@@ -358,14 +346,17 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         routeDetailTable.setFont(routeDetailTable.getFont().deriveFont(10.0f));
 
         // Set the minimum column widthsString()
-        for (int x = 0; x < COL_MIN_WIDTHS.length; x++) {
-            routeDetailTable.getColumnModel().getColumn(x).setMinWidth(COL_MIN_WIDTHS[x]);
+        for (int x = 0; x < FuelConsumptionTableModel.COL_MIN_WIDTHS.length; x++) {
+            routeDetailTable.getColumnModel().getColumn(x).setMinWidth(FuelConsumptionTableModel.COL_MIN_WIDTHS[x]);
         }
 
         // Configure heading column
         JComboBox<Heading> headingCombo = new JComboBox<>(Heading.values());
         headingCombo.setFont(headingCombo.getFont().deriveFont(10.0f));
         routeDetailTable.getColumnModel().getColumn(7).setCellEditor(new DefaultCellEditor(headingCombo));
+
+        propConfigsColumn.setFont(headingCombo.getFont().deriveFont(10.0f));
+        routeDetailTable.getColumnModel().getColumn(9).setCellEditor(new DefaultCellEditor(propConfigsColumn));
 
         JScrollPane scrollPane = new JScrollPane(routeDetailTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -410,136 +401,6 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
     }
 
     /**
-     * Initializes the table model used for route details
-     * 
-     * @return the table model
-     */
-    private DefaultTableModel createRouteTableModel() {
-        return new DefaultTableModel() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public int getRowCount() {
-                return route.getWaypoints().size();
-            }
-
-            @Override
-            public int getColumnCount() {
-                return COL_NAMES.length;
-            }
-
-            @Override
-            public String getColumnName(int columnIndex) {
-                return COL_NAMES[columnIndex];
-            }
-
-            @Override
-            public Object getValueAt(int rowIndex, int columnIndex) {
-                RouteWaypoint wp = route.getWaypoints().get(rowIndex);
-                Boolean isLastRow = wp.getOutLeg() == null;
-                RouteLeg ol = isLastRow ? null : wp.getOutLeg();
-                FuelConsumption fc = isLastRow ? null : ol.getFuelConsumption();
-                switch (columnIndex) {
-                /*
-                 * Info rotta "Name", "Latutide", "Longtitude", "TTG", "ETA", "RNG", "BRG",
-                 * "Head.", "SOG", // Dati fuel consumption "PSG","R.Cur", "Heading", "R.Wind",
-                 * "MWave", "F.C.", "D.T","F.C.R", "Tot.R","Rwa%", "Rwi%"
-                 */
-                case 0:
-                    return wp.getName(); // Name
-                case 1:
-                    return wp.getPos().getLatitudeAsString(); // Latitude
-                case 2:
-                    return wp.getPos().getLongitudeAsString(); // Longitude
-                case 3:
-                    return Formatter.formatTime(route.getWpTtg(rowIndex)); // Time to target, quanto ci metto a
-                                                                           // raggiungere il punto
-                case 4:
-                    return Formatter.formatShortDateTimeNoTz(route.getWpEta(rowIndex)); // Expected time of arrival
-                                                                                        // momento che sono sul punto
-                case 5:
-                    return Formatter.formatDistNM(route.getWpRng(rowIndex)); // Lunghezza del tratto
-                case 6:
-                    return Formatter.formatDegrees(route.getWpBrg(wp), 2); // Heading nel tratto
-                case 7:
-                    return isLastRow ? "N/A" : wp.getHeading(); // Tipo di rotta
-                case 8:
-                    return Formatter.formatSpeed(isLastRow ? null : ol.getSpeed()); // Speed over ground kn
-                case 9:
-                    return isLastRow ? "N/A" : Formatter.formatPropulsion(ol.getPropulsionConfig()); // propulsion
-                                                                                                     // configuration
-                case 10:
-                    return (fc == null) ? "N/A" : Formatter.formatCurrent(fc.getCurrent_rel()); // Relative current only
-                                                                                                // speed
-                case 11:
-                    return (fc == null) ? "N/A" : Formatter.formatDegrees(fc.getHeading(), 2); // Heading considering
-                                                                                               // current
-                case 12:
-                    return (fc == null) ? "N/A" : Formatter.formatWind(fc.getWind_rel(), fc.getHeading()); // Wind
-                                                                                                           // relative
-                case 13:
-                    return (fc == null) ? "N/A" : Formatter.formatWave(fc); // Mean Wave component;
-                case 14:
-                    return (fc == null) ? "N/A" : Formatter.formatDouble(fc.getFuel(), 3) + " t"; // Total fuel
-                                                                                                  // consumption for the
-                                                                                                  // leg
-                case 15:
-                    return (fc == null) ? "N/A" : Formatter.formatTime(ol.calcTtg()); // durata del tratto è la durata
-                                                                                      // del tratto successivo a questo
-                case 16:
-                    return (fc == null) ? "N/A" : Formatter.formatDouble(fc.getFuelRate(), 2) + " t/h"; // Fuel rate for
-                                                                                                        // the leg in
-                                                                                                        // t/h
-                case 17:
-                    return (fc == null) ? "N/A" : Formatter.formatDouble(fc.getTotalResistance(), 2) + "kN";// Total
-                                                                                                            // resistance,
-                                                                                                            // (Added
-                                                                                                            // wave
-                                                                                                            // wind) +
-                                                                                                            // carena
-                case 18:
-                    return (fc == null) ? "N/A"
-                            : Formatter.formatDouble((fc.getWave_resistance() / fc.getTotalResistance()) * 100, 2)
-                                    + " %"; // Wave added resustance in percentuale del totale
-                case 19:
-                    return (fc == null) ? "N/A"
-                            : Formatter.formatDouble((fc.getWind_resistance() / fc.getTotalResistance()) * 100, 2)
-                                    + " %"; // Wind added resustance in percentuale del totale
-
-                default:
-                    return null;
-                }
-            }
-
-            @Override
-            public void setValueAt(Object value, int rowIndex, int columnIndex) {
-                try {
-                    RouteWaypoint wp = route.getWaypoints().get(rowIndex);
-                    switch (columnIndex) {
-                    case 90:
-                        locked[rowIndex] = (Boolean) value;
-                        checkLockedRows();
-                        fireTableRowsUpdated(rowIndex, rowIndex);
-                        break;
-                    default:
-                    }
-                    routeUpdated();
-                } catch (Exception ex) {
-                    LOG.warn(String.format("Failed updating field '%s' in row %d: %s", COL_NAMES[columnIndex], rowIndex,
-                            ex.getMessage()));
-                    JOptionPane.showMessageDialog(RouteFuelConsumptionPropertiesDialogCommon.this,
-                            "Input error: " + ex.getMessage(), "Input error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-
-            @Override
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return !readOnlyRoute && columnIndex == 90;
-            }
-        };
-    }
-
-    /**
      * Updates the dialog with the value of the current route
      */
     private void initValues() {
@@ -574,6 +435,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                 configurationsSelector
                         .setSelectedItem(ship.serachConfigurationByName(fcSet.getConfiguration().getName()));
                 propConfigsSelector.addConfigurations(fcSet.getConfiguration().getPropulsions());
+                propConfigsColumn.addConfigurations(fcSet.getConfiguration().getPropulsions());
                 propConfigsSelector.setSelectedIndex(-1);
             }
         }
@@ -704,7 +566,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
 
             Path p = (Path) propConfigsSelector.getSelectedItem();
             updateLegPropulsionConfig(p);
-            return;
+            cleanFuelConsumption(true);
 
         } else if (evt.getSource() == btnCalcConsumption) {
             /**
@@ -713,13 +575,13 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
              */
             caluclateConsumption();
 
-        }else if(evt.getSource() == btnExport) {
+        } else if (evt.getSource() == btnExport) {
             exportToFile();
             return;
         }
         // Attenzione salva ogni volta che updati un campo forse per nostro
         // scopo sarebbe meglio salvare solo dopo il calcolo
-        EPD.getInstance().getRouteManager().notifyListeners(RoutesUpdateEvent.ROUTE_CHANGED);
+        notifyRouteListeners(RoutesUpdateEvent.ROUTE_CHANGED);
     }
 
     @Override
@@ -739,8 +601,9 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         else {
             return;
         }
-        // no li salvo subito li voglio syncroni con il calcolo
-        //EPD.getInstance().getRouteManager().notifyListeners(RoutesUpdateEvent.ROUTE_CHANGED);
+        cleanFuelConsumption(true);
+
+        notifyRouteListeners(RoutesUpdateEvent.ROUTE_CHANGED);
     }
 
     /***************************************************/
@@ -786,8 +649,6 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         EPD.getInstance().getRouteManager().notifyListeners(event);
     }
 
-
-
     private void updateLegPropulsionConfig(Path config) {
         String path = config != null ? config.toString() : null;
         route.getWaypoints().forEach(wp -> {
@@ -800,12 +661,11 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
 
     }
 
-
     /**
      * Remove fuel consumption info.
      */
     private void cleanFuelConsumption(Boolean forceTable) {
-
+        totalFuel.setText(Formatter.formatDouble(0., 2));
         route.removeFuelConsumption();
         if (forceTable) {
             routeTableModel.fireTableDataChanged();
@@ -813,10 +673,9 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
 
     }
 
-
     /**
-     * Given a route, the metoc for the route and ship configuration
-     * calculate the fuel consumption on that route.
+     * Given a route, the metoc for the route and ship configuration calculate the
+     * fuel consumption on that route.
      */
     private void caluclateConsumption() {
 
@@ -827,8 +686,6 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
 
         // first of all clean old values
         cleanFuelConsumption(false);
-
-        
 
         // Sulla base delle options selezionate carichiamo i file
         ShipConfiguration config = (ShipConfiguration) configurationsSelector.getSelectedItem();
@@ -855,9 +712,10 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                     }).collect(Collectors.toMap(FuelRateTable::getId, t -> t));
 
             LinkedList<MetocForecastPoint> metocList = metoc.getForecasts().stream()
-                    .collect(Collectors.toCollection(LinkedList::new));;
+                    .collect(Collectors.toCollection(LinkedList::new));
+            ;
             ListIterator<MetocForecastPoint> iter = metocList.listIterator();
-            
+
             List<Date> etas = route.getEtas();
 
             LinkedList<RouteWaypoint> wps = route.getWaypoints();
@@ -867,7 +725,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                 JOptionPane.showMessageDialog(null, "Impossibile calcolare il consumo, nessun metoc presente",
                         "Fuel Consumption Calculator error", JOptionPane.WARNING_MESSAGE);
                 return;
-            }            
+            }
 
             long timeStep = 60000L * route.getRouteMetocSettings().getInterval(); // comes in minutes to ms
 
@@ -879,23 +737,32 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                 Date nextEta = etas.get(i + 1);
                 Date eta = etas.get(i);
                 MetocPointForecast me = (MetocPointForecast) iter.next();
+
                 // Genera fc e metoc per il leg con media pesata dei singoli pezzi
                 FuelConsumption legFc = new FuelConsumption();
                 MetocPointForecast legMetoc = this.getEmptyMetoc();
-                // Does the calcolous on inner metoc 
-                while (me.getTime().getTime() >= eta.getTime() && me.getTime().getTime() < nextEta.getTime()) {
+                // Does the calcolous on inner metoc
+                while (me != null && me.getTime().getTime() >= eta.getTime()
+                        && me.getTime().getTime() < nextEta.getTime()) {
                     // Sono metoc validi per questo leg
-                    MetocPointForecast nextMe = (MetocPointForecast) metocList.get(iter.nextIndex());
-                    
-                    long distance =  nextMe.getTime().getTime() - me.getTime().getTime();
+                    long distance;
+                    MetocPointForecast nextMe = null;
+                    if (!iter.hasNext()) {
+                        // metoc finiti termino la tratta con eta next waypoint
+                        distance = nextEta.getTime() - me.getTime().getTime();
+
+                    } else {
+                        nextMe = (MetocPointForecast) iter.next();
+                        distance = nextMe.getTime().getTime() - me.getTime().getTime();
+                    }
                     // Cast to minutes
                     distance = (distance / 60000L) * 60000L;
                     // Calcola il peso del singolo tratto
-                    
+
                     double weight = ((double) distance) / timeStep;
 
                     if (outleg != null) {
-                        
+
                         MetocPointForecast nMe = normalizeMetoc(me);
                         // Sommatoria metoc
                         this.weightedSumMetocPoints(legMetoc, nMe, weight);
@@ -938,19 +805,18 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                         }
 
                     }
-                    if (!iter.hasNext()) {
-                        break;
-                    }
-                    me = (MetocPointForecast) iter.next();
+                    me = nextMe;
                 }
                 // end outelg calculation
-                int size = outleg.getInnerPointsConsumption().size();
-                if (size > 0) {
+                if (outleg.getInnerPointsConsumption().size() > 0) {
                     this.averageLegFuelConsumptionValue(legFc, legMetoc);
                     outleg.setFuelConsumption(legFc);
                 }
                 // riavvolgi di uno
                 iter.previous();
+                if (me == null) {
+                    break;
+                }
             }
 
             totalFuel.setText(Formatter.formatDouble(totalConsumption, 2));
@@ -960,6 +826,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         }
 
     }
+
     private void showErrorMessage(String txt, String title) {
         JOptionPane.showMessageDialog(null, txt, title, JOptionPane.WARNING_MESSAGE);
     }
@@ -968,26 +835,25 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
      * Adjust metoc used in computation, on user fleg selection base.
      */
     private MetocPointForecast normalizeMetoc(MetocPointForecast me) {
-            if(!skipWind.isSelected() && !skipCurrent.isSelected() && !skipWave.isSelected()) {
-                return me;
-            }
-            MetocPointForecast n = me.clone();
-            if(skipWind.isSelected()) {
-                n.getWind().setU(0);
-                n.getWind().setV(0);
-            }
-            if(skipCurrent.isSelected()) {
-                n.getCurrent().setU(0);
-                n.getCurrent().setV(0);
-            }
-            if(skipWave.isSelected()) {
-                n.getMeanWave().setDirection(0);
-                n.getMeanWave().setHeight(0);
-                n.getMeanWave().setPeriod(1);
-            }
-            return n;
+        if (!skipWind.isSelected() && !skipCurrent.isSelected() && !skipWave.isSelected()) {
+            return me;
+        }
+        MetocPointForecast n = me.clone();
+        if (skipWind.isSelected()) {
+            n.getWind().setU(0);
+            n.getWind().setV(0);
+        }
+        if (skipCurrent.isSelected()) {
+            n.getCurrent().setU(0);
+            n.getCurrent().setV(0);
+        }
+        if (skipWave.isSelected()) {
+            n.getMeanWave().setDirection(0);
+            n.getMeanWave().setHeight(0);
+            n.getMeanWave().setPeriod(1);
+        }
+        return n;
     }
-
 
     /**
      * Wighted sum of inner metoc fuel consumpiton values
@@ -995,7 +861,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
      */
     private void weightdSumConsumption(FuelConsumption acc, FuelConsumption val, double weight) {
 
-        acc.setWeight(acc.getWeight()+ weight);
+        acc.setWeight(acc.getWeight() + weight);
         acc.setFuelRate(acc.getFuelRate() + val.getFuelRate() * weight);
         acc.setFuel(acc.getFuel() + val.getFuel());
         acc.setWave_resistance(acc.getWave_resistance() + val.getWave_resistance() * weight);
@@ -1004,7 +870,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         acc.setWave_polar(acc.getWave_polar() + val.getWave_polar() * weight);
         acc.setWind_polar(acc.getWind_polar() + val.getWind_polar() * weight);
         acc.setHeading(acc.getHeading() + val.getHeading() * weight);
-        
+
         UVDimension current = acc.getCurrent_rel_uv();
         UVDimension newCurrent = val.getCurrent_rel_uv();
         current.setV(current.getV() + newCurrent.getV() * weight);
@@ -1076,6 +942,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         legFc.windThetaFromUV();
 
     }
+
     /**
      * Genereate an empty metoc, used to accumulate metoc data in computation cycle
      */
@@ -1150,8 +1017,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fc.setMultiSelectionEnabled(false);
 
-        fc.addChoosableFileFilter(new FileNameExtensionFilter(
-                "Simple fuel consumption text format", "txt", "TXT"));
+        fc.addChoosableFileFilter(new FileNameExtensionFilter("Simple fuel consumption text format", "txt", "TXT"));
         fc.setAcceptAllFileFilterUsed(true);
         File f = new File(route.getName() + "_fc.txt");
         fc.setSelectedFile(f);
@@ -1166,17 +1032,24 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         }
 
         if (file.exists()) {
-            if (JOptionPane.showConfirmDialog(this, "File exists. Overwrite?",
-                    "Overwrite?", JOptionPane.YES_NO_OPTION) != 0) {
+            if (JOptionPane.showConfirmDialog(this, "File exists. Overwrite?", "Overwrite?",
+                    JOptionPane.YES_NO_OPTION) != 0) {
                 exportToFile();
                 return;
             }
         }
 
         if (!Utils.saveSimple(route, file)) {
-            JOptionPane.showMessageDialog(EPD.getInstance().getMainFrame(),
-                    "Route save error", "Route not saved",
+            JOptionPane.showMessageDialog(EPD.getInstance().getMainFrame(), "Route save error", "Route not saved",
                     JOptionPane.ERROR_MESSAGE);
+        }
+
+    }
+
+    @Override
+    public void tableChanged(TableModelEvent e) {
+        if(e.getColumn() == 9) {
+            this.cleanFuelConsumption(false);
         }
 
     }

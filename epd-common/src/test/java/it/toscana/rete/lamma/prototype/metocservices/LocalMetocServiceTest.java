@@ -88,7 +88,7 @@ public class LocalMetocServiceTest {
      * @throws IOException
      */
     @Test
-    public final void TestWWWPartREading()
+    public final void TestWWWPartRead()
             throws URISyntaxException, RouteLoadException, ShoreServiceException, IOException {
         System.out.println("Loading Med-Route file");
         // int pnt
@@ -96,7 +96,7 @@ public class LocalMetocServiceTest {
         RouteMetocSettings ms = getMetocSettings();
         ms.setInterval(60);
         route.setRouteMetocSettings(ms);
-        ms.setLocalMetocFile(Paths.get("/Users/kappu/lamma/data/WW3_Med005MPI_2019111206-part-4h.grb").toString());
+        ms.setLocalMetocFile(Paths.get("/Users/kappu/lamma/data/WW3_Med005MPI_2019112500-part.grb").toString());
         LocalMetocService metocService = new LocalMetocService();
         
         metocService.openMetoc(ms.getLocalMetocFile());
@@ -106,7 +106,10 @@ public class LocalMetocServiceTest {
             System.out.println(var.getShortName());
             System.out.println(var.getFullName());
         });
+        GeoGrid swell_waves = metocService.getMetocDataset().findGridByShortName("Significant_height_of_swell_waves_OSEQD");
+        GridCoordSystem gcs = swell_waves.getCoordinateSystem(); 
         
+
         // C'è il problema di gestire la data, ma non ho bisogno di trasformare il richiesta metoc.
         // posso semplicemente filtrare quelli che non voglio se non li voglio e stop oppure
         // Date gribRun = metocService.getMetocDataset().getCalendarDateStart().toDate();
