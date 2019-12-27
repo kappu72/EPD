@@ -57,11 +57,11 @@ import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.commons.lang.StringUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.dma.epd.common.FormatException;
+
 import dk.dma.epd.common.Heading;
 import dk.dma.epd.common.prototype.EPD;
 import dk.dma.epd.common.prototype.gui.route.RoutePropertiesDialogCommon.RouteChangeListener;
@@ -72,9 +72,6 @@ import dk.dma.epd.common.prototype.model.route.RouteLoadException;
 import dk.dma.epd.common.prototype.model.route.RouteWaypoint;
 import dk.dma.epd.common.prototype.model.route.RoutesUpdateEvent;
 import dk.dma.epd.common.text.Formatter;
-import dk.dma.epd.common.util.ParseUtils;
-import dk.dma.epd.common.util.TypedValue.Time;
-import dk.dma.epd.common.util.TypedValue.TimeType;
 import dk.frv.enav.common.xml.metoc.MetocForecast;
 import dk.frv.enav.common.xml.metoc.MetocForecastPoint;
 import dk.frv.enav.common.xml.metoc.MetocForecastTriplet;
@@ -127,14 +124,14 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
     // Column 2 widgets
     // Fuel configurations settings
     protected ShipsSelector shipsSelector = new ShipsSelector(new ArrayList<ShipData>());
-    protected ShipConfigurationsSelector configurationsSelector = new ShipConfigurationsSelector(new ArrayList());
+    protected ShipConfigurationsSelector configurationsSelector = new ShipConfigurationsSelector(new ArrayList<ShipConfiguration>());
     protected ShipPropulsionConfigurationsSelector propConfigsSelector = new ShipPropulsionConfigurationsSelector(
-            new ArrayList());
+            new ArrayList<Path>());
     protected ShipPropulsionConfigurationsSelector propConfigsColumn = new ShipPropulsionConfigurationsSelector(
-            new ArrayList());
+            new ArrayList<Path>());
     protected JCheckBox waveComponents = new JCheckBox("Wave Components");
-    protected JCheckBox fromToMetoc = new JCheckBox("From/To Metoc");
-    protected JCheckBox skipWind = new JCheckBox("Skip Wind");
+    protected JCheckBox noWind = new JCheckBox("No wind");
+    protected JCheckBox skipWind = new JCheckBox("Skip Metoc Wind");
     protected JCheckBox skipWave = new JCheckBox("Skip Wave");
     protected JCheckBox skipCurrent = new JCheckBox("Skip Current");
 
@@ -307,13 +304,11 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
 
         gridY = 0;
         fcProps.add(waveComponents, new GridBagConstraints(3, gridY++, 1, 1, 0.0, 0.0, WEST, NONE, insets1, 0, 0));
-        fcProps.add(fromToMetoc, new GridBagConstraints(3, gridY++, 1, 1, 0.0, 0.0, WEST, NONE, insets1, 0, 0));
+        fcProps.add(noWind, new GridBagConstraints(3, gridY++, 1, 1, 0.0, 0.0, WEST, NONE, insets1, 0, 0));
         fcProps.add(skipWind, new GridBagConstraints(3, gridY++, 1, 1, 0.0, 0.0, WEST, NONE, insets1, 0, 0));
         fcProps.add(skipWave, new GridBagConstraints(3, gridY++, 1, 1, 0.0, 0.0, WEST, NONE, insets1, 0, 0));
 
-        // Unused all the metoc are managed during import
-        fromToMetoc.setEnabled(false);
-
+        
         // btnCalcConsumption.setEnabled(false);
         btnCalcConsumption.addActionListener(this);
         fcProps.add(fixSize(btnCalcConsumption, -1, 20),
@@ -382,7 +377,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         skipWave.addItemListener(this);
         skipWind.addItemListener(this);
         skipCurrent.addItemListener(this);
-        fromToMetoc.addItemListener(this);
+        noWind.addItemListener(this);
         waveComponents.addItemListener(this);
 
         btnActivate.addActionListener(this);
@@ -440,7 +435,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
             }
         }
         waveComponents.setSelected(fcSet.isWaveComponents());
-        fromToMetoc.setSelected(fcSet.isFromToMetoc());
+        noWind.setSelected(fcSet.isNoWind());
         skipCurrent.setSelected(fcSet.isSkipCurrent());
         skipWave.setSelected(fcSet.isSkipWave());
         skipWind.setSelected(fcSet.isSkipWind());
@@ -590,8 +585,9 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         RouteFuelConsumptionSettings fcCfg = route.getRouteFCSettings();
         if (s.equals(waveComponents))
             fcCfg.setWaveComponents(waveComponents.isSelected());
-        else if (s.equals(fromToMetoc))
-            fcCfg.setFromToMetoc(fromToMetoc.isSelected());
+        else if (s.equals(noWind)) {
+            fcCfg.setNoWind(noWind.isSelected());
+        }
         else if (s.equals(skipCurrent))
             fcCfg.setSkipCurrent(skipCurrent.isSelected());
         else if (s.equals(skipWave))
@@ -740,6 +736,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
 
                 // Genera fc e metoc per il leg con media pesata dei singoli pezzi
                 FuelConsumption legFc = new FuelConsumption();
+                legFc.setHull_resistance(0.);
                 MetocPointForecast legMetoc = this.getEmptyMetoc();
                 // Does the calcolous on inner metoc
                 while (me != null && me.getTime().getTime() >= eta.getTime()
@@ -773,6 +770,12 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                             Wave mwave = nMe.getMeanWave();
                             FuelConsumption c = FuelConsumptionCalculator.CalculateAllKinematical(SOG, nMe.getCurrent(),
                                     nMe.getWind(), mwave.getDirection(), true);
+                            if(noWind.isSelected()) {
+                                // Set to 0 relative wind
+                                ThetaUDimension rel_w = c.getWind_rel();
+                                rel_w.setU(0.);
+                                c.setWind_rel(rel_w);
+                            }
                             FuelConsumption r = FuelConsumptionCalculator.CalculateResistance(c, mwave.getHeight(),
                                     mwave.getPeriod(), cxRes, cawRes, 850); // occhio a 850 è fisso
                             if (hullResTable != null) {
@@ -864,9 +867,10 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         acc.setWeight(acc.getWeight() + weight);
         acc.setFuelRate(acc.getFuelRate() + val.getFuelRate() * weight);
         acc.setFuel(acc.getFuel() + val.getFuel());
-        acc.setWave_resistance(acc.getWave_resistance() + val.getWave_resistance() * weight);
-        acc.setWind_resistance(acc.getWind_resistance() + val.getWind_resistance() * weight);
-        acc.setHull_resistance(acc.getHull_resistance() + val.getHull_resistance() * weight);
+        acc.setWave_resistance((acc.getWave_resistance() + val.getWave_resistance() * weight));
+        acc.setWind_resistance((acc.getWind_resistance() + val.getWind_resistance() * weight));
+        acc.setHull_resistance((acc.getHull_resistance() + val.getHull_resistance() * weight));
+        System.out.println("Peso: " + weight + " val: " +val.getHull_resistance() + " tot: " + acc.getHull_resistance());
         acc.setWave_polar(acc.getWave_polar() + val.getWave_polar() * weight);
         acc.setWind_polar(acc.getWind_polar() + val.getWind_polar() * weight);
         acc.setHeading(acc.getHeading() + val.getHeading() * weight);
@@ -930,7 +934,9 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         legFc.setFuel(legFc.getFuel());
         legFc.setWave_resistance(legFc.getWave_resistance() / size);
         legFc.setWind_resistance(legFc.getWind_resistance() / size);
+        System.out.println("Valore totale " + legFc.getHull_resistance() + "Size: " + size);
         legFc.setHull_resistance(legFc.getHull_resistance() / size);
+        System.out.println("Valore medio " + legFc.getHull_resistance() );
         legFc.setWave_polar(legFc.getWave_polar() / size);
         legFc.setWind_polar(legFc.getWind_polar() / size);
         legFc.setHeading(legFc.getHeading() / size);
@@ -978,34 +984,6 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
             routeTableModel.fireTableRowsUpdated(locked.length - 1, locked.length - 1);
         }
         return lockedNo == locked.length;
-    }
-
-    /***************************************************/
-    /** Utility functions **/
-    /***************************************************/
-
-    /**
-     * Parses the text field as a double. Will skip any type suffix.
-     * 
-     * @param str the string to parse as a double
-     * @return the resulting value
-     */
-    private static double parseDouble(String str) throws FormatException {
-        str = str.replaceAll(",", ".");
-        String[] parts = StringUtils.split(str, " ");
-        return ParseUtils.parseDouble(parts[0]);
-    }
-
-    /**
-     * Parses the text, which has the time format hh:mm:ss, into milliseconds.
-     * 
-     * @param str the string to parse
-     * @return the time in milliseconds
-     */
-    private static long parseTime(String str) throws Exception {
-        String[] parts = str.split(":");
-        return new Time(TimeType.HOURS, Long.valueOf(parts[0])).add(new Time(TimeType.MINUTES, Long.valueOf(parts[1])))
-                .add(new Time(TimeType.SECONDS, Long.valueOf(parts[2]))).in(TimeType.MILLISECONDS).longValue();
     }
 
     /**

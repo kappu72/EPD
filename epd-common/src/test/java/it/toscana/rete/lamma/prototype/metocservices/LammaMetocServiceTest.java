@@ -37,14 +37,25 @@ public class LammaMetocServiceTest {
      */
     @Test
     public final void TestOpenMetoc() throws IOException {
-        
+       
+		
+		
+		
         // int pnt
+        for(int i = 0; i < 100; i++){
+            double rest = 15.0%1.;
+		
+		
+		
+            int up = (int) Math.ceil(15./1.);
+            int down = (int) Math.floor(15./1.);
+            System.out.println(i + " " + rest + " " + up + " " + down);
+        }
+        // LammaMetocService metocService = new LammaMetocService();
+        // metocService.getDatasetList(null);
+        // metocService.openMetoc("http://172.16.1.55/det.5km/2019112606.det.5km.nc");
         
-        LammaMetocService metocService = new LammaMetocService();
-        metocService.getDatasetList(null);
-        metocService.openMetoc("http://172.16.1.55/det.5km/2019112606.det.5km.nc");
-        
-        metocService.metocDataset.close();;
+        // metocService.metocDataset.close();;
         
     }
 

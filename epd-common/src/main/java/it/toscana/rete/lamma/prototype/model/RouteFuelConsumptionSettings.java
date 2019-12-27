@@ -12,10 +12,10 @@ public class RouteFuelConsumptionSettings implements Serializable {
 	private String ship;
 	private ShipConfiguration configuration;
 	private boolean waveComponents = false;
-	private boolean fromToMetoc = false;
-	private boolean skipWind = false;
-	private boolean skipWave = false;
-	private boolean skipCurrent = false;
+	private boolean noWind = false; // Skip metoc and apparent wind
+	private boolean skipWind = false; // Skip metoc wind
+	private boolean skipWave = false; // Skip metoc wave 
+	private boolean skipCurrent = false; // Skip metoc current
 
 	public RouteFuelConsumptionSettings() {
 
@@ -45,12 +45,12 @@ public class RouteFuelConsumptionSettings implements Serializable {
 		this.waveComponents = waveComponents;
 	}
 
-	public boolean isFromToMetoc() {
-		return fromToMetoc;
+	public boolean isNoWind() {
+		return noWind;
 	}
 
-	public void setFromToMetoc(boolean fromToMetoc) {
-		this.fromToMetoc = fromToMetoc;
+	public void setNoWind(boolean noWind) {
+		this.noWind = noWind;
 	}
 
 	public boolean isSkipWind() {

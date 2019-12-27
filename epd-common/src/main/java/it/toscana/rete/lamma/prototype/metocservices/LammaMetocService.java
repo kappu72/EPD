@@ -24,6 +24,7 @@ public class LammaMetocService extends MetocService {
     private CatalogBuilder catBuilder = new CatalogBuilder();
     private List<Dataset> ds;
     private Catalog cat;
+    private boolean requestActive = false;
 
     @Override
     public GridDataset openMetoc(String path) {
@@ -67,14 +68,18 @@ public class LammaMetocService extends MetocService {
      * @param listener
      */
     public void getDatasetList(OpenDapCatalogListener listener) {
+       
         new Thread(new Runnable() {
             public void run() {
+                
                 cat = cat == null ? catBuilder.buildFromLocation(LAMMA_CATALOG, null) : cat;
                 synchronized (this) { 
                     if ( cat!= null ) {
                         ds = (List<Dataset>) cat.getAllDatasets();
                     }
                 }
+                
+                
                 listener.onCatalogChanged(new OpenDapCatalogEvent(this, ds));
         } 
     }).start(); 

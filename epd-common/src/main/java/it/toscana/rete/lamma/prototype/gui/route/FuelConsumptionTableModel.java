@@ -9,6 +9,11 @@ import dk.dma.epd.common.prototype.model.route.Route;
 import dk.dma.epd.common.prototype.model.route.RouteLeg;
 import dk.dma.epd.common.prototype.model.route.RouteWaypoint;
 import dk.dma.epd.common.text.Formatter;
+import dk.dma.epd.common.util.ParseUtils;
+import org.apache.commons.lang.StringUtils;
+import dk.dma.epd.common.util.TypedValue.Time;
+import dk.dma.epd.common.util.TypedValue.TimeType;
+import dk.dma.epd.common.FormatException;
 import it.toscana.rete.lamma.prototype.model.FuelConsumption;
 
 public class FuelConsumptionTableModel extends DefaultTableModel {
@@ -150,4 +155,31 @@ public class FuelConsumptionTableModel extends DefaultTableModel {
         public boolean isCellEditable(int rowIndex, int columnIndex) {
             return columnIndex == 9 && rowIndex < route.getWaypoints().size() - 1;
         }
+    /***************************************************/
+    /** Utility functions **/
+    /***************************************************/
+
+    /**
+     * Parses the text field as a double. Will skip any type suffix.
+     * 
+     * @param str the string to parse as a double
+     * @return the resulting value
+     */
+    private static double parseDouble(String str) throws FormatException {
+        str = str.replaceAll(",", ".");
+        String[] parts = StringUtils.split(str, " ");
+        return ParseUtils.parseDouble(parts[0]);
+    }
+
+    /**
+     * Parses the text, which has the time format hh:mm:ss, into milliseconds.
+     * 
+     * @param str the string to parse
+     * @return the time in milliseconds
+     */
+    private static long parseTime(String str) throws Exception {
+        String[] parts = str.split(":");
+        return new Time(TimeType.HOURS, Long.valueOf(parts[0])).add(new Time(TimeType.MINUTES, Long.valueOf(parts[1])))
+                .add(new Time(TimeType.SECONDS, Long.valueOf(parts[2]))).in(TimeType.MILLISECONDS).longValue();
+    }
 }

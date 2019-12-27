@@ -4,7 +4,6 @@ import java.lang.reflect.Array;
 
 /**
  * The value in the array is indexed by MAX - MIN / STEP
- * 
  * @author kappu
  *
  */
@@ -82,17 +81,17 @@ public class OneDimTable<E> {
 	 * @return
 	 */
 	public double getWeightedValue(double idx, boolean force) throws IllegalArgumentException{
-		double nIdex = normalizeIdex(idx, force);
-		double rest = nIdex%delta;
+		double nIdx = normalizeIdex(idx, force);
+		double rest = nIdx % delta;
 		
 		if(rest == 0.0) {
 			return (Double) getValue(idx, force);
 		}
-		double up = (Double) values[(int) Math.ceil(nIdex/delta)];
-		double down = (Double) values[(int) Math.floor(nIdex/delta)];
-		double upD = delta-rest;
+		double up = (Double) values[(int) (Math.ceil(nIdx/delta))];
+		double down = (Double) values[(int) Math.floor(nIdx/delta)];
+		double upD = delta - rest;
 		double downD = rest;
-		return  (up * upD + down * downD) / (upD + downD);
+		return  (up * downD + down * upD) / (upD + downD);
 	}
 
 

@@ -46,7 +46,19 @@ public class OneDimTableTest {
 		assertEquals(5D, res, 0.000000000);
 		res = p.getWeightedValue(180);
 		assertEquals(180D, res, 0.000000000);
+		res = p.getWeightedValue(2D);
+		assertEquals(2D, res, 0.000000000);
+		res = p.getWeightedValue(7D);
+		assertEquals(7D, res, 0.000000000);
 		
+
+		vals = new Double[] {-1D, -0.5, 0D, 0.5, 1D, 1.5, 2D, 2.5, 3D, 3.5, 4D, 4.5D, 5D,
+			5.5, 6D, 6.5, 7D, 7.5, 8D, 8.5, 9D};
+		p = new OneDimTable<Double>(-1, 9, 0.5, vals);
+		res = p.getWeightedValue(5);
+		assertEquals(5D, res, 0.000000000); 
+		res = p.getWeightedValue(-0.7);
+		assertEquals(-0.7, res, 0.000000000); 
 		
 	}
 
