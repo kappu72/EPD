@@ -62,6 +62,8 @@ import dk.dma.epd.ship.layers.voyage.VoyageLayer;
 import dk.dma.epd.ship.service.voct.VOCTManager;
 import dk.dma.epd.ship.settings.EPDMapSettings;
 
+
+import it.toscana.rete.lamma.prototype.layers.WMSMetocLayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,7 +119,7 @@ public class ChartPanel extends ChartPanelCommon implements DockableComponentPan
         // Set layout
         setLayout(new BorderLayout());
         // Set border
-        setBorder(BorderFactory.createLineBorder(Color.GRAY));
+       // setBorder(BorderFactory.createLineBorder(Color.GRAY));
         this.activeWaypointPanel = activeWaypointPanel;
 
         setBackground(new Color(0.1f, 0.1f, 0.1f, 0.1f));
@@ -137,8 +139,9 @@ public class ChartPanel extends ChartPanelCommon implements DockableComponentPan
 
         // Add WMS Layer
         if (mapSettings.isUseWms()) {
-            wmsLayer = new WMSLayer(mapSettings.getWmsQuery(), EPDShip.getInstance().getSettings().getMapSettings());
-            mapHandler.add(wmsLayer);
+            wmsMetoc = new WMSMetocLayer(EPDShip.getInstance().getSettings().getMapSettings());
+//            wmsLayer = new WMSLayer(mapSettings.getWmsQuery(), EPDShip.getInstance().getSettings().getMapSettings());
+            mapHandler.add(wmsMetoc);
         }
 
         // Create a MapBean, and add it to the MapHandler.
@@ -569,9 +572,9 @@ public class ChartPanel extends ChartPanelCommon implements DockableComponentPan
             if (encLayer == null) {
                 topPanel.setEncDisabled();
             }
-            if (wmsLayer == null) {
+            /*if (wmsLayer == null) {
                 topPanel.setWMSDisabled();
-            }
+            }*/
         }
         if (obj instanceof VOCTManager) {
             voctManager = (VOCTManager) obj;

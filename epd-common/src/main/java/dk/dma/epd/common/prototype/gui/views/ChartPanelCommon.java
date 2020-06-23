@@ -52,7 +52,7 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
-
+import it.toscana.rete.lamma.prototype.layers.WMSMetocLayer;
 /**
  * The panel with chart. Initializes all layers to be shown on the map.
  * 
@@ -80,6 +80,7 @@ public abstract class ChartPanelCommon extends OMComponentPanel {
     protected OMGraphicHandlerLayer encLayer;
     protected MultiShapeLayer bgLayer;
     protected WMSLayer wmsLayer;
+    protected WMSMetocLayer wmsMetoc;
     protected AisLayerCommon<?> aisLayer;
     protected RouteLayerCommon routeLayer;
     protected RouteEditLayerCommon routeEditLayer;
@@ -384,8 +385,13 @@ public abstract class ChartPanelCommon extends OMComponentPanel {
      *            the visibility
      */
     public void wmsVisible(boolean visible) {
-        if (wmsLayer != null) {
+        /*if (wmsLayer != null) {
             wmsLayer.setVisible(visible);
+            EPD.getInstance().getSettings().getMapSettings().setWmsVisible(visible);
+        }*/
+        // da sistemare andranno separati i due layer wms
+        if (wmsMetoc != null) {
+            wmsMetoc.setVisible(visible);
             EPD.getInstance().getSettings().getMapSettings().setWmsVisible(visible);
         }
     }

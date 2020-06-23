@@ -53,6 +53,7 @@ import dk.dma.epd.ship.gui.component_panels.ScaleComponentPanel;
 import dk.dma.epd.ship.gui.route.strategic.SendStrategicRouteDialog;
 import dk.dma.epd.ship.settings.EPDGuiSettings;
 import it.toscana.rete.lamma.gui.ShipDataDialog;
+import it.toscana.rete.lamma.gui.WMSTimePanel;
 
 /**
  * The main frame containing map and panels
@@ -80,7 +81,7 @@ public class MainFrame extends MainFrameCommon implements IMapFrame {
     private MultiSourcePntComponentPanel msPntComponentPanel;
     private STCCCommunicationComponentPanel stccComponentPanel;
     private SafeHavenComponentPanel safeHavenPanel;
-
+    private WMSTimePanel wmsTimePanel;
     private AisDialog aisDialog;
     private SendStrategicRouteDialog sendStrategicRouteDialog;
 
@@ -160,7 +161,7 @@ public class MainFrame extends MainFrameCommon implements IMapFrame {
         msPntComponentPanel = new MultiSourcePntComponentPanel();
         stccComponentPanel = new STCCCommunicationComponentPanel();
         safeHavenPanel = new SafeHavenComponentPanel();
-
+        wmsTimePanel = new WMSTimePanel();
         // Unmovable panels
         bottomPanel = new BottomPanel();
 
@@ -199,7 +200,7 @@ public class MainFrame extends MainFrameCommon implements IMapFrame {
         mapHandler.add(sarPanel);
         mapHandler.add(msPntComponentPanel);
         mapHandler.add(safeHavenPanel);
-
+        mapHandler.add(wmsTimePanel);
         // Create top menubar
         menuBar = new MenuBar();
         this.setJMenuBar(menuBar);
@@ -332,7 +333,7 @@ public class MainFrame extends MainFrameCommon implements IMapFrame {
     public List<DockableComponentPanel> getDockableComponentPanels() {
         return Arrays.asList((DockableComponentPanel) chartPanel, scalePanel, ownShipPanel, gpsPanel, cursorPanel,
                 activeWaypointPanel, aisComponentPanel, nogoPanel, sarPanel, msPntComponentPanel, stccComponentPanel,
-                safeHavenPanel);
+                safeHavenPanel, wmsTimePanel);
     }
 
     /*******************************/

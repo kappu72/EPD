@@ -16,6 +16,7 @@
 
 	<properties>
 		<maritime.cloud.version>0.4-SNAPSHOT</maritime.cloud.version>
+		<geotools.version>23-SNAPSHOT</geotools.version>
 	</properties>
 
 	<dependencies>
@@ -166,7 +167,11 @@
             <version>5.2.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
-
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-wms</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
 	</dependencies>
 	<build>
 
@@ -339,7 +344,19 @@
 			
 
 		</repository>
-
+		<repository>
+			<id>osgeo</id>
+			<name>Open Source Geospatial Foundation Repository</name>
+			<url>http://download.osgeo.org/webdav/geotools/</url>
+		</repository>
+		<repository>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<id>boundless</id>
+			<name>Boundless Maven Repository</name>
+			<url>http://repo.boundlessgeo.com/main</url>
+		</repository>
 	</repositories>
 
 

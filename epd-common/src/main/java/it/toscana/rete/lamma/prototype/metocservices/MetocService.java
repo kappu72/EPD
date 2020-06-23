@@ -1,11 +1,7 @@
 package it.toscana.rete.lamma.prototype.metocservices;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -41,17 +37,17 @@ import ucar.nc2.time.CalendarDate;
 import ucar.nc2.time.CalendarDateRange;
 import ucar.unidata.geoloc.LatLonRect;
 
-public class MetocService extends MapHandlerChild {
+public class MetocService extends  MapHandlerChild {
 
     static final double EARTH_RADIUS = 6371;
 
-    public static final String U_WIND_10 = "u10";
-    public static final String V_WIND_10 = "v10";
-    public static final String H_WAVE_COMBINED = "swh";
-    public static final String M_WAVE_PERIOD = "mwp";
-    public static final String M_WAVE_DIRECTION = "mwd";
-    public static final String MERIDIONAL_CURRENT = "vo";
-    public static final String ZONAL_CURRENT = "uo";
+    public static final String[] U_WIND_10 = {"u10", "10_metre_U_wind_component_height_above_ground"};
+    public static final String[] V_WIND_10 = {"v10", "10_metre_V_wind_component_height_above_ground"};
+    public static final String[] H_WAVE_COMBINED = {"swh", "Significant_height_of_combined_wind_waves_and_swell_msl"};
+    public static final String[] M_WAVE_PERIOD = {"mwp", "Mean_wave_period_msl"};
+    public static final String[] M_WAVE_DIRECTION = {"mwd", "Mean_wave_direction_msl"};
+    public static final String[] MERIDIONAL_CURRENT = {"vo", "v-component_of_current_depth_below_sea"};
+    public static final String[] ZONAL_CURRENT = {"uo", "u-component_of_current_depth_below_sea"};
 
     public static final int MAX_FORECAST_FUTURE = 60;
 
@@ -61,7 +57,7 @@ public class MetocService extends MapHandlerChild {
     protected GridDataset metocDataset;
 
     public MetocService() {
-        // Non so se vale la pena cachere il file dato che tiene in memoria solo i file
+        // Non so se vale la pena to cache il file dato che tiene in memoria solo i file
         // handler o altro
         // da approfondire
         // NetcdfDataset.initNetcdfFileCache(minElementsInMemory,maxElementsInMemory,period);
@@ -175,17 +171,17 @@ public class MetocService extends MapHandlerChild {
         // Stream over generated waypoints
 
         openMetoc(metocSettings);
-        
-        GeoGrid v_10_Grid = metocDataset.findGridByShortName(V_WIND_10);
-        GeoGrid u_10_Grid = metocDataset.findGridByShortName(U_WIND_10);
-        GeoGrid swh_Grid = metocDataset.findGridByShortName(H_WAVE_COMBINED);
-        GeoGrid mwd_Grid = metocDataset.findGridByShortName(M_WAVE_DIRECTION);
-        GeoGrid mwp_Grid = metocDataset.findGridByShortName(M_WAVE_PERIOD);
-        GeoGrid uo_Grid = metocDataset.findGridByShortName(ZONAL_CURRENT);
-        GeoGrid vo_Grid = metocDataset.findGridByShortName(MERIDIONAL_CURRENT);
+
+        GeoGrid v_10_Grid = getGeoGridByName(V_WIND_10);
+        GeoGrid u_10_Grid = getGeoGridByName(U_WIND_10);
+        GeoGrid swh_Grid = getGeoGridByName(H_WAVE_COMBINED);
+        GeoGrid mwd_Grid = getGeoGridByName(M_WAVE_DIRECTION);
+        GeoGrid mwp_Grid = getGeoGridByName(M_WAVE_PERIOD);
+        GeoGrid uo_Grid = getGeoGridByName(ZONAL_CURRENT);
+        GeoGrid vo_Grid = getGeoGridByName(MERIDIONAL_CURRENT);
 
         GridCoordSystem gcs = v_10_Grid.getCoordinateSystem(); // Si assume che tutti i parametri nel file abbiano i
-                                                               // medesimi sistemi di coordinate
+                                                                // medesimi sistemi di coordinate
         LatLonRect bbox = gcs.getLatLonBoundingBox();
         CalendarDateRange calendarDateRange = gcs.getCalendarDateRange();
         LinkedList<RouteWaypoint> wps = densifiedRoute.getWaypoints();
@@ -247,6 +243,21 @@ public class MetocService extends MapHandlerChild {
         return forecast;
     }
 
+    /**
+     * Search a parameter by names
+     * @param names
+     * @return
+     * @throws ShoreServiceException
+     */
+    private GeoGrid getGeoGridByName(String[] names) throws ShoreServiceException {
+        for (String name : names) {
+           GeoGrid g = metocDataset.findGridByShortName(name);
+           if(g != null) {
+               return g;
+           }
+        }
+        throw new ShoreServiceException("Missing mandatory metoc parameter: " + names[0]);
+    }
     /**
      * 
      * @param route the route to be densified

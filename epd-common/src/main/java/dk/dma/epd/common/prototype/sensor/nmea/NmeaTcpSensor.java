@@ -75,7 +75,7 @@ public class NmeaTcpSensor extends NmeaSensor {
                 connect();
                 readLoop(clientSocket.getInputStream());
             } catch (IOException e) {
-                LOG.error("TCP NMEA sensor failed: " + e.getMessage() + " retry in " + reconnectInterval / 1000 + " seconds");
+               // LOG.error("TCP NMEA sensor failed: " + e.getMessage() + " retry in " + reconnectInterval / 1000 + " seconds");
                 try {
                     Thread.sleep(reconnectInterval);
                 } catch (InterruptedException intE) {
@@ -86,7 +86,7 @@ public class NmeaTcpSensor extends NmeaSensor {
         // Disconnect and flag that the sensor has terminated
         disconnect();
         flagTerminated();
-        LOG.warn("TCP NMEA sensor terminated");
+      //  LOG.warn("TCP NMEA sensor terminated");
     }
 
     private void connect() throws IOException {
@@ -103,7 +103,7 @@ public class NmeaTcpSensor extends NmeaSensor {
             LOG.error("Unknown host: " + hostname + ": " + e.getMessage());
             throw e;
         } catch (IOException e) {
-            LOG.error("Could not connect to NMEA source: " + hostname + ": " + e.getMessage());
+           // LOG.error("Could not connect to NMEA source: " + hostname + ": " + e.getMessage());
             throw e;
         }
     }

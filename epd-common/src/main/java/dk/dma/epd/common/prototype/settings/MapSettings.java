@@ -47,6 +47,7 @@ public class MapSettings implements Serializable {
     private String color = "Day";
     private String wmsQuery = "";
     private boolean multipleBackgrounds;
+    private String lammaWMSservice = "https://geoportale.lamma.rete.toscana.it/geoserver_mare/ows";
     
     public MapSettings() {
     }
@@ -68,6 +69,7 @@ public class MapSettings implements Serializable {
         
         //settings for wms
         wmsQuery = props.getProperty(PREFIX + "wmsQuery", "");
+        lammaWMSservice = props.getProperty(PREFIX + "lammaWMSservice", "https://geoportale.lamma.rete.toscana.it/geoserver_mare/ows");
         
         // settings for S52 layer
         s52ShowText = PropUtils.booleanFromProperties(props, PREFIX + "s52ShowText", s52ShowText);
@@ -80,6 +82,7 @@ public class MapSettings implements Serializable {
         usePlainAreas = PropUtils.booleanFromProperties(props, PREFIX + "usePlainAreas", usePlainAreas);
         s52TwoShades = PropUtils.booleanFromProperties(props, PREFIX + "s52TwoShades", s52TwoShades);
         color = props.getProperty(PREFIX + "color", color);
+
             }
 
     public void setProperties(Properties props) {
@@ -94,6 +97,7 @@ public class MapSettings implements Serializable {
         props.put(PREFIX + "multipleBackgrounds", Boolean.toString(multipleBackgrounds));
         
         props.put(PREFIX + "wmsQuery", wmsQuery);
+        props.put(PREFIX + "lammaWMSservice", lammaWMSservice);
         
         // settings for S52 layer
         props.put(PREFIX + "s52ShowText", Boolean.toString(s52ShowText));
@@ -261,5 +265,12 @@ public class MapSettings implements Serializable {
     public void setMultipleBackgrounds(boolean multipleBackgrounds) {
         this.multipleBackgrounds = multipleBackgrounds;
     }
-    
+
+    public String getLammaWMSservice() {
+        return lammaWMSservice;
+    }
+
+    public void setLammaWMSservice(String lammaWMSservice) {
+        this.lammaWMSservice = lammaWMSservice;
+    }
 }

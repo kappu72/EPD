@@ -1,4 +1,4 @@
-package it.toscana.rete.lamma.prototype.model;
+ package it.toscana.rete.lamma.prototype.model;
 
 import java.io.Serializable;
 

@@ -276,7 +276,7 @@ public class RoutePropertiesDialogCommon extends JDialog implements ActionListen
         initDatePicker(departurePicker, departureSpinner);
         routeProps.add(new JLabel("Estimated Time of Departure:"), new GridBagConstraints(2, gridY, 1, 1, 0.0, 0.0, WEST, NONE, insets2, 0, 0));
         routeProps.add(fixSize(departurePicker, 120), new GridBagConstraints(3, gridY, 1, 1, 0.0, 0.0, WEST, NONE, insets3, 0, 0));
-        routeProps.add(fixSize(departureSpinner, 60, h), new GridBagConstraints(4, gridY++, 1, 1, 0.0, 0.0, WEST, NONE, insets4, 0, 0));
+        routeProps.add(fixSize(departureSpinner, 160, h), new GridBagConstraints(4, gridY++, 1, 1, 0.0, 0.0, WEST, NONE, insets4, 0, 0));
         
         initDatePicker(arrivalPicker, arrivalSpinner);
         routeProps.add(new JLabel("Estimated Time of Arrival:"), new GridBagConstraints(2, gridY, 1, 1, 0.0, 0.0, WEST, NONE, insets2, 0, 0));

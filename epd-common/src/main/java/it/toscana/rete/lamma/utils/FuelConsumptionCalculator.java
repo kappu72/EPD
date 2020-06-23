@@ -92,6 +92,7 @@ public class FuelConsumptionCalculator {
 	}
 	
 	/**
+	 * @deprecated 
 	 * Calculate Kinematical
 	 * @param curr or wind ThetaUDimension
 	 * @param sog ThetaUDimension
@@ -115,7 +116,7 @@ public class FuelConsumptionCalculator {
 	}
 	
 	/**
-	 * 
+	 *  We use the polar windx\
 	 * @param c fuelConsumption
 	 * @param waveH
 	 * @param waveTm

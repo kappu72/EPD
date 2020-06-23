@@ -36,7 +36,9 @@ import dk.dma.epd.common.prototype.service.VoctHandlerCommon;
 import dk.dma.epd.common.prototype.settings.SensorSettings;
 import dk.dma.epd.common.prototype.settings.Settings;
 import dk.dma.epd.common.prototype.voct.VOCTManagerCommon;
+import it.toscana.rete.lamma.prototype.metocservices.WMSClientService;
 import net.maritimecloud.core.id.MaritimeId;
+import org.geotools.ows.wms.WMSCapabilities;
 
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -83,6 +85,7 @@ public abstract class EPD implements ISettingsListener {
     protected VoctHandlerCommon voctHandler;
     protected VOCTManagerCommon voctManager;
     protected FALHandlerCommon falHandler;
+    protected WMSClientService wmsClientService;
 
     /**
      * Constructor
@@ -457,7 +460,10 @@ public abstract class EPD implements ISettingsListener {
     public VOCTManagerCommon getVoctManager() {
         return voctManager;
     }
-    
-    
-
+    /**
+     * @return the WMSClientService
+     */
+    public WMSClientService getWmsClientService() {
+        return wmsClientService;
+    }
 }

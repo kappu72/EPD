@@ -42,9 +42,7 @@ public abstract class AbstractWMSService extends Observable {
     protected int wmsHeight;
     protected Double wmsullon;
     protected Double wmsullat;
-    // protected Double deltaX = 0.0013;
-    // protected Double deltaY = 0.00058;
-    // protected Double deltaY = 0.00068;
+    
     private Double deltaX = 0.000000;
     private Double deltaY = 0.000000;
     protected WMSStatus status = new WMSStatus();
@@ -96,14 +94,14 @@ public abstract class AbstractWMSService extends Observable {
         this.wmsWidth = w;
         this.wmsHeight = h;
         this.wmsullon = ullon;
-        this.wmsullat = ullat;
+        this.wmsullat = ullat + 1;
         this.width = Integer.toString(w);
         this.height = Integer.toString(h);
 
         this.upperLeftLon = upperLeftLon;
-        this.upperLeftLat = upperLeftLat;
-        this.lowerRightLon = lowerRightLon;
-        this.lowerRightLat = lowerRightLat;
+        this.upperLeftLat = upperLeftLat + 1;
+        this.lowerRightLon = lowerRightLon ;
+        this.lowerRightLat = lowerRightLat ;
 
     }
 
@@ -115,56 +113,7 @@ public abstract class AbstractWMSService extends Observable {
      */
     protected String getQueryString() {
         String queryString = "";
-
-        // if (wmsQuery.indexOf("kortforsyningen.kms.dk/soe_enc_primar") > 0) {
-        //
-        // String[] splittedUrl = wmsQuery.split("&");
-        // String newUrl = "";
-        //
-        // String styleReplacer = "";
-        //
-        // // 3428460
-        // // Do style 244
-        // if (zoomLevel > 727875) {
-        // styleReplacer = "STYLES=style-id-244";
-        // }
-        //
-        // // Do style 200
-        // if (zoomLevel <= 727875) {
-        // styleReplacer = "STYLES=style-id-200";
-        // }
-        //
-        // // Do style 246
-        // if (zoomLevel <= 363937) {
-        // styleReplacer = "STYLES=style-id-246";
-        // }
-        //
-        // // //Do style 245
-        // // if (zoomLevel <= 181968){
-        // // styleReplacer = "STYLES=style-id-245";
-        // // }
-        //
-        // for (int i = 0; i < splittedUrl.length; i++) {
-        //
-        // if (splittedUrl[i].startsWith("STYLES=")) {
-        // splittedUrl[i] = styleReplacer;
-        // }
-        //
-        // if (i != splittedUrl.length - 1) {
-        //
-        // newUrl = newUrl + splittedUrl[i] + "&";
-        // } else {
-        // newUrl = newUrl + splittedUrl[i];
-        // }
-        //
-        // }
-        // queryString = newUrl + "&BBOX=" + getBbox() + "&WIDTH=" + width
-        // + "&HEIGHT=" + height;
-        // } else {
         queryString = wmsQuery + "&BBOX=" + getBbox() + "&WIDTH=" + width + "&HEIGHT=" + height;
-        // }
-//        LOG.info(queryString);
-
         return queryString;
     }
 

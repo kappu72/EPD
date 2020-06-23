@@ -35,6 +35,7 @@ import javax.swing.UIManager;
 import com.bbn.openmap.MapHandler;
 import com.jtattoo.plaf.hifi.HiFiLookAndFeel;
 
+import it.toscana.rete.lamma.prototype.metocservices.WMSClientService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -320,7 +321,9 @@ public final class EPDShip extends EPD implements IOwnShipListener {
         mapHandler.add(lammaMetocService);
         // Start sensors
         startSensors();
-
+        // Add WMSLammaService
+        wmsClientService = new WMSClientService(settings.getMapSettings());
+        mapHandler.add(wmsClientService);
         // Create plugin components
 
         try {
@@ -893,6 +896,7 @@ public final class EPDShip extends EPD implements IOwnShipListener {
     public MapHandler getMapHandler() {
         return mapHandler;
     }
+
 
     public ShoreServicesCommon getShoreServices() {
         return shoreServices;

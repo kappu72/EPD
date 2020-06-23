@@ -16,6 +16,8 @@ package dk.dma.epd.common.prototype.gui.settings;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,12 +33,17 @@ import javax.swing.JTextField;
 
 import com.bbn.openmap.proj.coords.LatLonPoint;
 
+import dk.dma.epd.common.prototype.EPD;
 import dk.dma.epd.common.prototype.gui.settings.ISettingsListener.Type;
 import dk.dma.epd.common.prototype.settings.MapSettings;
+import it.toscana.rete.lamma.prototype.gui.WMSLayerSelector;
+import it.toscana.rete.lamma.prototype.metocservices.WMSClientService;
+import org.geotools.ows.wms.Layer;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
+
 
 /**
  * 
@@ -70,7 +77,10 @@ public class CommonMapSettingsPanel extends BaseSettingsPanel implements
     private JCheckBox chckbxTwoShades;
     private JCheckBox chckbxPlainAreas;
     private JButton btnAdvancedOptions;
-
+    private JPanel lammaMetocwmsSettings;
+    private JTextField lammatextFieldWMSURL;
+    private WMSClientService wmsClient;
+    private WMSLayerSelector wmsLayerSelector;
     private boolean s57SettingsChanged;
 
     /**
@@ -140,29 +150,27 @@ public class CommonMapSettingsPanel extends BaseSettingsPanel implements
         /************** WMS settings ***************/
 
         wmsSettings = new JPanel();
-        wmsSettings.setBounds(6, 409, 438, 155);
+        wmsSettings.setBounds(6, 405, 438, 100);
         wmsSettings.setLayout(null);
         wmsSettings.setBorder(new TitledBorder(null, "WMS Settings",
                 TitledBorder.LEADING, TitledBorder.TOP, null, null));
-
         chckbxUseWms = new JCheckBox("Use WMS");
-        chckbxUseWms.setBounds(16, 20, 88, 23);
+        chckbxUseWms.setBounds(420, 20, 80, 23);
         wmsSettings.add(chckbxUseWms);
-
         lblWmsUrl = new JLabel("WMS URL:");
-        lblWmsUrl.setBounds(16, 50, 61, 16);
+        lblWmsUrl.setBounds(16, 20, 61, 16);
         wmsSettings.add(lblWmsUrl);
 
         textFieldWMSURL = new JTextField();
-        textFieldWMSURL.setBounds(16, 75, 405, 20);
+        textFieldWMSURL.setBounds(16, 45, 405, 20);
         wmsSettings.add(textFieldWMSURL);
         textFieldWMSURL.setColumns(10);
 
         this.add(wmsSettings);
 
         lblenterTheUrl = new JLabel(
-                "<html>Enter the URL to the WMS service you wish to use, <br>enter everything except BBOX and height/width options.</html>");
-        lblenterTheUrl.setBounds(16, 100, 405, 37);
+                "<html>Enter the WMS service URL you wish to use, don't enter BBOX and height/width options.</html>");
+        lblenterTheUrl.setBounds(16, 70, 480, 37);
         wmsSettings.add(lblenterTheUrl);
 
         /************** S52 settings ***************/
@@ -248,6 +256,48 @@ public class CommonMapSettingsPanel extends BaseSettingsPanel implements
         // });
 
         panel.add(btnAdvancedOptions);
+        /************** Lamma WMS settings ***************/
+
+        lammaMetocwmsSettings = new JPanel();
+        lammaMetocwmsSettings.setBounds(6, 519, 438, 100);
+        lammaMetocwmsSettings.setLayout(null);
+        lammaMetocwmsSettings.setBorder(new TitledBorder(null, "Lamma WMS Metoc Settings",
+                TitledBorder.LEADING, TitledBorder.TOP, null, null));
+
+        JLabel lblLammaWmsUrl = new JLabel("URL:");
+        lblLammaWmsUrl.setBounds(16, 27, 30, 16);
+        lammaMetocwmsSettings.add(lblLammaWmsUrl);
+
+        lammatextFieldWMSURL = new JTextField();
+        lammatextFieldWMSURL.setBounds(50, 25 , 450, 20);
+        lammaMetocwmsSettings.add(lammatextFieldWMSURL);
+        lammatextFieldWMSURL.setColumns(10);
+        wmsLayerSelector = new WMSLayerSelector(new Layer[0]);
+        wmsLayerSelector.setBounds(16, 50, 405, 37);
+        lammaMetocwmsSettings.add(wmsLayerSelector);
+        this.add(lammaMetocwmsSettings);
+
+        //JLabel lblLammaenterTheUrl = new JLabel(
+          //      "<html>Enter the URL to the Lamma WMS service you wish to use</html>");
+        //lblLammaenterTheUrl.setBounds(16, 50, 405, 37);
+        //lammaMetocwmsSettings.add(lblLammaenterTheUrl);
+        initWMS();
+    }
+    private void initWMS() {
+        wmsClient = EPD.getInstance().getWmsClientService();
+        Layer [] ls =  wmsClient.getLayers();
+        if(ls != null) {
+            wmsLayerSelector.addLayers(ls);
+        }
+        wmsClient.addPropertyChangeListener("capabilities", new
+                PropertyChangeListener() {
+                    @Override
+                    public void propertyChange(PropertyChangeEvent evt) {
+                        wmsLayerSelector.addLayers(wmsClient.getLayers());
+                    }
+                });
+        wmsClient.getCapabilities();
+
     }
 
     /**
@@ -321,7 +371,10 @@ public class CommonMapSettingsPanel extends BaseSettingsPanel implements
                 || changed(this.settings.getWmsQuery(),
                         this.textFieldWMSURL.getText())
 
-                || s57SettingsChanged;
+                || s57SettingsChanged
+
+                || changed(this.settings.getLammaWMSservice(),
+                this.lammatextFieldWMSURL.getText());
     }
 
     /**
@@ -368,6 +421,9 @@ public class CommonMapSettingsPanel extends BaseSettingsPanel implements
         this.chckbxUseWms.setSelected(this.settings.isUseWms());
         this.textFieldWMSURL.setText(settings.getWmsQuery());
         this.btnAdvancedOptions.setEnabled(this.settings.isUseEnc());
+
+        // Load settings for Lamma WMS
+        this.lammatextFieldWMSURL.setText(settings.getLammaWMSservice());
     }
 
     /**
@@ -411,6 +467,8 @@ public class CommonMapSettingsPanel extends BaseSettingsPanel implements
         // Save settings for WMS.
         this.settings.setUseWms(this.chckbxUseWms.isSelected());
         this.settings.setWmsQuery(textFieldWMSURL.getText());
+
+        this.settings.setLammaWMSservice(lammatextFieldWMSURL.getText());
     }
 
     /**
@@ -463,4 +521,5 @@ public class CommonMapSettingsPanel extends BaseSettingsPanel implements
             new AdvancedSettingsWindow(this);
         }
     }
+
 }
