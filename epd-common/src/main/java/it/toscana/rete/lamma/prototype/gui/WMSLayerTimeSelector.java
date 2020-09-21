@@ -39,7 +39,7 @@ public class WMSLayerTimeSelector extends JComboBox<Date> {
 	public WMSLayerTimeSelector(List<Date> times) {
 		super();
 		df = new SimpleDateFormat(pattern);
-		df.setTimeZone(TimeZone.getTimeZone("GMT"));
+		df.setTimeZone(TimeZone.getTimeZone("UTC"));
 		setRenderer(new DimensionRenderer());
 		model = new DefaultComboBoxModel(times.toArray());
 
@@ -69,19 +69,33 @@ public class WMSLayerTimeSelector extends JComboBox<Date> {
         		return this;
         }
     }
-//	public Layer selectByName(String name) {
-//		Layer selected = null;
-//		for (int i = 0; i < model.getSize(); i++) {
-//			if(model.getElementAt(i).getName().equals(name)) {
-//				selected = model.getElementAt(i);
-//				break;
-//			}
-//		}
-//
-//		if(selected != null) {
-//			this.setSelectedItem(selected);
-//		}
-//		return selected;
-//	}
+	public Date selectByDate(Date searchDate) {
+		Layer selected = null;
+		Long diff;
+
+		if(model.getSize() == 0 ) {
+			return null;
+		}
+		if(searchDate.before(model.getElementAt(0))) {
+			this.setSelectedIndex(0);
+			return (Date) model.getSelectedItem();
+		}
+		if(searchDate.after(model.getElementAt(model.getSize()-1))){
+			this.setSelectedIndex(model.getSize() -1);
+			return (Date) model.getSelectedItem();
+		}
+
+		diff =  Math.abs(searchDate.getTime() - model.getElementAt(0).getTime());
+
+		for (int i = 1; i < model.getSize(); i++) {
+			if (diff < Math.abs(searchDate.getTime() - model.getElementAt(i).getTime())) {
+				this.setSelectedIndex(i);
+				break;
+			}
+			   diff = Math.abs(searchDate.getTime() - model.getElementAt(i).getTime() );
+		}
+		return (Date) model.getSelectedItem();
+	}
+
 
 }

@@ -47,7 +47,6 @@ public class WMSMetocLayer extends EPDLayerCommon implements WMSEventListener, P
      */
     public WMSMetocLayer(MapSettings mapSettings) {
         LOG.info("WMS Metoc Layer initialized");
-
         wmsService = new StreamingTiledWmsTimeService(mapSettings.getLammaWMSservice(), 4);
         wmsService.addWMSEventListener(this);
 
@@ -79,7 +78,7 @@ public class WMSMetocLayer extends EPDLayerCommon implements WMSEventListener, P
      */
     public void drawWMS(OMGraphicList tiles) {
         graphics.clear();
-        if (this.isVisible()) {
+        if (this.wmsConfig != null && this.wmsConfig.getShow()) {
             graphics.addAll(tiles);
             doPrepare();
         }
@@ -89,7 +88,7 @@ public class WMSMetocLayer extends EPDLayerCommon implements WMSEventListener, P
      */
     private void renderWMS() {
         Projection proj = this.getProjection();
-        if(proj != null && this.isVisible() && this.wmsConfig != null && this.wmsConfig.isValid()) {
+        if(proj != null && this.wmsConfig != null && this.wmsConfig.getShow()  && this.wmsConfig.isValid()) {
             /** CLEAN OLD GRAPHICS ON SCALE CHANGE*/
             if (proj.getScale() != lastScale) {
                 lastScale = proj.getScale();
@@ -166,10 +165,18 @@ public class WMSMetocLayer extends EPDLayerCommon implements WMSEventListener, P
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if(evt.getSource() == wmsTimePanel && evt.getPropertyName() == "wmsConfigChanged") {
-                this.drawWMS(new OMGraphicList());
+
+                graphics.clear();
+                if(wmsService.getWmsServiceURL() != mapSettings.getLammaWMSservice()) {
+                    wmsService.clearAllCache();
+                    wmsService.setWmsServiceURL(mapSettings.getLammaWMSservice());
+                    wmsService.setWMSString(mapSettings.getLammaWMSservice());
+                }
+
                 wmsConfig = (LammaMetocWMSConfig) evt.getNewValue();
                 wmsService.setWmsParams(wmsConfig);
-                wmsService.cache.clear();
+                // wmsService.cache.clear();
+
                 wmsService.queue(this.getProjection());
         }
     }

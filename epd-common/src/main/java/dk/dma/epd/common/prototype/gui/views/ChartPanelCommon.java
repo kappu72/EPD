@@ -385,13 +385,8 @@ public abstract class ChartPanelCommon extends OMComponentPanel {
      *            the visibility
      */
     public void wmsVisible(boolean visible) {
-        /*if (wmsLayer != null) {
+        if (wmsLayer != null) {
             wmsLayer.setVisible(visible);
-            EPD.getInstance().getSettings().getMapSettings().setWmsVisible(visible);
-        }*/
-        // da sistemare andranno separati i due layer wms
-        if (wmsMetoc != null) {
-            wmsMetoc.setVisible(visible);
             EPD.getInstance().getSettings().getMapSettings().setWmsVisible(visible);
         }
     }
@@ -483,6 +478,10 @@ public abstract class ChartPanelCommon extends OMComponentPanel {
      */
     public NogoLayer getNogoLayer() {
         return nogoLayer;
+    }
+
+    public WMSMetocLayer getWmsMetoc() {
+        return wmsMetoc;
     }
 
 }

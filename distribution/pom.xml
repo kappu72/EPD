@@ -16,7 +16,7 @@
 
   <modules>
     <module>EPD-Ship-Singlejar</module>
-	<module>EPD-Shore-Singlejar</module>
+	<!--module>EPD-Shore-Singlejar</module-->
   </modules>
 
 </project>

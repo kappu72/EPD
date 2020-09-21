@@ -17,13 +17,13 @@ package it.toscana.rete.lamma.prototype.layers;
 import com.bbn.openmap.omGraphics.OMGraphicList;
 import com.bbn.openmap.proj.Projection;
 import dk.dma.epd.common.prototype.layers.wms.AsyncWMSService;
-
+import it.toscana.rete.lamma.prototype.model.LammaMetocWMSConfig;
 
 
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.concurrent.*;
-
+// https://geoportale.lamma.rete.toscana.it/geoserver_meteo/wms?service=WMS&request=GetMap&layers=meteo%3Aswh&styles=&format=image%2Fpng&transparent=true&version=1.3.0&tiled=true&srs=EPSG%3A3857&time=2020-06-26T15%3A00%3A00.000Z&width=256&height=256&crs=EPSG%3A3857&bbox=782715.1696402049,5322463.153553395,939258.203568246,5479006.187481435
 public class StreamingTiledWmsTimeService extends TiledWMSTimeService implements
         Runnable, AsyncWMSService {
 
@@ -77,7 +77,7 @@ public class StreamingTiledWmsTimeService extends TiledWMSTimeService implements
     @Override
     public void run() {
         while (shouldRun) {
-            LOG.debug("Runnig async download");
+            LOG.info("Running StreamingTiledWmsService");
             Projection job = null;
             try {
                 // blocks until projection bbox job ready
@@ -91,7 +91,7 @@ public class StreamingTiledWmsTimeService extends TiledWMSTimeService implements
             }
 
             if (cache.containsKey(getID(job))) {
-                clearCache();
+                clearCache(); // Perchè la pulisce se la contiene? questo non è logico
             } else {
                 LOG.debug("JOB TAKEN");
                 asyncDownload(job);
@@ -112,6 +112,11 @@ public class StreamingTiledWmsTimeService extends TiledWMSTimeService implements
             }
 
         }
+    }
+
+    public void clearAllCache() {
+        cache.clear();
+        tmpCache.clear();
     }
 
     /**
@@ -136,12 +141,19 @@ public class StreamingTiledWmsTimeService extends TiledWMSTimeService implements
                 }
 
                 boolean allSuccess = true;
+                int legendOffset = 0;
                 for (int i = 0; i < workers.size(); i++) {
                     Future<OMGraphicList> future;
                     try {
-                        future = completionService.poll(Math.max(100,5000/(i+1)),
+                        future = completionService.poll(Math.max(10000,20000/(i+1)),
                                 TimeUnit.MILLISECONDS);
                         OMGraphicList tile = future.get();
+                        if(tile.size() > 0 && tile.get(0) instanceof LegendRaster) {
+                            LegendRaster legend = (LegendRaster) tile.get(0);
+                            legend.setY(legendOffset);
+                            legendOffset +=legend.getHeight();
+                        }
+
                         result.addAll(tile);
                         tmpCache.putIfAbsent(getID(job), new OMGraphicList());
                         tmpCache.get(getID(job)).addAll(tile);
@@ -159,7 +171,7 @@ public class StreamingTiledWmsTimeService extends TiledWMSTimeService implements
                     fireWMSEvent();
                 } else {
                     LOG.debug("A Tile failed to download, resubmitting job");
-                    queue(job);
+                   // queue(job); perchè ripetere la cosa?
                 }
             }
         });
@@ -174,6 +186,7 @@ public class StreamingTiledWmsTimeService extends TiledWMSTimeService implements
             fireWMSEvent();
 
         }else if (this.projectionJobs.offer(p)) {
+            LOG.info("Job offered");
 
         } else {
             LOG.debug("Queue is full, kicking old job in favor of new");
@@ -187,14 +200,9 @@ public class StreamingTiledWmsTimeService extends TiledWMSTimeService implements
         }
 
     }
-
-    // meh!
-    public String getBbox(Projection p) {
-        String meh = (new SingleWMSTimeService(wmsQuery, p)).getBbox();
-        return meh;
-    }
-
+    // La stringa è esattamente la key
     public String getID(Projection p) {
-        return getBbox(p)+Math.round(p.getScale());
+        LOG.info("Richiedo ID");
+        return getQueryString(p) + "LEGEND=" + this.getWmsParams().getLegend();
     }
 }

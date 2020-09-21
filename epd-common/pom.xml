@@ -16,7 +16,7 @@
 
 	<properties>
 		<maritime.cloud.version>0.4-SNAPSHOT</maritime.cloud.version>
-		<geotools.version>23-SNAPSHOT</geotools.version>
+		<geotools.version>23.2</geotools.version>
 	</properties>
 
 	<dependencies>
@@ -172,6 +172,11 @@
 			<artifactId>gt-wms</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.intellij</groupId>
+			<artifactId>forms_rt</artifactId>
+			<version>7.0.3</version>
+		</dependency>
 	</dependencies>
 	<build>
 
@@ -237,6 +242,24 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!--plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>ideauidesigner-maven-plugin</artifactId>
+				<version>1.0-beta-1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>javac2</goal>
+						</goals>
+					</execution>
+				</executions>
+
+				<configuration>
+					<fork>true</fork>
+					<debug>true</debug>
+					<failOnError>true</failOnError>
+				</configuration>
+			</plugin-->
 
 		</plugins>
 
@@ -310,6 +333,20 @@
 
 	<repositories>
 		<repository>
+		<id>maven.central</id>
+		<name>maven</name>
+
+		<url>https://repo1.maven.org/maven2/</url>
+		<releases>
+			<enabled>true</enabled>
+		</releases>
+		<snapshots>
+			<enabled>true</enabled>
+		</snapshots>
+		</repository>
+
+
+		<repository>
 			<id>snapshots-repo</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 			<releases>
@@ -333,7 +370,7 @@
 			</snapshots>
 
 		</repository>
-<repository>
+        <repository>
 			<id>maven.nuiton</id>
 			<name>nuiton</name>
 			
@@ -344,10 +381,20 @@
 			
 
 		</repository>
+
 		<repository>
 			<id>osgeo</id>
-			<name>Open Source Geospatial Foundation Repository</name>
-			<url>http://download.osgeo.org/webdav/geotools/</url>
+			<name>OSGeo Release Repository</name>
+			<url>https://repo.osgeo.org/repository/release/</url>
+			<snapshots><enabled>false</enabled></snapshots>
+			<releases><enabled>true</enabled></releases>
+		</repository>
+		<repository>
+			<id>osgeo-snapshot</id>
+			<name>OSGeo Snapshot Repository</name>
+			<url>https://repo.osgeo.org/repository/snapshot/</url>
+			<snapshots><enabled>true</enabled></snapshots>
+			<releases><enabled>false</enabled></releases>
 		</repository>
 		<repository>
 			<snapshots>
@@ -357,6 +404,16 @@
 			<name>Boundless Maven Repository</name>
 			<url>http://repo.boundlessgeo.com/main</url>
 		</repository>
+
+			<repository>
+				<snapshots>
+					<enabled>true</enabled>
+				</snapshots>
+				<id>imageio-ext-repository</id>
+				<name>imageio-ext Repository</name>
+				<url>http://maven.geo-solutions.it/</url>
+			</repository>
+
 	</repositories>
 
 

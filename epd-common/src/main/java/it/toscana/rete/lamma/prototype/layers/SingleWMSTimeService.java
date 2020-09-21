@@ -37,20 +37,23 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-public final class SingleWMSTimeService extends AbstractWMSTimeService implements ImageServerConstants, IStatusComponent,
+public  class SingleWMSTimeService extends AbstractWMSTimeService implements ImageServerConstants, IStatusComponent,
         Callable<OMGraphicList> {
-    private static final Logger LOG = LoggerFactory.getLogger(SingleWMSTimeService.class);
     private Projection projection;
+
+    public SingleWMSTimeService(String wmsQuery) {
+        super(wmsQuery);
+    }
 
     public SingleWMSTimeService(String wmsQuery, Projection p) {
         super(wmsQuery, p);
         this.projection = p;
     }
     public SingleWMSTimeService(String wmsQuery, Projection p, LammaMetocWMSConfig params) {
-        super(wmsQuery, p);
-        this.projection = p;
+        this(wmsQuery, p);
         this.setWmsParams(params);
     }
+
 
     public Projection getProjection() {
         return projection;
@@ -60,9 +63,6 @@ public final class SingleWMSTimeService extends AbstractWMSTimeService implement
         this.projection = projection;
     }
 
-    public SingleWMSTimeService(String wmsQuery) {
-        super(wmsQuery);
-    }
 
     public OMGraphicList getWmsList(Projection p) {
         java.net.URL url = null;
@@ -86,8 +86,9 @@ public final class SingleWMSTimeService extends AbstractWMSTimeService implement
                         this.wmsHeight, noImageIcon));
 
             } else {
+                LOG.info("Immagine scaricata");
                 status.markContactSuccess();
-               // Image maskedImage = transformWhiteToTransparent(image);
+                // Image maskedImage = transformWhiteToTransparent(image);
                 Mercator pp = (Mercator) p;
                 LatLonPoint ul = pp.getUpperLeft();
                 wmsList.add(new OMRaster(ul.getLatitude() , ul.getLongitude(), new ImageIcon(image)));

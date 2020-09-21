@@ -10,7 +10,6 @@ public class LammaMetocWMSConfig {
     private Date currentTime;
     private String run;
     private List<String> layers = new ArrayList<>();
-    private Dimension timeDimension;
     private Boolean show = true;
     private Boolean legend = false;
 
@@ -24,7 +23,11 @@ public class LammaMetocWMSConfig {
         this.run = run;
         this.layers = layers;
     }
-
+    public LammaMetocWMSConfig(Date currentTime, String run, List<String> layers, boolean show, boolean legend) {
+        this(currentTime, run, layers);
+        this.show = show;
+        this.legend = legend;
+    }
     public Date getCurrentTime() {
         return currentTime;
     }
@@ -49,6 +52,22 @@ public class LammaMetocWMSConfig {
         this.layers = layers;
     }
 
+    public Boolean getShow() {
+        return show;
+    }
+
+    public void setShow(Boolean show) {
+        this.show = show;
+    }
+
+    public Boolean getLegend() {
+        return legend;
+    }
+
+    public void setLegend(Boolean legend) {
+        this.legend = legend;
+    }
+
     public boolean isValid() {
         return run != null && currentTime != null && layers != null && layers.size() > 0;
     }
@@ -58,6 +77,8 @@ public class LammaMetocWMSConfig {
         return super.equals(obj) &&
                 (layers != null && layers.equals(c.getLayers()) || c.getLayers() == null) &&
                 (run == c.getRun()) &&
-                (currentTime != null && currentTime.equals(c.getCurrentTime()) || c.getCurrentTime() == null);
+                (currentTime != null && currentTime.equals(c.getCurrentTime()) || c.getCurrentTime() == null)
+                && show == c.getShow()
+                && legend == c.getLegend();
     }
 }

@@ -18,6 +18,8 @@ import java.awt.Point;
 
 import com.bbn.openmap.MouseDelegator;
 
+import it.toscana.rete.lamma.gui.WMSTimePanel;
+import it.toscana.rete.lamma.prototype.gui.WMSTimePanelCommon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,6 +93,7 @@ public class MapMenu extends MapMenuCommon {
     private NogoHandler nogoHandler;
     private MouseDelegator mouseDelegator;
     private StrategicRouteHandler strategicRouteHandler;
+    private WMSTimePanelCommon wmsTimePanel;
 
     // private RouteLayer routeLayer;
     // private VoyageLayer voyageLayer;
@@ -461,7 +464,7 @@ public class MapMenu extends MapMenuCommon {
 
         routeMetocProperties.setRouteIndex(routeIndex);
         add(routeMetocProperties);
-
+        add(routeWmsTime);
         routeProperties.setRouteIndex(routeIndex);
         routeProperties.setChartPanel(EPDShip.getInstance().getMainFrame().getChartPanel());
         add(routeProperties);
@@ -497,7 +500,7 @@ public class MapMenu extends MapMenuCommon {
         routeLegInsertWaypoint.setRouteLeg(routeLeg);
         routeLegInsertWaypoint.setRouteIndex(routeIndex);
         routeLegInsertWaypoint.setPoint(point);
-
+        routeWmsTime.setEnabled(false);
         add(routeLegInsertWaypoint);
 
         generalRouteMenu(routeIndex);
@@ -541,6 +544,12 @@ public class MapMenu extends MapMenuCommon {
         routeWaypointEditEta.setRouteWaypointIndex(routeWaypointIndex);
         routeWaypointEditEta.setRouteIndex(routeIndex);
         add(routeWaypointEditEta);
+
+        routeWmsTime.setRouteWaypointIndex(routeWaypointIndex);
+        routeWmsTime.setRouteManager(routeManager);
+        routeWmsTime.setRouteIndex(routeIndex);
+        routeWmsTime.setWmsTimePanel(wmsTimePanel);
+        routeWmsTime.setEnabled(wmsTimePanel != null && wmsTimePanel.isVisible());
 
         generalRouteMenu(routeIndex);
         revalidate();
@@ -610,6 +619,17 @@ public class MapMenu extends MapMenuCommon {
         if (obj instanceof StrategicRouteHandler) {
             strategicRouteHandler = (StrategicRouteHandler) obj;
         }
+        if (obj instanceof WMSTimePanel) {
+            wmsTimePanel = (WMSTimePanelCommon) obj;
+        }
 
     }
+    @Override
+    public void findAndUndo(Object o) {
+        super.findAndUndo(o);
+        if(o instanceof WMSTimePanel) {
+            wmsTimePanel = null;
+        }
+    }
+
 }

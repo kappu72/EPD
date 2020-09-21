@@ -139,11 +139,12 @@ public class ChartPanel extends ChartPanelCommon implements DockableComponentPan
 
         // Add WMS Layer
         if (mapSettings.isUseWms()) {
-            wmsMetoc = new WMSMetocLayer(EPDShip.getInstance().getSettings().getMapSettings());
-//            wmsLayer = new WMSLayer(mapSettings.getWmsQuery(), EPDShip.getInstance().getSettings().getMapSettings());
-            mapHandler.add(wmsMetoc);
+            wmsLayer = new WMSLayer(mapSettings.getWmsQuery(), EPDShip.getInstance().getSettings().getMapSettings());
+            mapHandler.add(wmsLayer);
         }
-
+        // Add Lamma wms metoc layer
+        wmsMetoc = new WMSMetocLayer(EPDShip.getInstance().getSettings().getMapSettings());
+        mapHandler.add(wmsMetoc);
         // Create a MapBean, and add it to the MapHandler.
         map = new DraggableLayerMapBean();
         map.setDoubleBuffered(true);
@@ -572,9 +573,9 @@ public class ChartPanel extends ChartPanelCommon implements DockableComponentPan
             if (encLayer == null) {
                 topPanel.setEncDisabled();
             }
-            /*if (wmsLayer == null) {
+            if (wmsLayer == null) {
                 topPanel.setWMSDisabled();
-            }*/
+            }
         }
         if (obj instanceof VOCTManager) {
             voctManager = (VOCTManager) obj;

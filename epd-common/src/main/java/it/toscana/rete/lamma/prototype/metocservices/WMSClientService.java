@@ -1,6 +1,7 @@
 package it.toscana.rete.lamma.prototype.metocservices;
 
 import com.bbn.openmap.MapHandlerChild;
+import dk.dma.epd.common.prototype.gui.settings.ISettingsListener;
 import dk.dma.epd.common.prototype.settings.MapSettings;
 import org.geotools.ows.ServiceException;
 import org.geotools.ows.wms.Layer;
@@ -19,14 +20,15 @@ import java.net.MalformedURLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class WMSClientService extends MapHandlerChild {
+public class WMSClientService extends MapHandlerChild implements ISettingsListener {
 
     private WebMapServer lamma;
     private MapSettings settings;
-    private String BASE = "ww3_medit_Direction_of_wind_waves_surface_";
     private WMSCapabilities capabilities;
     private Layer[] layers;
     private WMSMetocLayers METOC_LAYERS;
+    private String serverURL;
+
 
     public boolean isInitialized() {
         return initialized;
@@ -53,9 +55,14 @@ public class WMSClientService extends MapHandlerChild {
             public void run() {
                 synchronized (this) {
                     WebMapServer wms = null;
-
                     try {
                         wms = new WebMapServer(finalUrl);
+                        lamma = wms;
+                        capabilities= wms.getCapabilities();
+                        getLayers();
+                        initialized = true;
+                        firePropertyChange("wmsServer", serverURL, wmsURL);
+                        serverURL = wmsURL;
                     } catch (IOException e) {
                         initialized = false;
                         LOG.error(e.getMessage());
@@ -66,11 +73,7 @@ public class WMSClientService extends MapHandlerChild {
                         initialized = false;
                         LOG.error(e.getMessage());
                     }
-                    lamma = wms;
-                    capabilities= wms.getCapabilities();
-                    getLayers();
-                    initialized = true;
-                    firePropertyChange("wms", null, lamma);
+
                 }
 
             }
@@ -78,9 +81,9 @@ public class WMSClientService extends MapHandlerChild {
         }
 
     }
-    private WebMapServer getService() {
+    /* private WebMapServer getService() {
         return this.lamma;
-    }
+    }*/
     public WMSCapabilities getCapabilities () {
         if(this.capabilities == null && this.lamma != null) {
             capabilities = lamma.getCapabilities();
@@ -131,7 +134,22 @@ public class WMSClientService extends MapHandlerChild {
     public void addPropertyChangeListener(String propertyName, PropertyChangeListener in_pcl) {
         super.addPropertyChangeListener(propertyName, in_pcl);
     }
-
+    /*
+    * Se cambia il url dell wms server va aggiornato
+    * */
+    @Override
+    public void settingsChanged(Type type) {
+            if(type == Type.MAP && this.serverURL != this.settings.getLammaWMSservice()){
+                firePropertyChange("wmsUrl", serverURL, this.settings.getLammaWMSservice());
+                refreshServer();
+            }
+    }
+    private synchronized void refreshServer() {
+        capabilities = null;
+        layers = null;
+        initialized = false;
+        createService();
+    }
     // TODO: implementare il reset quanto cambia la url inoltre
 
 

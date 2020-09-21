@@ -94,12 +94,12 @@ public abstract class AbstractWMSService extends Observable {
         this.wmsWidth = w;
         this.wmsHeight = h;
         this.wmsullon = ullon;
-        this.wmsullat = ullat + 1;
+        this.wmsullat = ullat;
         this.width = Integer.toString(w);
         this.height = Integer.toString(h);
 
         this.upperLeftLon = upperLeftLon;
-        this.upperLeftLat = upperLeftLat + 1;
+        this.upperLeftLat = upperLeftLat;
         this.lowerRightLon = lowerRightLon ;
         this.lowerRightLat = lowerRightLat ;
 

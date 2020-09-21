@@ -19,11 +19,14 @@ import com.bbn.openmap.proj.GeoProj;
 import com.bbn.openmap.proj.Mercator;
 import com.bbn.openmap.proj.Proj;
 import com.bbn.openmap.proj.Projection;
+import it.toscana.rete.lamma.prototype.metocservices.WMSMetocLayers;
+import it.toscana.rete.lamma.prototype.model.LammaMetocWMSConfig;
 
 
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 public class TiledWMSTimeService extends AbstractWMSTimeService {
 
@@ -45,7 +48,13 @@ public class TiledWMSTimeService extends AbstractWMSTimeService {
      */
     protected final Collection<SingleWMSTimeService> getTiles(Projection p) {
         LinkedList<SingleWMSTimeService> l = new LinkedList<>();
-        l.add(new SingleWMSTimeService(wmsQuery, p.makeClone(), this.getWmsParams()));
+        LammaMetocWMSConfig params = this.getWmsParams();
+        l.add(new SingleWMSTimeService(wmsQuery, p.makeClone(), params));
+        if(params.getLegend()){
+            // Adds legend layers
+            params.getLayers().stream()
+                    .forEach(layer -> l.add(new WMSLayerLegendService(wmsQuery, p.makeClone(), params,layer)));
+        }
         return l;
     }
 
@@ -72,7 +81,7 @@ public class TiledWMSTimeService extends AbstractWMSTimeService {
             for (Future<OMGraphicList> f : futures) {
                 try {
                     result.addAll(f.get());
-//                    System.out.println("added tile");
+//
                 } catch (CancellationException e) {
                     LOG.debug("WMS TILE CANCELLED");
                 }

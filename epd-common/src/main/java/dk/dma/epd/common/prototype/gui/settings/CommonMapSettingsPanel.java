@@ -285,21 +285,18 @@ public class CommonMapSettingsPanel extends BaseSettingsPanel implements
     }
     private void initWMS() {
         wmsClient = EPD.getInstance().getWmsClientService();
+        this.addListener(wmsClient);
         Layer [] ls =  wmsClient.getLayers();
         if(ls != null) {
-            wmsLayerSelector.addLayers(ls);
+           wmsLayerSelector.addLayers(ls);
         }
-        wmsClient.addPropertyChangeListener("capabilities", new
-                PropertyChangeListener() {
-                    @Override
-                    public void propertyChange(PropertyChangeEvent evt) {
-                        wmsLayerSelector.addLayers(wmsClient.getLayers());
-                    }
-                });
-        wmsClient.getCapabilities();
-
     }
-
+    public void removeNotify() {
+        super.removeNotify();
+        if(wmsClient != null){
+            this.removeListener(wmsClient);
+        }
+    }
     /**
      * 
      * @return The General settings panel.

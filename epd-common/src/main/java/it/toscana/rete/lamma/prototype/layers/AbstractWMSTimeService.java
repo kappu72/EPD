@@ -1,5 +1,6 @@
 package it.toscana.rete.lamma.prototype.layers;
 
+import com.bbn.openmap.proj.Proj;
 import com.bbn.openmap.proj.Projection;
 import com.bbn.openmap.proj.coords.CoordinateReferenceSystem;
 import dk.dma.epd.common.prototype.layers.wms.AbstractWMSService;
@@ -25,23 +26,33 @@ public abstract class AbstractWMSTimeService extends AbstractWMSService {
     private static String pattern = "yyyy-MM-dd'T'HH:mm:00.000'Z'";
     private static DateFormat df = new SimpleDateFormat(pattern);
 
+
+
+
     public AbstractWMSTimeService(String wmsServiceURL) {
         super(wmsServiceURL);
         this.wmsServiceURL = wmsServiceURL;
-        df = new SimpleDateFormat(pattern);
         df.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
     public AbstractWMSTimeService(String wmsServiceURL, Projection p) {
         super(wmsServiceURL, p);
         this.wmsServiceURL = wmsServiceURL;
-        df = new SimpleDateFormat(pattern);
         df.setTimeZone(TimeZone.getTimeZone("GMT"));
+    }
+
+    public String getWmsServiceURL() {
+        return wmsServiceURL;
+    }
+
+    public void setWmsServiceURL(String wmsServiceURL) {
+        this.wmsServiceURL = wmsServiceURL;
     }
 
     public LammaMetocWMSConfig getWmsParams() {
         return wmsParams;
     }
+
     public void setWmsParams(LammaMetocWMSConfig wmsP) {
         this.wmsParams = wmsP;
     }
@@ -56,27 +67,40 @@ public abstract class AbstractWMSTimeService extends AbstractWMSService {
 
     private String getRequestLayers() {
         return "&LAYERS=" + wmsParams.getLayers().stream()
-                .map(l -> WMSMetocLayers.valueOf(l).layerName() + "_" + wmsParams.getRun())
+                .map(l -> this.getRequestLayer(l))
                 .collect(Collectors.joining(","));
+    }
+    private String getRequestLayer(String layer) {
+        return WMSMetocLayers.valueOf(layer).layerName();
     }
     private String getInterpolation() {
         return "&INTERPOLATIONS=" + wmsParams.getLayers().stream()
                 .map(l -> {
-                    return WMSMetocLayers.valueOf(l).isInterpolate() ? "bicubic" : "";
+                    return WMSMetocLayers.valueOf(l).isInterpolate() ? "bilinear" : " ";
                 })
-                .collect(Collectors.joining(","));
+                .collect(Collectors.joining(",")).replace(" ", "");
     }
     private String getBaseParams() {
-        return "SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=true&EXCEPTIONS=INIMAGE";
+        return "SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&FORMAT=image/png&TRANSPARENT=true&EXCEPTIONS=INIMAGE";
+    }
+    // https://geoportale.lamma.rete.toscana.it/geoserver/WW3_MEDIT_RUN00/ows?SERVICE=WMS&EXCEPTIONS=application%2Fvnd.ogc.se_xml&TRANSPARENT=TRUE&VERSION=1.3.0&REQUEST=GetLegendGraphic&ELEVATION=0.0&CRS=EPSG%3A900913&LAYER=ww3_medit_Sig_height_of_wind_waves_and_swell_surface_20200626T000000000Z&STYLE=&LEGEND_OPTIONS=forceLabels%3Aon%3BfontSize%3A10&WIDTH=12&HEIGHT=12&FORMAT=image%2Fgif&SCALE=17471284.63743896
+    private String getLegendBaseParams() {
+        return "SERVICE=WMS&VERSION=1.3.0&REQUEST=GetLegendGraphic&ELEVATION=0.0&CRS=EPSG:900913&STYLES=&FORMAT=image/png&EXCEPTIONS=application/vnd.ogc.se_xml&&LEGEND_OPTIONS=forceLabels:on;fontSize:10;border:true";
+    }
+    private String getLegend() {
+        String l = "";
+        if(this.wmsParams.getLegend()){
+          l = "&format_options=layout:legend&legend_options=fontAntiAliasing:true";
+        }
+        return l;
     }
     @Override
     protected String getQueryString() {
         return super.getQueryString() + getBaseParams() + getRequestLayers() + getRequestTime();
     }
-    // openmap projetta in WGS 84/Pseudo-Mercator (Web Mercator, Google Web Mercator, Spherical Mercator, WGS 84 Web Mercato)
+    // openmap projetta in WGS 84/Pseudo-Mercator (Web Mercator, Google Web Mercator, Spherical Mercator, WGS 84 Web Mercator)
     // per questo il wms deve richiedere i dati in quella proiezione
     protected String getQueryString(Projection prj) {
-
 
         String queryString = "";
         String bbox = "undefined";
@@ -94,12 +118,25 @@ public abstract class AbstractWMSTimeService extends AbstractWMSService {
             width = Integer.toString(prj.getWidth());
         }
 
-        queryString = wmsServiceURL + getBaseParams()+ "&SRS=EPSG:900913&CRS=EPSG:900913" +"&BBOX=" + bbox + "&WIDTH=" + width + "&HEIGHT=" + height + getRequestLayers() + getRequestTime() + getInterpolation();
-        LOG.info(queryString);
+        queryString = wmsServiceURL + getBaseParams()+ "&SRS=EPSG:900913&CRS=EPSG:900913" +"&BBOX=" + bbox + "&WIDTH=" + width + "&HEIGHT=" + height + getRequestLayers() + getInterpolation() + getRequestTime();
+
+
+        LOG.info("STRINGA RICHIESTA: " + queryString);
 
         return queryString;
 
 
+    }
+
+    /**
+     *
+     * @return legend query string
+     * https://geoportale.lamma.rete.toscana.it/geoserver/WW3_MEDIT_RUN00/ows?SERVICE=WMS&EXCEPTIONS=application%2Fvnd.ogc.se_xml&TRANSPARENT=TRUE&VERSION=1.3.0&REQUEST=GetLegendGraphic&ELEVATION=0.0&CRS=EPSG%3A900913&LAYER=ww3_medit_Sig_height_of_wind_waves_and_swell_surface_20200626T000000000Z&STYLE=&LEGEND_OPTIONS=forceLabels%3Aon%3BfontSize%3A10&WIDTH=12&HEIGHT=12&FORMAT=image%2Fgif&SCALE=17471284.63743896
+     */
+    protected String getLegendQueryString(float scale, String layer ) {
+        String queryString = wmsServiceURL + getLegendBaseParams() + "&LAYER=" + getRequestLayer(layer) + "&SCALE=" + scale + "&WIDTH=100";
+        LOG.info("STRINGA LEGENDA RICHIESTA: " + queryString);
+        return queryString;
     }
 }
 
