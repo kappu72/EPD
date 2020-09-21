@@ -18,6 +18,7 @@ import com.bbn.openmap.Layer;
 import com.bbn.openmap.LayerHandler;
 import com.bbn.openmap.MouseDelegator;
 
+import com.bbn.openmap.layer.shape.ShapeLayer;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.epd.common.prototype.event.HistoryListener;
 import dk.dma.epd.common.prototype.event.mouse.CommonDistanceCircleMouseMode;
@@ -278,6 +279,14 @@ public class ChartPanel extends ChartPanelCommon implements DockableComponentPan
 
         mapHandler.add(bgLayer);
 
+        // add Costsal on as upper layer in the map
+
+        ShapeLayer costal = new ShapeLayer();
+        costal.setProperties("background.WorldOutLine", props);
+        costal.getDrawingAttributes().setFillPaint(new Color(0,0,0,0));
+        costal.setAddAsBackground(false);
+        costal.setVisible(true);
+        mapHandler.add(costal);
         // Add ENC layer
         if (encLayer != null) {
             mapHandler.add(encLayer);
