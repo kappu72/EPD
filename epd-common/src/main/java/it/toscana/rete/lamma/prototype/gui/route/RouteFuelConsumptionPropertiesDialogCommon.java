@@ -697,6 +697,9 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                 hullResTable = TableLoader.laodHullres(config.getHullres());
             }
 
+
+            //Table for wave partitions
+
             HashMap<String, FuelRateTable> propulsionTables = (HashMap<String, FuelRateTable>) config.getPropulsions()
                     .stream().map(p -> {
                         try {

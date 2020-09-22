@@ -1,6 +1,7 @@
 package it.toscana.rete.lamma.prototype.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 
@@ -33,7 +34,8 @@ public class MetocPointForecast extends MetocForecastPoint implements Serializab
     private UVDimension current = new UVDimension(0, 0);
     private Wave meanWave = new Wave();
     private Wave windWave = new Wave();
-    private List<Wave> swellWave;
+    private List<Wave> swellWave = new ArrayList<Wave>();
+    private Boolean hasPartitions = false;
 
     /**
      * 
@@ -42,10 +44,10 @@ public class MetocPointForecast extends MetocForecastPoint implements Serializab
     public MetocPointForecast() {
         super();
     }
-    // Used to transform metoc from epd (dmi provider)
-    // current in kn and to
-    // wind ms and from
-    // wave from
+    /**
+     * Used to transform metoc from epd (dmi provider)
+     * current in kn and to wind ms and from wave from
+     */
     public MetocPointForecast(MetocForecastPoint m ) {
         super();
         if(m.getCurrentSpeed() != null && m.getCurrentSpeed() != null){
@@ -216,9 +218,18 @@ public class MetocPointForecast extends MetocForecastPoint implements Serializab
     public void setSwellWave(List<Wave> swellWave) {
         this.swellWave = swellWave;
     }
-    
 
+    /**
+     * @return if the metoc point has sea partitions info
+     */
+    public Boolean getHasPartitions() {
+        return hasPartitions;
+    }
 
-
-    
+    /**
+     * @param hasPartitions
+     */
+    public void setHasPartitions(Boolean hasPartitions) {
+        this.hasPartitions = hasPartitions;
+    }
 }
