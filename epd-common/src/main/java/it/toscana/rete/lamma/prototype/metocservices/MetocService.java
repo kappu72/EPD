@@ -197,18 +197,20 @@ public class MetocService extends  MapHandlerChild {
          * e sono composte dalle onde da vento e swell, lo swell può avere da 1 a 5 componenti
          */
         Boolean hasPartitions = false;
-        try{
-            swhw_Grid = getGeoGridByName(WIND_WAVE_H);
-            mwdw_Grid = getGeoGridByName(WIND_WAVE_D);
-            mwpw_Grid = getGeoGridByName(WIND_WAVE_P);
-            hasPartitions = true;
-        }catch (ShoreServiceException e ) {
-            LOG.info("Partizioni non disponibili");
-        }
-        if(hasPartitions){
-            swhP_Grid = getPartitionsGrid(SWELL_WAVE_H);
-            mwpP_Grid = getPartitionsGrid(SWELL_WAVE_P);
-            mwdP_Grid = getPartitionsGrid(SWELL_WAVE_D);
+        if(metocSettings.getReqWavesPart()){
+            try{
+                swhw_Grid = getGeoGridByName(WIND_WAVE_H);
+                mwdw_Grid = getGeoGridByName(WIND_WAVE_D);
+                mwpw_Grid = getGeoGridByName(WIND_WAVE_P);
+                hasPartitions = true;
+            }catch (ShoreServiceException e ) {
+                LOG.info("Partizioni non disponibili");
+            }
+            if(hasPartitions){
+                swhP_Grid = getPartitionsGrid(SWELL_WAVE_H);
+                mwpP_Grid = getPartitionsGrid(SWELL_WAVE_P);
+                mwdP_Grid = getPartitionsGrid(SWELL_WAVE_D);
+            }
         }
 
 

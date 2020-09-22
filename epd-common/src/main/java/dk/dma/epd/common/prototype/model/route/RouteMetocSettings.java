@@ -39,6 +39,10 @@ public class RouteMetocSettings implements Serializable {
     private Boolean to = true;
     private String provider = "dmi";
     private Boolean ignoreMetocValidation = false;
+
+
+
+    private Boolean reqWavesPart = false;
     public String getProvider() {
         return provider;
     }
@@ -190,6 +194,13 @@ public class RouteMetocSettings implements Serializable {
      */
     public void setIgnoreMetocValidation(Boolean ignoreMetocValidation) {
         this.ignoreMetocValidation = ignoreMetocValidation;
+    }
+    public Boolean getReqWavesPart() {
+        return reqWavesPart;
+    }
+
+    public void setReqWavesPart(Boolean reqWavesPart) {
+        this.reqWavesPart = reqWavesPart;
     }
 
 }
