@@ -15,7 +15,7 @@ public class LocalMetocService extends MetocService {
 public GridDataset openMetoc(RouteMetocSettings metocSettings) {
 
     if (metocDataset == null || !metocDataset.getLocation().equals(metocSettings.getLocalMetocFile())) {
-        
+        clearDatasets();
         return this.openMetoc(metocSettings.getLocalMetocFile());
 
     }

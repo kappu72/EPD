@@ -15,13 +15,20 @@ import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 
 /**
- * This class models a cube of data x -> lat y -> lon z -> time around a metoc
- * point It can do a trilinear interpolation to get metoc point value The
- * interpolation firsts squashes the data on x axis then on y and finally on z
- * 
- * 011+--------+111 + + /| /| /| / / | / | / | / + 010 +--------+110 + | + |
- * |001 | | Y Z | | | +-----|--+101 | / | + | / | / | / | / |/ |/ |/ |/ 000
- * +--------+ 100 +-----X +
+ * https://github.com/kappu72/EPD/blob/69136cca51aa8641461fb55c842d838bd524803d/epd-common/src/main/java/it/toscana/rete/lamma/utils/Lattice.java
+ * This class models a cube of data x -> lat y -> lon z -> time around a metoc point
+ * It can do a trilinear interpolation to get metoc point value
+ * The interpolation firsts squashes the data on x axis then on y and finally on z
+ *
+                   011+--------+111                +       +
+                     /|       /|                  /|      /
+                    / |      / |                 / |     /   +
+               010 +--------+110                +  |    +
+                   |  |001  |  |     Y   Z      |  |
+                   |  +-----|--+101  |  /       |  +
+                   | /      | /      | /        | /
+                   |/       |/       |/         |/
+               000 +--------+ 100    +-----X    +
  */
 public class Lattice {
 
@@ -79,11 +86,35 @@ public class Lattice {
         private boolean isValueValid(double val) {
             return Double.isFinite(val);
         }
+        public void fixNan(double value) {
+            this.c000 = fixNanNumber(this.c000, value);
+            this.c100 = fixNanNumber(this.c100, value);
+            this.c010 = fixNanNumber(this.c010, value);
+            this.c110 = fixNanNumber(this.c110, value);
+            this.c001 = fixNanNumber(this.c001, value);
+            this.c101 = fixNanNumber(this.c101, value);
+            this.c011 = fixNanNumber(this.c011, value);
+            this.c111 = fixNanNumber(this.c111, value);
+        }
+        public void fixNan () {
+            fixNan(0.);
+        }
+        private double fixNanNumber(Double val, Double newVal){
+            return Double.isNaN(val) ? newVal : val;
+        }
 
     }
 
     public double interpolateValue(GridDatatype param) throws IOException {
         return interpolateValue(getLatticeValue(param));
+    }
+
+    public double interpolateValue(GridDatatype param, boolean fixNan) throws IOException {
+        return interpolateValue(getLatticeValue(param, fixNan));
+    }
+
+    public double interpolateValue(GridDatatype param, boolean fixNan, double defaultVal) throws IOException {
+        return interpolateValue(getLatticeValue(param, fixNan, defaultVal));
     }
 
     public double interpolateValue(LatticeValues v) throws IOException {
@@ -105,14 +136,26 @@ public class Lattice {
         return xyz;
 
     }
-
+    public LatticeValues getLatticeValue(GridDatatype param) throws IOException {
+        return getLatticeValue(param, false, 0.);
+    }
+    public LatticeValues getLatticeValue(GridDatatype param, boolean nanToZero) throws IOException {
+            return getLatticeValue(param, nanToZero, 0.);
+    }
     // Extract the data from the grid (todo: consider if it has or not height
     // dimension)
-    public LatticeValues getLatticeValue(GridDatatype param) throws IOException {
+
+    /**
+     *
+     * @param param The Grid data to be read
+     * @param nanToZero If true nan value are converted to 0
+     * @return the interpolated value
+     * @throws IOException
+     */
+    public LatticeValues getLatticeValue(GridDatatype param, boolean nanToZero, double defaultVal) throws IOException {
         // fixed dimension time, lat, long
         /**
-         * TODO: To improve speed  with opendap iosp will have to find a way to request
-         * all the variables in one request.
+         * TODO: To improve speed  with opendap iosp will have to find a way to request all the variables in one request.
          */
         Array r;
         try {
@@ -140,7 +183,9 @@ public class Lattice {
         // check if the values are valid
         LatticeValues values = new LatticeValues(r.getDouble(0), r.getDouble(1), r.getDouble(2), r.getDouble(3),
                 r.getDouble(4), r.getDouble(5), r.getDouble(6), r.getDouble(7));
-        if (!values.isValid()) {
+        if(nanToZero) {
+          values.fixNan(defaultVal);
+        } else if (!values.isValid()) {
             throw new IOException("Value not valid");
         }
         return values;

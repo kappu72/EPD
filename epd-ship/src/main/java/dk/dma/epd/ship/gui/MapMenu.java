@@ -18,7 +18,8 @@ import java.awt.Point;
 
 import com.bbn.openmap.MouseDelegator;
 
-import it.toscana.rete.lamma.gui.WMSTimePanel;
+import it.toscana.rete.lamma.prototype.gui.MetocPanelCommon;
+import it.toscana.rete.lamma.ship.gui.WMSTimePanel;
 import it.toscana.rete.lamma.prototype.gui.WMSTimePanelCommon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,13 +95,13 @@ public class MapMenu extends MapMenuCommon {
     private MouseDelegator mouseDelegator;
     private StrategicRouteHandler strategicRouteHandler;
     private WMSTimePanelCommon wmsTimePanel;
+    private MetocPanelCommon metocPanelCommon;
 
     // private RouteLayer routeLayer;
     // private VoyageLayer voyageLayer;
 
     public MapMenu() {
         super();
-
         // general menu items
         clearMap = new GeneralClearMap("Clear chart");
         clearMap.addActionListener(this);
@@ -153,6 +154,7 @@ public class MapMenu extends MapMenuCommon {
                 .getVoyageEventDispatcher());
         voyageLegInsertWaypoint.addActionListener(this);
     }
+
 
     /**
      * Adds the general menu to the right-click menu. Remember to always add this first, when creating specific menus.
@@ -464,7 +466,7 @@ public class MapMenu extends MapMenuCommon {
 
         routeMetocProperties.setRouteIndex(routeIndex);
         add(routeMetocProperties);
-        add(routeWmsTime);
+        add(timePanelMenu);
         routeProperties.setRouteIndex(routeIndex);
         routeProperties.setChartPanel(EPDShip.getInstance().getMainFrame().getChartPanel());
         add(routeProperties);
@@ -500,7 +502,7 @@ public class MapMenu extends MapMenuCommon {
         routeLegInsertWaypoint.setRouteLeg(routeLeg);
         routeLegInsertWaypoint.setRouteIndex(routeIndex);
         routeLegInsertWaypoint.setPoint(point);
-        routeWmsTime.setEnabled(false);
+        timePanelMenu.setEnabled(false);
         add(routeLegInsertWaypoint);
 
         generalRouteMenu(routeIndex);
@@ -545,11 +547,12 @@ public class MapMenu extends MapMenuCommon {
         routeWaypointEditEta.setRouteIndex(routeIndex);
         add(routeWaypointEditEta);
 
-        routeWmsTime.setRouteWaypointIndex(routeWaypointIndex);
-        routeWmsTime.setRouteManager(routeManager);
-        routeWmsTime.setRouteIndex(routeIndex);
-        routeWmsTime.setWmsTimePanel(wmsTimePanel);
-        routeWmsTime.setEnabled(wmsTimePanel != null && wmsTimePanel.isVisible());
+        timePanelMenu.setRouteWaypointIndex(routeWaypointIndex);
+        timePanelMenu.setRouteManager(routeManager);
+        timePanelMenu.setRouteIndex(routeIndex);
+        timePanelMenu.setWmsTimePanel(wmsTimePanel);
+        timePanelMenu.setMetocPanelCommon(metocPanelCommon);
+        timePanelMenu.setEnabled(wmsTimePanel != null && wmsTimePanel.isVisible() || metocPanelCommon != null && metocPanelCommon.isVisible());
 
         generalRouteMenu(routeIndex);
         revalidate();
@@ -622,6 +625,10 @@ public class MapMenu extends MapMenuCommon {
         if (obj instanceof WMSTimePanel) {
             wmsTimePanel = (WMSTimePanelCommon) obj;
         }
+        if (obj instanceof MetocPanelCommon) {
+            metocPanelCommon = (MetocPanelCommon) obj;
+        }
+
 
     }
     @Override
@@ -629,7 +636,10 @@ public class MapMenu extends MapMenuCommon {
         super.findAndUndo(o);
         if(o instanceof WMSTimePanel) {
             wmsTimePanel = null;
+        }if(o instanceof MetocPanelCommon) {
+            metocPanelCommon = null;
         }
+
     }
 
 }

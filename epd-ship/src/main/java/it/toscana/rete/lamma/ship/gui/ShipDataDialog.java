@@ -1,4 +1,4 @@
-package it.toscana.rete.lamma.gui;
+package it.toscana.rete.lamma.ship.gui;
 
 import javax.swing.JFrame;
 
@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.dma.epd.common.prototype.ais.VesselStaticData;
-import dk.dma.epd.common.prototype.ais.VesselTarget;
 import dk.dma.epd.ship.EPDShip;
 
 import dk.dma.epd.ship.ownship.OwnShipHandler;

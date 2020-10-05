@@ -365,4 +365,7 @@ public class Formatter {
         double nWave = FuelConsumptionCalculator.wrapTo360(fc.getHeading() + fc.getWave_polar());
         return formatDouble(w.getHeight(),2) + "m " + formatDouble(w.getPeriod(), 0) + "s " + formatDegrees(nWave, 0);
     }
+    public static String formatWave( Wave w) {
+        return formatDouble(w.getHeight(),2) + "m " + formatDouble(w.getPeriod(), 0) + "s " + formatDegrees(w.getDirection(), 0);
+    }
 }

@@ -47,7 +47,7 @@ public class LammaMetocService extends MetocService {
     public GridDataset openMetoc(RouteMetocSettings metocSettings) {
 
         if (metocDataset == null || !metocDataset.getLocation().equals(metocSettings.getLocalMetocFile())) {
-
+            clearDatasets();
             Dataset d = ds.stream().filter(data -> data.getName().equals(metocSettings.getLammaMetocFile())).findAny()
                     .orElse(null);
             URI u = d.getAccess(ServiceType.OPENDAP).getStandardUri();

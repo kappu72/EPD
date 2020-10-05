@@ -232,4 +232,14 @@ public class MetocPointForecast extends MetocForecastPoint implements Serializab
     public void setHasPartitions(Boolean hasPartitions) {
         this.hasPartitions = hasPartitions;
     }
+
+    /**
+     *
+     * @return a List of wave components containig Swell and Wind sea
+     */
+    public List<Wave> getWindSwellComponents() {
+        List<Wave> l = new ArrayList<Wave>(swellWave);
+        l.add(windWave);
+        return l;
+    }
 }

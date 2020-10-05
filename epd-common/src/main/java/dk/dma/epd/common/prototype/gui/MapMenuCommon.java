@@ -54,7 +54,8 @@ import dk.dma.epd.common.prototype.notification.MsiNmNotification;
 import dk.dma.epd.common.prototype.service.IntendedRouteHandlerCommon;
 import dk.dma.epd.common.prototype.service.MsiNmServiceHandlerCommon;
 import it.toscana.rete.lamma.prototype.gui.menuitems.RouteFuelConsumptionProperties;
-import it.toscana.rete.lamma.prototype.gui.menuitems.WmsTimeMenu;
+import it.toscana.rete.lamma.prototype.gui.menuitems.TimePanelMenu;
+
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -110,7 +111,8 @@ public abstract class MapMenuCommon extends JPopupMenu implements ActionListener
     protected RouteWaypointDelete routeWaypointDelete;
     protected RouteWaypointEditEta routeWaypointEditEta;
 
-    protected WmsTimeMenu routeWmsTime;
+    protected TimePanelMenu timePanelMenu;
+
 
     protected IntendedRouteToggle intendedRouteToggle;
     protected HideAllIntendedRoutes hideIntendedRoutes;
@@ -196,9 +198,9 @@ public abstract class MapMenuCommon extends JPopupMenu implements ActionListener
         routeWaypointEditEta.addActionListener(this);
         routeFCProperties = new RouteFuelConsumptionProperties("Fuel Consumption Properties");
         routeFCProperties.addActionListener(this);
-        routeWmsTime = new WmsTimeMenu("Set WMS Time");
-        routeWmsTime.addActionListener(this);
-
+        timePanelMenu = new TimePanelMenu("Set Time");
+        timePanelMenu.addActionListener(this);
+        
         // MSI menu items
         msiNmAcknowledge = new MsiNmAcknowledge("Acknowledge MSI-NM");
         msiNmAcknowledge.addActionListener(this);

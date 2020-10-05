@@ -63,12 +63,10 @@ import dk.dma.epd.ship.layers.voyage.VoyageLayer;
 import dk.dma.epd.ship.service.voct.VOCTManager;
 import dk.dma.epd.ship.settings.EPDMapSettings;
 
-
 import it.toscana.rete.lamma.prototype.layers.WMSMetocLayer;
+import it.toscana.rete.lamma.ship.layers.MouseEventLayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.swing.BorderFactory;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -201,6 +199,11 @@ public class ChartPanel extends ChartPanelCommon implements DockableComponentPan
         GeneralLayer generalLayer = new GeneralLayer();
         generalLayer.setVisible(true);
         mapHandler.add(generalLayer);
+
+        // Create the general layer
+        MouseEventLayer evtLayer  = new MouseEventLayer();
+        evtLayer.setVisible(true);
+        mapHandler.add(evtLayer);
 
         // Create VOCT Layer
         voctLayer = new VoctLayer();

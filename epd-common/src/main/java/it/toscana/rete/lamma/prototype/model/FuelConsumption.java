@@ -15,6 +15,9 @@ public class FuelConsumption implements Serializable {
 	UVDimension current_rel_uv = new UVDimension(0, 0);
 	ThetaUDimension wind_rel = new ThetaUDimension(0, 0);;
 	UVDimension wind_rel_uv = new UVDimension(0, 0);
+	boolean hasPartitions = false;
+	int pointWithPartitions = 0;
+
 	double heading = 0;
 	double wave_polar = 0;
 	double wind_polar = 0;
@@ -34,7 +37,7 @@ public class FuelConsumption implements Serializable {
 
 	public FuelConsumption(ThetaUDimension current_rel, ThetaUDimension wind_rel, double heading, double wave_polar,
 			double wind_polar, double wave_resistance, double wind_resistance,
-			double fuel_rate, double fuel, MetocPointForecast metoc, double hull_resistance, double weight) {
+			double fuel_rate, double fuel, MetocPointForecast metoc, double hull_resistance, double weight, boolean hasPartitions) {
 		super();
 		this.heading = heading;
 		this.wave_polar = wave_polar;
@@ -48,11 +51,12 @@ public class FuelConsumption implements Serializable {
 		this.weight = weight;
 		this.setCurrent_rel(current_rel);
 		this.setWind_rel(wind_rel);
+		this.hasPartitions = hasPartitions;
 	}
 	public FuelConsumption clone() {
 		return new FuelConsumption(current_rel,
 				wind_rel, heading, wave_polar, wind_polar,
-				wave_resistance, wind_resistance, fuel_rate, fuel, metoc, hull_resistance, weight);
+				wave_resistance, wind_resistance, fuel_rate, fuel, metoc, hull_resistance, weight, hasPartitions);
 		
 	}
 	public ThetaUDimension getCurrent_rel() {
@@ -199,4 +203,29 @@ public class FuelConsumption implements Serializable {
 		this.wind_rel = FuelConsumptionCalculator.vectorToSpeedDir(this.wind_rel_uv);
 	}
 
+	public boolean isHasPartitions() {
+		return hasPartitions;
+	}
+
+	public void setHasPartitions(boolean hasPartitions) {
+		this.hasPartitions = hasPartitions;
+	}
+
+	public int getPointWithPartitions() {
+		return pointWithPartitions;
+	}
+
+	public void setPointWithPartitions(int pointWithPartitions) {
+		this.pointWithPartitions = pointWithPartitions;
+	}
+	public int incrementPointWithPartitions() {
+		return ++pointWithPartitions;
+	}
+
+	public UVDimension getUVHeading() {
+		return FuelConsumptionCalculator.dirToVector(heading);
+	}
+	public void setUVHeading(UVDimension val) {
+		FuelConsumptionCalculator.uvDirToDir(val);
+	}
 }

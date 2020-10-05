@@ -26,12 +26,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -58,6 +53,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
 
+import it.toscana.rete.lamma.prototype.model.tables.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,11 +82,6 @@ import it.toscana.rete.lamma.prototype.model.ShipData;
 import it.toscana.rete.lamma.prototype.model.ThetaUDimension;
 import it.toscana.rete.lamma.prototype.model.UVDimension;
 import it.toscana.rete.lamma.prototype.model.Wave;
-import it.toscana.rete.lamma.prototype.model.tables.FuelRateTable;
-import it.toscana.rete.lamma.prototype.model.tables.HullresTable;
-import it.toscana.rete.lamma.prototype.model.tables.TableLoader;
-import it.toscana.rete.lamma.prototype.model.tables.WaveresGenericTable;
-import it.toscana.rete.lamma.prototype.model.tables.WindresTable;
 import it.toscana.rete.lamma.utils.FuelConsumptionCalculator;
 import it.toscana.rete.lamma.utils.Utils;
 
@@ -178,7 +169,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
      */
     public RouteFuelConsumptionPropertiesDialogCommon(Window parent, ChartPanelCommon chartPanel, Route route,
             boolean readOnlyRoute) {
-        super(parent, "Route Fuel Consumption Properties", Dialog.ModalityType.APPLICATION_MODAL);
+        super(parent, "Route Fuel Consumption Properties", ModalityType.MODELESS);
 
         this.parent = parent;
         this.chartPanel = chartPanel;
@@ -447,11 +438,10 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         }
 
         // se ho calcoli e valori di consumo aggiorno il campo con il totale
-        waveComponents.setEnabled(false);
-        if (metoc != null) {
-            MetocPointForecast mp = (MetocPointForecast) metoc.getForecasts().get(0);
-            if (mp.getSwellWave() != null && mp.getSwellWave().size() > 0)
-                waveComponents.setEnabled(true);
+        if (metoc != null && hasWavePartitions()) {
+            waveComponents.setEnabled(true);
+        }else {
+            waveComponents.setEnabled(false);
         }
 
         updateButtonEnabledState();
@@ -464,6 +454,22 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
 
         // Done
         quiescent = false;
+    }
+
+    /**
+     *
+     * @return boolean true if we have at least one metoc with wave partitions info
+     */
+    private boolean hasWavePartitions() {
+        if(metoc != null) {
+            Iterator<MetocForecastPoint> iter = metoc.getForecasts().iterator();
+            while(iter.hasNext()) {
+                if(((MetocPointForecast)iter.next()).getHasPartitions()) {
+                    return true;
+                };
+            }
+        }
+        return false;
     }
 
     /**
@@ -685,39 +691,44 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
 
         // Sulla base delle options selezionate carichiamo i file
         ShipConfiguration config = (ShipConfiguration) configurationsSelector.getSelectedItem();
-        // qui andrebbe fatta prima distinzione nel caso che fossero disponibili dati
-        // meteo con swell e wind sea!!
+        Boolean usePartitions = waveComponents.isEnabled() && waveComponents.isSelected();
         try {
             WindresTable cxRes = TableLoader.laodWindres(config.getWindres());
-            WaveresGenericTable cawRes = TableLoader.laodWaveGenericTable(config.getWaveres());
+            WaveresGenericTable cawRes = TableLoader.loadWaveGenericTable(config.getWaveres());
 
             // If hullresistance table is configured load it
             HullresTable hullResTable = null;
             if (config.getHullres() != null) {
-                hullResTable = TableLoader.laodHullres(config.getHullres());
+                hullResTable = TableLoader.loadHullres(config.getHullres());
             }
 
+            WaveresCompTable windCawRes = null;
+            WaveresCompTable swellCawRes = null;
 
-            //Table for wave partitions
-
+            //Table for wave partitions waveres_swell and waveres_wind
+            if(usePartitions && config.getWaveres_se() != null && config.getWaveres_sw() != null) {
+                windCawRes = TableLoader.loadWaveCompTable(config.getWaveres_se());
+                swellCawRes = TableLoader.loadWaveCompTable(config.getWaveres_sw());
+            }
+            // Load FuelRes Tables
             HashMap<String, FuelRateTable> propulsionTables = (HashMap<String, FuelRateTable>) config.getPropulsions()
                     .stream().map(p -> {
                         try {
-                            return TableLoader.laodFuelRateTable(p);
+                            return TableLoader.loadFuelRateTable(p);
                         } catch (RouteLoadException e) {
                             e.printStackTrace();
                         }
                         return null;
                     }).collect(Collectors.toMap(FuelRateTable::getId, t -> t));
 
-            LinkedList<MetocForecastPoint> metocList = metoc.getForecasts().stream()
-                    .collect(Collectors.toCollection(LinkedList::new));
+            LinkedList<MetocForecastPoint> metocList = new LinkedList<>(metoc.getForecasts());
             ;
-            ListIterator<MetocForecastPoint> iter = metocList.listIterator();
+            ListIterator<MetocForecastPoint> iter = metocList.listIterator(); // lista metocs
 
-            List<Date> etas = route.getEtas();
+            List<Date> etas = route.getEtas(); // Lista delle Date leg
 
-            LinkedList<RouteWaypoint> wps = route.getWaypoints();
+            LinkedList<RouteWaypoint> wps = route.getWaypoints(); // Lista waypoints
+
             double totalConsumption = 0;
 
             if (!iter.hasNext()) {
@@ -726,22 +737,24 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                 return;
             }
 
-            long timeStep = 60000L * route.getRouteMetocSettings().getInterval(); // comes in minutes to ms
+            long timeStep = 60000L * route.getRouteMetocSettings().getInterval(); // converts minutes to ms
 
             // vanno messi dei check per i metoc e le tabelle
-
+            // Ciclo su tutti i waypoints per ogni singolo leg devo effettuare il calcolo per i metoc densificati
+            // per la leg in uscita
             for (int i = 0; i < route.getWaypoints().size() - 1; i++) {
-                RouteWaypoint wp = wps.get(i);
-                RouteLeg outleg = wp.getOutLeg();
+                RouteWaypoint wp = wps.get(i);  // waypoint
+                RouteLeg outleg = wp.getOutLeg(); // out leg
                 Date nextEta = etas.get(i + 1);
                 Date eta = etas.get(i);
                 MetocPointForecast me = (MetocPointForecast) iter.next();
 
                 // Genera fc e metoc per il leg con media pesata dei singoli pezzi
                 FuelConsumption legFc = new FuelConsumption();
-                legFc.setHull_resistance(0.);
+                legFc.setHull_resistance(0.); // TODO:: chiedere ad Andrea perchè abbiamo azzerato la hul res
                 MetocPointForecast legMetoc = this.getEmptyMetoc();
                 // Does the calcolous on inner metoc
+                // Condizioni ora del metoc compresa fra ora partenza ed arrivo del leg e metoc non null
                 while (me != null && me.getTime().getTime() >= eta.getTime()
                         && me.getTime().getTime() < nextEta.getTime()) {
                     // Sono metoc validi per questo leg
@@ -762,47 +775,75 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                     double weight = ((double) distance) / timeStep;
 
                     if (outleg != null) {
-
+                        // in base alle richieste azzero i valori nei calcoli
                         MetocPointForecast nMe = normalizeMetoc(me);
                         // Sommatoria metoc
                         this.weightedSumMetocPoints(legMetoc, nMe, weight);
+
                         FuelRateTable fuelRateTable = propulsionTables.get(outleg.getPropulsionConfig());
+
                         ThetaUDimension SOG = new ThetaUDimension(outleg.getSpeed(), outleg.calcBrg());
+
                         try {
-                            // Attento che le correnti sono in m/sec on in nodi da ricontrollare
+                            // Correnti e vento in nodi calcola la cinematica della nave corrente e vento
                             Wave mwave = nMe.getMeanWave();
                             FuelConsumption c = FuelConsumptionCalculator.CalculateAllKinematical(SOG, nMe.getCurrent(),
-                                    nMe.getWind(), mwave.getDirection(), true);
+                                    nMe.getWind(), mwave.getDirection());
                             if(noWind.isSelected()) {
                                 // Set to 0 relative wind
                                 ThetaUDimension rel_w = c.getWind_rel();
                                 rel_w.setU(0.);
                                 c.setWind_rel(rel_w);
                             }
-                            FuelConsumption r = FuelConsumptionCalculator.CalculateResistance(c, mwave.getHeight(),
-                                    mwave.getPeriod(), cxRes, cawRes, 850); // occhio a 850 è fisso
+                            c.setWind_resistance(FuelConsumptionCalculator.CalculateWindResistance(c.getWind_rel().getU(), cxRes.getCx(c.getWind_polar()), 850));
+
                             if (hullResTable != null) {
-                                r.setHull_resistance(hullResTable.getRes(r.getCurrent_rel().getU()));
+                                c.setHull_resistance(hullResTable.getRes(c.getCurrent_rel().getU()));
                             }
 
-                            r.setWeight(weight);
-                            double fuelRate = fuelRateTable.getFuelRate((float) r.getCurrent_rel().getU(),
-                                    (float) r.getTotalAddedResistance());
-                            r.setFuelRate(fuelRate);
-                            r.setMetoc(nMe);
+                            // Calcola resistenze da mare se ho le partizioni sommo le singole resistenze da mare da vento e componenti spettro swell
+                            // altrimenti si utilizza il mare aggregato
+                            double waveRes = 0;
+                            if(usePartitions && nMe.getHasPartitions()) {
+                                c.setHasPartitions(true);
+                                Wave windWave  = nMe.getWindWave();
+                                if(windWave != null && windWave.isValid()) {
+                                    waveRes += FuelConsumptionCalculator.CalculateWaveResistance(windWave.getHeight(), windCawRes.getCawValue(c.getCurrent_rel().getU(),
+                                            windWave.getPeriod(), FuelConsumptionCalculator.rilevamentoPolare(c.getHeading(), windWave.getDirection())));
+                                }
+                                WaveresCompTable finalSwellCawRes = swellCawRes;
+                                waveRes += nMe.getSwellWave().stream()
+                                        .mapToDouble(w -> {
+                                            if(w != null && w.isValid() ) {
+                                                return FuelConsumptionCalculator.CalculateWaveResistance(w.getHeight(), finalSwellCawRes.getCawValue(c.getCurrent_rel().getU(),
+                                                        w.getPeriod(), FuelConsumptionCalculator.rilevamentoPolare(c.getHeading(), w.getDirection())));
+                                            }else return 0.;
+                                        })
+                                        .sum();
+                            }else if (mwave.isValid()){
+                                waveRes = FuelConsumptionCalculator.CalculateWaveResistance(mwave.getHeight(), cawRes.getCawValue(c.getCurrent_rel().getU(),
+                                        mwave.getPeriod(), FuelConsumptionCalculator.rilevamentoPolare(c.getHeading(), mwave.getDirection())));
+
+                            }
+                            c.setWave_resistance(waveRes);
+                            c.setWeight(weight);
+                            double fuelRate = fuelRateTable.getFuelRate((float) c.getCurrent_rel().getU(),
+                                    (float) c.getTotalAddedResistance());
+                            c.setFuelRate(fuelRate);
+                            c.setMetoc(nMe);
 
                             if (fuelRate != -1) {
                                 double fuel = fuelRate * (distance / 3600000.0);
-                                r.setFuel(fuel);
-                                totalConsumption += r.getFuel();
+                                c.setFuel(fuel);
+                                totalConsumption += c.getFuel();
                             } else {
                                 JOptionPane.showMessageDialog(null, "Try to modify speed for this leg " + wp.getName(),
                                         "Spedd error", JOptionPane.WARNING_MESSAGE);
                             }
-                            outleg.getInnerPointsConsumption().add(r);
+                            outleg.getInnerPointsConsumption().add(c);
                             // Setting vaules on fuel consumption of the outer leg
 
-                            this.weightdSumConsumption(legFc, r, weight);
+                            this.weightdSumConsumption(legFc, c, weight);
 
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -857,6 +898,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
             n.getMeanWave().setDirection(0);
             n.getMeanWave().setHeight(0);
             n.getMeanWave().setPeriod(1);
+            n.setHasPartitions(false); // non uso partizioni anche se le ho
         }
         return n;
     }
@@ -876,7 +918,12 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         System.out.println("Peso: " + weight + " val: " +val.getHull_resistance() + " tot: " + acc.getHull_resistance());
         acc.setWave_polar(acc.getWave_polar() + val.getWave_polar() * weight);
         acc.setWind_polar(acc.getWind_polar() + val.getWind_polar() * weight);
-        acc.setHeading(acc.getHeading() + val.getHeading() * weight);
+        // Anche questa va fatta in vettoriale
+        UVDimension accH = acc.getUVHeading();
+        UVDimension valH = val.getUVHeading();
+        accH.setV(accH.getV() + valH.getV() * weight);
+        accH.setU(accH.getU() + valH.getU() * weight);
+        acc.setUVHeading(accH);
 
         UVDimension current = acc.getCurrent_rel_uv();
         UVDimension newCurrent = val.getCurrent_rel_uv();
@@ -886,6 +933,9 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         UVDimension newWind = val.getWind_rel_uv();
         wind.setV(wind.getV() + newWind.getV() * weight);
         wind.setU(wind.getU() + newWind.getU() * weight);
+        if (val.isHasPartitions()) {
+            acc.incrementPointWithPartitions();
+        }
     }
 
     /**
@@ -901,10 +951,36 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         current.setU(current.getU() + val.getCurrent().getU() * weight);
         current.setV(current.getV() + val.getCurrent().getV() * weight);
 
-        Wave wave = acc.getMeanWave();
-        wave.setHeight(wave.getHeight() + val.getMeanWave().getHeight() * weight);
-        wave.setPeriod(wave.getPeriod() + val.getMeanWave().getPeriod() * weight);
-        wave.setDirection(wave.getDirection() + val.getMeanWave().getDirection() * weight);
+        waveAverage(acc.getMeanWave(), val.getMeanWave(), weight);
+        // If wave partitions we have to average them too per ora non serve
+        /*if(val.getHasPartitions()) {
+            waveAverage(acc.getWindWave(), val.getWindWave(), weight);
+            for(int i =0; i < val.getSwellWave().size(); i++){
+                if(acc.getSwellWave().get(i) == null) {
+                    acc.getSwellWave().add(new Wave());
+                }
+                waveAverage(acc.getSwellWave().get(i), val.getSwellWave().get(i), weight);
+            }
+        }*/
+
+    }
+
+    /**
+     * Calculate the averages of waves, for directions convert to uv
+     * @param wave
+     * @param val
+     * @param weight
+     * @return
+     */
+    private Wave waveAverage(Wave wave, Wave val, double weight) {
+        wave.setHeight(wave.getHeight() + val.getHeight() * weight);
+        wave.setPeriod(wave.getPeriod() + val.getPeriod() * weight);
+
+        UVDimension wDir = wave.getUvDir();
+        wDir.setU(wDir.getU() + val.getUvDir().getU() * weight);
+        wDir.setV(wDir.getV() + val.getUvDir().getV() * weight);
+        wave.setUvDir(wDir);
+        return wave;
     }
 
     /**
@@ -927,7 +1003,10 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         Wave wave = legMetoc.getMeanWave();
         wave.setHeight(wave.getHeight() / size);
         wave.setPeriod(wave.getPeriod() / size);
-        wave.setDirection(wave.getDirection() / size);
+        UVDimension uvDir= wave.getUvDir();
+        uvDir.setU(current.getU() / size);
+        uvDir.setV(current.getV() / size);
+        wave.setUvDir(uvDir);
         legMetoc.setMeanWave(wave);
 
         legFc.setMetoc(legMetoc);
@@ -951,6 +1030,8 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         legFc.windThetaFromUV();
 
     }
+
+
 
     /**
      * Genereate an empty metoc, used to accumulate metoc data in computation cycle

@@ -27,6 +27,8 @@ public class GeneralLayer extends EPDLayerCommon {
 
     private static final long serialVersionUID = 1L;
 
+
+
     /**
      * Provides default behavior for right-clicks by
      * showing the general menu.
@@ -36,7 +38,7 @@ public class GeneralLayer extends EPDLayerCommon {
     @Override
     public boolean mouseClicked(MouseEvent evt) {
         if (evt.getButton() == MouseEvent.BUTTON3) {
-            mapMenu.generalMenu(true);
+            ((MapMenu) mapMenu).generalMenu(true);
             mapMenu.setVisible(true);
 
             if (mainFrame.getHeight() < evt.getYOnScreen() + mapMenu.getHeight()) {

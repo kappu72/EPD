@@ -52,8 +52,9 @@ import dk.dma.epd.ship.gui.component_panels.SafeHavenComponentPanel;
 import dk.dma.epd.ship.gui.component_panels.ScaleComponentPanel;
 import dk.dma.epd.ship.gui.route.strategic.SendStrategicRouteDialog;
 import dk.dma.epd.ship.settings.EPDGuiSettings;
-import it.toscana.rete.lamma.gui.ShipDataDialog;
-import it.toscana.rete.lamma.gui.WMSTimePanel;
+import it.toscana.rete.lamma.ship.gui.ShipDataDialog;
+import it.toscana.rete.lamma.ship.gui.WMSTimePanel;
+import it.toscana.rete.lamma.ship.gui.MetocPointPanel;
 
 /**
  * The main frame containing map and panels
@@ -82,6 +83,7 @@ public class MainFrame extends MainFrameCommon implements IMapFrame {
     private STCCCommunicationComponentPanel stccComponentPanel;
     private SafeHavenComponentPanel safeHavenPanel;
     private WMSTimePanel wmsTimePanel;
+    private MetocPointPanel metocPointPanel;
     private AisDialog aisDialog;
     private SendStrategicRouteDialog sendStrategicRouteDialog;
 
@@ -162,6 +164,7 @@ public class MainFrame extends MainFrameCommon implements IMapFrame {
         stccComponentPanel = new STCCCommunicationComponentPanel();
         safeHavenPanel = new SafeHavenComponentPanel();
         wmsTimePanel = new WMSTimePanel();
+        metocPointPanel = new MetocPointPanel();
         // Unmovable panels
         bottomPanel = new BottomPanel();
 
@@ -201,6 +204,7 @@ public class MainFrame extends MainFrameCommon implements IMapFrame {
         mapHandler.add(msPntComponentPanel);
         mapHandler.add(safeHavenPanel);
         mapHandler.add(wmsTimePanel);
+        mapHandler.add(metocPointPanel);
         // Create top menubar
         menuBar = new MenuBar();
         this.setJMenuBar(menuBar);
@@ -333,7 +337,7 @@ public class MainFrame extends MainFrameCommon implements IMapFrame {
     public List<DockableComponentPanel> getDockableComponentPanels() {
         return Arrays.asList((DockableComponentPanel) chartPanel, scalePanel, ownShipPanel, gpsPanel, cursorPanel,
                 activeWaypointPanel, aisComponentPanel, nogoPanel, sarPanel, msPntComponentPanel, stccComponentPanel,
-                safeHavenPanel, wmsTimePanel);
+                safeHavenPanel, wmsTimePanel, metocPointPanel);
     }
 
     /*******************************/

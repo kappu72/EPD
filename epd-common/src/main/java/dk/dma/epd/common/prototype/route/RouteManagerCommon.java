@@ -712,5 +712,7 @@ public abstract class RouteManagerCommon extends MapHandlerChild implements Runn
         return lammaMetocService;
     }
 
-
+    public LocalMetocService getLocalMetocService() {
+        return localMetocService;
+    }
 }

@@ -1,8 +1,5 @@
 package it.toscana.rete.lamma.utils;
 
-import com.bbn.openmap.proj.RhumbCalculator;
-
-import dk.dma.epd.common.prototype.model.route.RouteLeg;
 import it.toscana.rete.lamma.prototype.model.FuelConsumption;
 import it.toscana.rete.lamma.prototype.model.ThetaUDimension;
 import it.toscana.rete.lamma.prototype.model.UVDimension;
@@ -38,7 +35,7 @@ public class FuelConsumptionCalculator {
 	/**
 	 * Convert from  ThetaUDimension to UVDimension form
 	 * 
-	 * @param ThetaUDimension 
+	 * @param v ThetaUDimension
 	 * @return UVDimension
 	 */
 	public static UVDimension speedDirToVector(ThetaUDimension v) {
@@ -51,7 +48,7 @@ public class FuelConsumptionCalculator {
 	/**
 	 * Convert from UVDimension to ThetaUDimension form
 	 * 
-	 * @param UVDimension
+	 * @param v Vector UV components of a value
 	 * @return ThetaUDimension
 	 */
 	public static ThetaUDimension vectorToSpeedDir(UVDimension v) {
@@ -62,6 +59,33 @@ public class FuelConsumptionCalculator {
 			theta = theta + 360;
 		
 		return new ThetaUDimension(U, theta);
+	}
+
+	/**
+	 * Convert from  Direction to UVDimension
+	 *
+	 * @param dir Direction in degrees 0 to North
+	 * @return UVDimension
+	 */
+	public static UVDimension dirToVector(double dir) {
+
+		double UU = Math.sin(Math.toRadians(dir));
+		double VV = Math.cos(Math.toRadians(dir));
+		return new UVDimension(UU, VV);
+	}
+
+	/**
+	 * Convert from a direction in UVDimension to dir in angle
+	 *
+	 * @param uvDir Vector (UV) direction components
+	 * @return double the direction as angle 0 to north
+	 */
+	public static double uvDirToDir(UVDimension uvDir) {
+
+		double theta = Math.toDegrees(Math.atan2(uvDir.getU(), uvDir.getV()));
+		if (theta < 0)
+			theta = theta + 360;
+		return theta;
 	}
 
 	/**
@@ -83,7 +107,7 @@ public class FuelConsumptionCalculator {
 	}
 	/**
 	 * Calculate Kinematical
-	 * @param curr or wind UVDimension
+	 * @param param cur or wind UVDimension
 	 * @param sog ThetaUDimension
 	 * @return ThetaUDimension
 	 */
@@ -94,7 +118,7 @@ public class FuelConsumptionCalculator {
 	/**
 	 * @deprecated 
 	 * Calculate Kinematical
-	 * @param curr or wind ThetaUDimension
+	 * @param param curr or wind ThetaUDimension
 	 * @param sog ThetaUDimension
 	 * @return ThetaUDimension
 	 */
@@ -123,24 +147,30 @@ public class FuelConsumptionCalculator {
 	 * @param cxTables
 	 * @param cawTables
 	 * @param aT (sezione nave)
-	 * @param useUV 
 	 * @return
 	 */
 	public static FuelConsumption CalculateResistance(FuelConsumption c, double waveH, double waveTm , WindresTable cxTables, WaveresGenericTable cawTables, int aT) {
-		double rAw = 0; // se non valido lo va a zero!!
+		double rAw = 0; // se non valido  va a zero!!
 		if(cawTables.isValidTm(waveTm)) {
-			rAw = square(waveH) * cawTables.getCawValue(c.getCurrent_rel().getU(), waveTm, c.getWave_polar());
+			rAw = CalculateWaveResistance(waveH,cawTables.getCawValue(c.getCurrent_rel().getU(), waveTm, c.getWave_polar()));
 		}
-		double rWind = (0.5 * rhoAir * aT * square(knToms(c.getWind_rel().getU())) * cxTables.getCx(c.getWind_polar())) / 1000;
+		double rWind = CalculateWindResistance(c.getWind_rel().getU(), cxTables.getCx(c.getWind_polar()), aT);
 
 		c.setWind_resistance(rWind);
 		c.setWave_resistance(rAw);
 		
 		return c;
 	}
+	public static double CalculateWaveResistance(double waveH, double caw) {
+		return square(waveH) * caw;
+	}
+
+	public static double CalculateWindResistance(double relWindSpeed, double cx, int aT) {
+		return (0.5 * rhoAir * aT * square(knToms(relWindSpeed)) * cx) / 1000;
+	}
 
 	// non serve più i dati li ho sempre in uv from
-	public static FuelConsumption CalculateAllKinematical(ThetaUDimension sog, ThetaUDimension cur, ThetaUDimension wind, double wave) {
+	/*public static FuelConsumption CalculateAllKinematical(ThetaUDimension sog, ThetaUDimension cur, ThetaUDimension wind, double wave) {
 		
 		FuelConsumption c = new FuelConsumption();
 		ThetaUDimension cur_rel = kinematical(cur, sog);
@@ -158,14 +188,14 @@ public class FuelConsumptionCalculator {
 		c.setWind_polar(rilevamentoPolare(cur_rel.getTheta(), wind_rel.getTheta()));
 		return c;
 		
-	}
+	}*/
 
 
 
-	public static FuelConsumption CalculateAllKinematical(ThetaUDimension sog, UVDimension cur, UVDimension wind, double wave, boolean useUV) {
+	public static FuelConsumption CalculateAllKinematical(ThetaUDimension sog, UVDimension cur, UVDimension wind, double wave) {
 		
 		FuelConsumption c = new FuelConsumption();
-		ThetaUDimension cur_rel = kinematical(cur, sog, useUV);
+		ThetaUDimension cur_rel = kinematical(cur, sog, true);
 		// current kinematical
 		c.setCurrent_rel(cur_rel);
 		
@@ -175,12 +205,33 @@ public class FuelConsumptionCalculator {
 		c.setWave_polar(rilevamentoPolare(heading, wave));
 
 		// wind kinematical
-		ThetaUDimension wind_rel = kinematical(wind, sog, useUV);
+		ThetaUDimension wind_rel = kinematical(wind, sog, true);
 		c.setWind_rel(wind_rel);
 		c.setWind_polar(rilevamentoPolare(cur_rel.getTheta(), wind_rel.getTheta())); // controllare bene!!
 		return c;
 		
 	}
+
+	public static FuelConsumption CalculateAllKinematical(ThetaUDimension sog, UVDimension cur, UVDimension wind) {
+
+		FuelConsumption c = new FuelConsumption();
+		ThetaUDimension cur_rel = kinematical(cur, sog, true);
+		// current kinematical
+		c.setCurrent_rel(cur_rel);
+
+		double heading = wrapTo360(sog.getTheta()+cur_rel.getTheta());
+		c.setHeading(heading);
+
+
+
+		// wind kinematical
+		ThetaUDimension wind_rel = kinematical(wind, sog, true);
+		c.setWind_rel(wind_rel);
+		c.setWind_polar(rilevamentoPolare(cur_rel.getTheta(), wind_rel.getTheta())); // controllare bene!!
+		return c;
+
+	}
+
 	
 	public static double square(double val) {
 		return Math.pow(val, 2.0);

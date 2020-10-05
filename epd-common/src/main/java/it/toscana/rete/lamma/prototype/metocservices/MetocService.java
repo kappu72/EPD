@@ -1,24 +1,11 @@
 package it.toscana.rete.lamma.prototype.metocservices;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import com.bbn.openmap.MapHandlerChild;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.model.geometry.PositionTime;
 import dk.dma.epd.common.prototype.communication.webservice.ShoreServiceErrorCode;
 import dk.dma.epd.common.prototype.communication.webservice.ShoreServiceException;
-import dk.dma.epd.common.prototype.model.route.ActiveRoute;
-import dk.dma.epd.common.prototype.model.route.Route;
-import dk.dma.epd.common.prototype.model.route.RouteLeg;
-import dk.dma.epd.common.prototype.model.route.RouteMetocSettings;
-import dk.dma.epd.common.prototype.model.route.RouteWaypoint;
+import dk.dma.epd.common.prototype.model.route.*;
 import dk.dma.epd.common.prototype.sensor.pnt.PntData;
 import dk.dma.epd.common.prototype.sensor.pnt.PntHandler;
 import dk.dma.epd.common.prototype.sensor.pnt.PntTime;
@@ -29,6 +16,8 @@ import it.toscana.rete.lamma.prototype.model.UVDimension;
 import it.toscana.rete.lamma.prototype.model.Wave;
 import it.toscana.rete.lamma.utils.FuelConsumptionCalculator;
 import it.toscana.rete.lamma.utils.Lattice;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.dt.GridCoordSystem;
 import ucar.nc2.dt.grid.GeoGrid;
@@ -37,9 +26,15 @@ import ucar.nc2.time.CalendarDate;
 import ucar.nc2.time.CalendarDateRange;
 import ucar.unidata.geoloc.LatLonRect;
 
-public class MetocService extends  MapHandlerChild {
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-    static final double EARTH_RADIUS = 6371;
+public class MetocService extends MapHandlerChild {
 
     public static final String[] U_WIND_10 = {"u10", "10_metre_U_wind_component_height_above_ground"};
     public static final String[] V_WIND_10 = {"v10", "10_metre_V_wind_component_height_above_ground"};
@@ -56,11 +51,24 @@ public class MetocService extends  MapHandlerChild {
     public static final String[] WIND_WAVE_P = {"mwpw", ""}; // mancano i nomi per il grib
     public static final String[] WIND_WAVE_D = {"mwdw", ""}; // mancano i nomi per il grib
     public static final int MAX_FORECAST_FUTURE = 60;
-
-    protected PntHandler pntHandler;
-
+    static final double EARTH_RADIUS = 6371;
     private static final Logger LOG = LoggerFactory.getLogger(MetocService.class);
+    protected PntHandler pntHandler;
     protected GridDataset metocDataset;
+    private GeoGrid v_10_grid;
+    private GeoGrid u_10_grid;
+    private GeoGrid swh_grid;
+    private GeoGrid mwd_grid;
+    private GeoGrid mwp_grid;
+    private GeoGrid uo_grid;
+    private GeoGrid vo_grid;
+    private GeoGrid swhw_grid;
+    private GeoGrid mwdw_grid;
+    private GeoGrid mwpw_grid;
+    private List<GeoGrid> swhP_grid;
+    private List<GeoGrid> mwpP_grid;
+    private List<GeoGrid> mwdP_grid;
+    private GridCoordSystem gcs;
 
     public MetocService() {
         // Non so se vale la pena to cache il file dato che tiene in memoria solo i file
@@ -83,15 +91,16 @@ public class MetocService extends  MapHandlerChild {
         return metocDataset;
     }
 
-/**
- * this method has to be overwritten by subclass this is the version for local file
- * @param metocSettings
- * @return
- */
+    /**
+     * this method has to be overwritten by subclass this is the version for local file
+     *
+     * @param metocSettings
+     * @return
+     */
     public GridDataset openMetoc(RouteMetocSettings metocSettings) {
 
         if (metocDataset == null || !metocDataset.getLocation().equals(metocSettings.getLocalMetocFile())) {
-            
+            clearDatasets();
             return this.openMetoc(metocSettings.getLocalMetocFile());
 
         }
@@ -128,7 +137,7 @@ public class MetocService extends  MapHandlerChild {
 
     /**
      * Called when a bean is added to this bean context
-     * 
+     *
      * @param obj the bean that was added
      */
     @Override
@@ -141,7 +150,7 @@ public class MetocService extends  MapHandlerChild {
 
     /**
      * Called when a bean is removed from this bean context
-     * 
+     *
      * @param obj the bean that was removed
      */
     @Override
@@ -163,145 +172,196 @@ public class MetocService extends  MapHandlerChild {
 
     public MetocForecast routeMetoc(Route route, Date now) throws ShoreServiceException, IOException {
 
-        
-        
+
         RouteMetocSettings metocSettings = route.getRouteMetocSettings();
         Route densifiedRoute = densifyRoute(route, now);
         if (now == null) {
             now = PntTime.getDate();
         }
-        
+
         // To see densified route uncomment following line
         // EPD.getInstance().getRouteManager().addRoute(densifiedRoute);
 
         // Stream over generated waypoints
 
         openMetoc(metocSettings);
-
-        GeoGrid v_10_Grid = getGeoGridByName(V_WIND_10);
-        GeoGrid u_10_Grid = getGeoGridByName(U_WIND_10);
-        GeoGrid swh_Grid = getGeoGridByName(H_WAVE_COMBINED);
-        GeoGrid mwd_Grid = getGeoGridByName(M_WAVE_DIRECTION);
-        GeoGrid mwp_Grid = getGeoGridByName(M_WAVE_PERIOD);
-        GeoGrid uo_Grid = getGeoGridByName(ZONAL_CURRENT);
-        GeoGrid vo_Grid = getGeoGridByName(MERIDIONAL_CURRENT);
-        GeoGrid swhw_Grid = null;
-        GeoGrid mwdw_Grid = null;
-        GeoGrid mwpw_Grid = null;
-        List<GeoGrid> swhP_Grid = null;
-        List<GeoGrid> mwpP_Grid = null;
-        List<GeoGrid> mwdP_Grid = null;
-
-        /**
-         * Le Partizioni possono esistere oppure essere assenti nel file
-         * e sono composte dalle onde da vento e swell, lo swell può avere da 1 a 5 componenti
-         */
-        Boolean hasPartitions = false;
-        if(metocSettings.getReqWavesPart()){
-            try{
-                swhw_Grid = getGeoGridByName(WIND_WAVE_H);
-                mwdw_Grid = getGeoGridByName(WIND_WAVE_D);
-                mwpw_Grid = getGeoGridByName(WIND_WAVE_P);
-                hasPartitions = true;
-            }catch (ShoreServiceException e ) {
-                LOG.info("Partizioni non disponibili");
-            }
-            if(hasPartitions){
-                swhP_Grid = getPartitionsGrid(SWELL_WAVE_H);
-                mwpP_Grid = getPartitionsGrid(SWELL_WAVE_P);
-                mwdP_Grid = getPartitionsGrid(SWELL_WAVE_D);
-            }
-        }
+        openGrids();
+        Boolean hasPartitions = hasPartitions();
 
 
-        GridCoordSystem gcs = v_10_Grid.getCoordinateSystem(); // Si assume che tutti i parametri nel file abbiano i
-                                                                // medesimi sistemi di coordinate
-        LatLonRect bbox = gcs.getLatLonBoundingBox();
-        CalendarDateRange calendarDateRange = gcs.getCalendarDateRange();
+        // Si assume che tutti i parametri nel file abbiano i
+        gcs = v_10_grid.getCoordinateSystem();
+
+        // medesimi sistemi di coordinate
+
         LinkedList<RouteWaypoint> wps = densifiedRoute.getWaypoints();
 
-        Boolean finalHasPartitions = hasPartitions;
-        List<GeoGrid> finalSwhP_Grid = swhP_Grid;
-        GeoGrid finalSwhw_Grid = swhw_Grid;
-        GeoGrid finalMwdw_Grid = mwdw_Grid;
-        GeoGrid finalMwpw_Grid = mwpw_Grid;
-        List<GeoGrid> finalMwdP_Grid = mwdP_Grid;
-        List<GeoGrid> finalMwpP_Grid = mwpP_Grid;
-        List<MetocForecastPoint> metocs = IntStream.range(0, wps.size()).mapToObj(i -> {
-            MetocPointForecast mp = new MetocPointForecast();
-
+        List<MetocForecastPoint> metocs = IntStream.range(0, wps.size()).mapToObj(i ->
+        {
             RouteWaypoint p = wps.get(i);
             Position gp = p.getPos();
             double lat = gp.getLatitude();
             double lon = gp.getLongitude();
             Date eta = densifiedRoute.getEtas().get(i);
-            mp.setLat(lat);
-            mp.setLon(lon);
-            mp.setTime(eta);
 
-            // System.out.println(p.getName());
-            // System.out.println(lon);
-            // System.out.println(lat);
-            // System.out.println(eta.toString());
-            // Do the same for point outside temporal domain
-            if(!bbox.contains(lat, lon) || !calendarDateRange.includes(CalendarDate.of(eta))) {
-                // Skip points outside spatial domain
-                return null;
-            }
-            try {
-                // Ad ora fa 8 * n variabili di richieste, 56 per punto un pò troppe :-) su opendap
-                Lattice lattice = new Lattice(gcs, lat, lon, eta);
-                double v_10 = lattice.interpolateValue(v_10_Grid);
-                double u_10 = lattice.interpolateValue(u_10_Grid);
-                double swh = lattice.interpolateValue(swh_Grid);
-                double mwd = lattice.interpolateValue(mwd_Grid);
-                double mwp = lattice.interpolateValue(mwp_Grid);
-                double uo = lattice.interpolateValue(uo_Grid);
-                double vo = lattice.interpolateValue(vo_Grid);
-                
+            return readMetocPointForecast(lat,lon,eta, hasPartitions);
 
-                // IMPORTANT:: Porti tutto a nodi! SOG in nodi wind speed in nodi curren tspeed in nodi
-                UVDimension wind = new UVDimension(FuelConsumptionCalculator.msTokn(u_10), FuelConsumptionCalculator.msTokn(v_10));
-                UVDimension current = new UVDimension(FuelConsumptionCalculator.msTokn(uo), FuelConsumptionCalculator.msTokn(vo));
-
-                Wave wave = new Wave(swh, mwd, mwp);
-                mp.setWind(wind);
-                mp.setMeanWave(wave);
-                mp.setCurrent(current);
-                if(finalHasPartitions) {
-                    mp.setWindWave(readWindWave(lattice, finalSwhw_Grid,finalMwdw_Grid,finalMwpw_Grid));
-                    mp.setSwellWave(readSwellComponents(lattice, finalSwhP_Grid,finalMwdP_Grid,finalMwpP_Grid));
-                    if(mp.getSwellWave() != null || mp.getSwellWave().size() > 0) {
-                        mp.setHasPartitions(true);
-                    }
-                }
-
-                // System.out.println("u_10 " + u_10 + " v_10 " + v_10 + " " + windD.getTheta() + " " + windD.getU() + " ° " + mp.getWindDirection().getForecast() + " " + mp.getWindSpeed().getForecast());
-                // System.out.println("uo " + uo + " vo " + vo + " ° " + mp.getCurrentDirection().getForecast() + " " + mp.getCurrentSpeed().getForecast());
-                // System.out.println("swh " + swh + " mwd " + mwd + " mwp " + mwp);
-            } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                mp = null;
-            }
-                return mp;
-        }).filter(mp -> mp != null).collect(Collectors.toList());
+        } ).filter(mp -> mp != null).collect(Collectors.toList());
         MetocForecast forecast = new MetocForecast(now);
         forecast.setForecasts(metocs);
         return forecast;
     }
 
-    private List<Wave> readSwellComponents(Lattice lattice, List<GeoGrid> finalSwhP_grid, List<GeoGrid> finalMwdP_grid, List<GeoGrid> finalMwpP_grid)  {
+    /**
+     * Read all forecast parameter for give position and time
+     * @param lat
+     * @param lon
+     * @param eta
+     * @param hasPartitions
+     * @return
+     */
+    public MetocPointForecast readMetocPointForecast(double lat, double lon, Date eta, boolean hasPartitions) {
+        LatLonRect bbox = gcs.getLatLonBoundingBox();
+        CalendarDateRange calendarDateRange = gcs.getCalendarDateRange();
+        if (!bbox.contains(lat, lon) || !calendarDateRange.includes(CalendarDate.of(eta))) {
+            // Skip points outside spatial and time domain
+            return null;
+        }
+
+        MetocPointForecast mp = new MetocPointForecast();
+
+        mp.setLat(lat);
+        mp.setLon(lon);
+        mp.setTime(eta);
+
+
+        try {
+            // Ad ora fa 8 * n variabili di richieste, 56 per punto un pò troppe :-) su opendap
+            Lattice lattice = new Lattice(gcs, lat, lon, eta);
+            double v_10 = lattice.interpolateValue(v_10_grid);
+            double u_10 = lattice.interpolateValue(u_10_grid);
+            double swh = lattice.interpolateValue(swh_grid);
+            double mwd = lattice.interpolateValue(mwd_grid);
+            double mwp = lattice.interpolateValue(mwp_grid);
+            double uo = lattice.interpolateValue(uo_grid);
+            double vo = lattice.interpolateValue(vo_grid);
+
+
+            // IMPORTANT:: Porti tutto a nodi! SOG in nodi wind speed in nodi curren tspeed in nodi
+            UVDimension wind = new UVDimension(FuelConsumptionCalculator.msTokn(u_10), FuelConsumptionCalculator.msTokn(v_10));
+            UVDimension current = new UVDimension(FuelConsumptionCalculator.msTokn(uo), FuelConsumptionCalculator.msTokn(vo));
+
+            Wave wave = new Wave(swh, mwd, mwp);
+            mp.setWind(wind);
+            mp.setMeanWave(wave);
+            mp.setCurrent(current);
+            if (hasPartitions) {
+                mp.setWindWave(readWindWave(lattice, swhw_grid, mwdw_grid, mwpw_grid));
+                mp.setSwellWave(readSwellComponents(lattice, swhP_grid, mwdP_grid, mwpP_grid));
+                List<Wave> ckList = new ArrayList<Wave>(mp.getSwellWave());
+                ckList.add(mp.getWindWave());
+                if (Math.abs(waveHeightQuadraticSum(ckList) - mp.getMeanWave().getHeight()) <= 0.2) {
+                    mp.setHasPartitions(true);
+                } else {
+                    LOG.info("Wave partition doesn't match swh");
+                }
+            }
+
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            mp = null;
+        }
+        return mp;
+    }
+
+    protected void clearDatasets() {
+        v_10_grid = null;
+        u_10_grid = null;
+        swh_grid = null;
+        mwd_grid = null;
+        mwp_grid = null;
+        uo_grid = null;
+        vo_grid = null;
+        swhw_grid = null;
+        mwdw_grid = null;
+        mwpw_grid = null;
+        swhP_grid = null;
+        mwpP_grid = null;
+        mwdP_grid = null;
+        gcs = null;
+    }
+
+    /**
+     * Open all needed datasets if needed cheks un wind v component
+     *
+     * @throws ShoreServiceException
+     */
+
+    public void openGrids() throws ShoreServiceException {
+        if (v_10_grid == null) {
+            v_10_grid = getGeoGridByName(V_WIND_10);
+            u_10_grid = getGeoGridByName(U_WIND_10);
+            swh_grid = getGeoGridByName(H_WAVE_COMBINED);
+            mwd_grid = getGeoGridByName(M_WAVE_DIRECTION);
+            mwp_grid = getGeoGridByName(M_WAVE_PERIOD);
+            uo_grid = getGeoGridByName(ZONAL_CURRENT);
+            vo_grid = getGeoGridByName(MERIDIONAL_CURRENT);
+            gcs = v_10_grid.getCoordinateSystem();
+            swhw_grid = null;
+            mwdw_grid = null;
+            mwpw_grid = null;
+            swhP_grid = null;
+            mwpP_grid = null;
+            mwdP_grid = null;
+            /**
+             * Le Partizioni possono esistere oppure essere assenti nel file
+             * e sono composte dalle onde da vento e swell, lo swell può avere da 1 a 5 componenti
+             */
+            Boolean hasPartitions = false;
+            try {
+                swhw_grid = getGeoGridByName(WIND_WAVE_H);
+                mwdw_grid = getGeoGridByName(WIND_WAVE_D);
+                mwpw_grid = getGeoGridByName(WIND_WAVE_P);
+                hasPartitions = true;
+            } catch (ShoreServiceException e) {
+                LOG.info("Partizioni non disponibili");
+            }
+            if (hasPartitions) {
+                swhP_grid = getPartitionsGrid(SWELL_WAVE_H);
+                mwpP_grid = getPartitionsGrid(SWELL_WAVE_P);
+                mwdP_grid = getPartitionsGrid(SWELL_WAVE_D);
+            }
+        }
+    }
+
+    public boolean hasPartitions() {
+        return swhw_grid != null
+                && mwdw_grid != null
+                && mwpw_grid != null
+                && swhP_grid != null
+                && mwpP_grid != null
+                && mwdP_grid != null;
+    }
+
+    private double waveHeightQuadraticSum(List<Wave> waveComps) {
+        return Math.sqrt(waveComps.stream()
+                .mapToDouble(w -> Math.pow(w.getHeight(), 2.))
+                .sum());
+    }
+
+    private List<Wave> readSwellComponents(Lattice lattice, List<GeoGrid> finalSwhP_grid, List<GeoGrid> finalMwdP_grid, List<GeoGrid> finalMwpP_grid) {
         List<Wave> comps = new ArrayList<Wave>();
         for (int ii = 0; ii < finalSwhP_grid.size(); ii++) {
             try {
-                comps.add(new Wave(lattice.interpolateValue(finalSwhP_grid.get(ii)),
-                        lattice.interpolateValue(finalMwdP_grid.get(ii)),
-                        lattice.interpolateValue(finalMwpP_grid.get(ii))));
-
-                } catch (IOException e) {
-                    break; // Esco percheè le componenti sono ordinate e se manca una di oridne superiore non dovrebbe esserci quella dopo
-                }
+                Wave v = new Wave(lattice.interpolateValue(finalSwhP_grid.get(ii), true),
+                        lattice.interpolateValue(finalMwdP_grid.get(ii), true),
+                        lattice.interpolateValue(finalMwpP_grid.get(ii), true));
+                v.sanitize();
+                comps.add(v);
+            } catch (IOException e) {
+                break; // Esco percheè le componenti sono ordinate e se manca una di oridne superiore non dovrebbe esserci quella dopo
+            }
 
         }
         return comps;
@@ -309,10 +369,12 @@ public class MetocService extends  MapHandlerChild {
 
     private Wave readWindWave(Lattice lattice, GeoGrid swhw_grid, GeoGrid mwdw_Grid, GeoGrid mwpw_Grid) {
         try {
-            return new Wave(lattice.interpolateValue(swhw_grid),
-                    lattice.interpolateValue(mwdw_Grid),
-                    lattice.interpolateValue(mwpw_Grid));
-        }catch (IOException e) {
+            Wave w = new Wave(lattice.interpolateValue(swhw_grid, true),
+                    lattice.interpolateValue(mwdw_Grid, true),
+                    lattice.interpolateValue(mwpw_Grid, true));
+            w.sanitize();
+            return w;
+        } catch (IOException e) {
             return null;
         }
 
@@ -322,6 +384,7 @@ public class MetocService extends  MapHandlerChild {
     /**
      * Read swell partitions grid from input file
      * Partition could vary from none to five components
+     *
      * @return
      */
     private List<GeoGrid> getPartitionsGrid(String[] component_names) {
@@ -342,21 +405,22 @@ public class MetocService extends  MapHandlerChild {
 
     /**
      * Search a parameter by names
+     *
      * @param names
      * @return
      * @throws ShoreServiceException
      */
     private GeoGrid getGeoGridByName(String[] names) throws ShoreServiceException {
         for (String name : names) {
-           GeoGrid g = metocDataset.findGridByShortName(name);
-           if(g != null) {
-               return g;
-           }
+            GeoGrid g = metocDataset.findGridByShortName(name);
+            if (g != null) {
+                return g;
+            }
         }
         throw new ShoreServiceException("Missing mandatory metoc parameter: " + names[0]);
     }
+
     /**
-     * 
      * @param route the route to be densified
      * @param now   optional the date used to cal max MAX_FORECAST_FUTURE if null
      *              uses pnt handle date
@@ -469,7 +533,5 @@ public class MetocService extends  MapHandlerChild {
 
     }
 
-
-    
 
 }

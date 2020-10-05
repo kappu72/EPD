@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="it.toscana.rete.lamma.prototype.gui.MetocPanelCommon">
+  <grid id="27dc6" binding="panel1" default-binding="true" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="24" width="350" height="540"/>
+    </constraints>
+    <properties>
+      <minimumSize width="350" height="540"/>
+      <preferredSize width="350" height="540"/>
+      <requestFocusEnabled value="false"/>
+    </properties>
+    <border type="none" title-justification="2" title-position="2"/>
+    <children>
+      <grid id="e652f" layout-manager="FormLayout">
+        <rowspec value="center:d:noGrow"/>
+        <rowspec value="top:3dlu:noGrow"/>
+        <rowspec value="center:max(d;4px):noGrow"/>
+        <colspec value="fill:max(d;4px):noGrow"/>
+        <colspec value="left:4dlu:noGrow"/>
+        <colspec value="fill:84px:noGrow"/>
+        <colspec value="left:4dlu:noGrow"/>
+        <colspec value="fill:184px:noGrow"/>
+        <colspec value="fill:d:grow"/>
+        <constraints border-constraint="North"/>
+        <properties>
+          <minimumSize width="350" height="70"/>
+          <preferredSize width="350" height="70"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <component id="83ed6" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties>
+              <font style="1"/>
+              <text value="Metoc File"/>
+            </properties>
+          </component>
+          <component id="8d0d4" class="javax.swing.JCheckBox" binding="metocActivecb">
+            <constraints>
+              <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties>
+              <text value="Active"/>
+            </properties>
+          </component>
+          <component id="fe802" class="it.toscana.rete.lamma.prototype.gui.PointMetocProviderSelector" binding="pointMetocProviderSelector1" custom-create="true" default-binding="true">
+            <constraints>
+              <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties/>
+          </component>
+          <component id="f43e9" class="it.toscana.rete.lamma.prototype.gui.WMSLayerTimeSelector" binding="timeSelector" custom-create="true">
+            <constraints>
+              <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties/>
+          </component>
+          <component id="19bdb" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties>
+              <text value="Time"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <component id="a307f" class="it.toscana.rete.lamma.prototype.gui.chart.WaveSpectrumChart" binding="waveSpectrumChart" custom-create="true">
+        <constraints border-constraint="Center"/>
+        <properties>
+          <autoscrolls value="true"/>
+          <background color="-12828863"/>
+          <focusCycleRoot value="true"/>
+          <minimumSize width="400" height="460"/>
+          <name value=""/>
+          <opaque value="true"/>
+          <preferredSize width="350" height="460"/>
+          <toolTipText value="Puppamelo"/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>

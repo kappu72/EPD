@@ -1,4 +1,4 @@
-package it.toscana.rete.lamma.gui;
+package it.toscana.rete.lamma.ship.gui;
 
 import dk.dma.epd.ship.gui.component_panels.DockableComponentPanel;
 import it.toscana.rete.lamma.prototype.gui.WMSTimePanelCommon;

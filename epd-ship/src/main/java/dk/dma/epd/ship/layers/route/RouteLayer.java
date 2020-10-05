@@ -70,7 +70,9 @@ public class RouteLayer extends RouteLayerCommon implements IOwnShipListener,
      */
     @Override
     protected void timerAction() {
-        routesChanged(null);
+        if(activeSafeHaven) {
+            routesChanged(null);
+        }
     }
 
     /**
@@ -296,7 +298,9 @@ public class RouteLayer extends RouteLayerCommon implements IOwnShipListener,
                 }
             }
         }
-        doPrepare();
+        if(routeManager.isRouteActive()){
+            doPrepare();
+        }
 
     }
 

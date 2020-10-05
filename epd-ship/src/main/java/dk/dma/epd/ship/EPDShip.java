@@ -93,7 +93,7 @@ import dk.dma.epd.ship.service.shore.ShoreServices;
 import dk.dma.epd.ship.service.voct.VOCTManager;
 import dk.dma.epd.ship.settings.EPDSensorSettings;
 import dk.dma.epd.ship.settings.EPDSettings;
-import it.toscana.rete.lamma.prototype.FuelService;
+import it.toscana.rete.lamma.ship.prototype.FuelService;
 import it.toscana.rete.lamma.prototype.metocservices.LocalMetocService;
 import it.toscana.rete.lamma.prototype.metocservices.LammaMetocService;
 import net.maritimecloud.core.id.MaritimeId;

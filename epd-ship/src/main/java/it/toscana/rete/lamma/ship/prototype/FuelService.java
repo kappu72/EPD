@@ -1,4 +1,4 @@
-package it.toscana.rete.lamma.prototype;
+package it.toscana.rete.lamma.ship.prototype;
 
 import javax.swing.JButton;
 

@@ -67,7 +67,7 @@ public class TableLoader {
 	}
 
 
-	public static WaveresGenericTable laodWaveGenericTable(Path path) throws RouteLoadException {
+	public static WaveresGenericTable loadWaveGenericTable(Path path) throws RouteLoadException {
 		BufferedReader reader = null;
 		WaveresGenericTable waveresg = null;
 		Parameter tM = null;
@@ -118,7 +118,7 @@ public class TableLoader {
 	}
 
 
-	public static WaveresCompTable laodWaveCompTable(Path path) throws RouteLoadException {
+	public static WaveresCompTable loadWaveCompTable(Path path) throws RouteLoadException {
 		BufferedReader reader = null;
 		WaveresCompTable waveresComp = null;
 		Parameter tP = null;
@@ -169,7 +169,7 @@ public class TableLoader {
 		return waveresComp;
 	}
 
-	public static FuelRateTable laodFuelRateTable(Path path) throws RouteLoadException {
+	public static FuelRateTable loadFuelRateTable(Path path) throws RouteLoadException {
 		BufferedReader reader = null;
 		FuelRateTable fuelRateTable = null;
 		Parameter rHull = null;
@@ -220,7 +220,7 @@ public class TableLoader {
 
 
 	// Load data from windres
-	public static HullresTable laodHullres(Path path) throws RouteLoadException {
+	public static HullresTable loadHullres(Path path) throws RouteLoadException {
 		BufferedReader reader = null;
 		HullresTable hullres = null;
 		try {
