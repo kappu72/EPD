@@ -6,11 +6,13 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import dk.dma.epd.common.prototype.EPD;
+import dk.dma.epd.common.prototype.gui.route.RoutePropertiesDialogCommon;
 import dk.dma.epd.common.prototype.model.route.IRoutesUpdateListener;
 import dk.dma.epd.common.prototype.model.route.Route;
 import dk.dma.epd.common.prototype.model.route.RoutesUpdateEvent;
 import dk.dma.epd.common.prototype.route.RouteManagerCommon;
 import it.toscana.rete.lamma.prototype.gui.route.FuelConsumptionTableModel;
+import it.toscana.rete.lamma.prototype.gui.route.RouteFuelConsumptionPropertiesDialogCommon;
 import it.toscana.rete.lamma.prototype.gui.route.RoutesConsumtionTableModel;
 import org.geotools.util.DateTimeParser;
 
@@ -19,20 +21,18 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class RoutesConsumptionPanelCommon extends OMComponentPanel implements PropertyChangeListener, ItemListener, IRoutesUpdateListener, TableModelListener {
     private JPanel panel1;
-    private JTable rcTable;
+    public JTable rcTable;
     private JScrollPane scrollPane;
-    private RouteManagerCommon routeManager;
+    public RouteManagerCommon routeManager;
     private RoutesConsumtionTableModel routesTableModel;
 
     public RoutesConsumptionPanelCommon() {
@@ -48,9 +48,23 @@ public class RoutesConsumptionPanelCommon extends OMComponentPanel implements Pr
         for (int x = 0; x < routesTableModel.COL_MIN_WIDTHS.length; x++) {
             rcTable.getColumnModel().getColumn(x).setPreferredWidth(routesTableModel.COL_MIN_WIDTHS[x]);
         }
+        rcTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    openFuelConsumtion();
+                }
+            }
+        });
         scrollPane = new JScrollPane(rcTable);
 
     }
+
+    public void openFuelConsumtion() {
+
+    }
+
+    ;
 
     double calcTotal(Route route) {
         return route.getWaypoints().stream().filter(wp -> wp != null).map(wp -> wp.getOutLeg())
@@ -58,13 +72,22 @@ public class RoutesConsumptionPanelCommon extends OMComponentPanel implements Pr
                 .mapToDouble(fc -> fc.getFuel()).reduce(0, Double::sum);
     }
 
-    private java.util.List<Route> getRoutes() {
+    private List<Route> getRoutes() {
         return routeManager.getRoutes().stream()
                 .filter(r -> r.getRouteFCSettings() != null)
                 .collect(Collectors.toList());
 
     }
 
+    public int getRouteIdexByName(String name) {
+        List<Route> routes = routeManager.getRoutes();
+        for (int i = 0; i < routes.size(); i++) {
+            if (routes.get(i).getName() == name)
+                return i;
+        }
+
+        return -1;
+    }
 
     @Override
     public void routesChanged(RoutesUpdateEvent e) {
