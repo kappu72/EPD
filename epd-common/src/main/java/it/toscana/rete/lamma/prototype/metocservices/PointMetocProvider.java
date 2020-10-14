@@ -36,4 +36,9 @@ public class PointMetocProvider {
     public RouteMetocSettings getSettings() {
         return settings;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
 }

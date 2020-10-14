@@ -1,23 +1,21 @@
 package it.toscana.rete.lamma.prototype.gui;
 
 import com.bbn.openmap.gui.OMComponentPanel;
-import com.intellij.uiDesigner.core.GridConstraints;
-import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import dk.dma.epd.common.prototype.EPD;
 import dk.dma.epd.common.prototype.communication.webservice.ShoreServiceException;
 import dk.dma.epd.common.prototype.layers.EPDLayerCommon;
 import dk.dma.epd.common.prototype.model.route.IRoutesUpdateListener;
-import dk.dma.epd.common.prototype.model.route.RouteMetocSettings;
+
 import dk.dma.epd.common.prototype.model.route.RoutesUpdateEvent;
 import dk.dma.epd.common.prototype.route.RouteManagerCommon;
 import dk.dma.epd.common.prototype.settings.EnavSettings;
-import dk.dma.epd.common.text.Formatter;
+
 import it.toscana.rete.lamma.prototype.gui.chart.WaveSpectrumChart;
 import it.toscana.rete.lamma.prototype.metocservices.*;
 import it.toscana.rete.lamma.prototype.model.MetocPointForecast;
-import it.toscana.rete.lamma.prototype.model.Wave;
+
 import org.geotools.util.DateTimeParser;
 import ucar.nc2.time.CalendarDateRange;
 
@@ -36,11 +34,16 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.TimeZone;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.Map;
+
 import java.util.stream.Collectors;
 
 
-public class MetocPanelCommon extends OMComponentPanel implements PropertyChangeListener, ItemListener, IRoutesUpdateListener {
+public class MetocPanelCommon extends OMComponentPanel implements PropertyChangeListener, ItemListener, IRoutesUpdateListener, ActionListener {
 
     private final EnavSettings enavSettings;
     private JPanel panel1;
@@ -48,6 +51,7 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
     private JCheckBox metocActivecb;
     private PointMetocProviderSelector pointMetocProviderSelector1;
     private WMSLayerTimeSelector timeSelector;
+    private JButton setValBtn;
     protected EPDLayerCommon layer;
 
     private static String pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'";
@@ -57,6 +61,7 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
     private LocalMetocService locService;
     private LammaMetocService lammaService;
     private DateTimeParser dateTimeParser = new DateTimeParser();
+    private MetocPointForecast mpf;
 
     /**
      * TODO:: Configurare il settaggio della data dal metopoint nel munu
@@ -79,6 +84,8 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
         timeSelector.addItemListener(this);
         enavSettings = EPD.getInstance().getSettings().getEnavSettings();
         initValues();
+        setValBtn.addActionListener(this);
+
     }
 
     // inizializza i valori dei componenti
@@ -105,7 +112,7 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
         try {
             metocService.openMetoc(mp.getSettings());
             metocService.openGrids();
-            MetocPointForecast mpf = metocService.readMetocPointForecast(point.getY(), point.getX(), (Date) timeSelector.getSelectedItem(), true);
+            mpf = metocService.readMetocPointForecast(point.getY(), point.getX(), (Date) timeSelector.getSelectedItem(), true);
             waveSpectrumChart.drawMetocPointForecast(mpf);
             if (mpf != null) {
                 layer.prepare().add(new PointMetocGraphic(mpf, mp.getSettings(), enavSettings));
@@ -119,11 +126,17 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
 
     }
 
+    public void drawMetoc(MetocPointForecast mpf) {
+        this.mpf = mpf;
+        waveSpectrumChart.drawMetocPointForecast(mpf);
+    }
+
     /**
      * @param mp Point Metoc Provider
      * @return The Metoc Service
      */
     public MetocService getService(PointMetocProvider mp) {
+        if (mp == null) return null;
         if (mp.getType() == MetocProviders.LAMMA.label())
             return lammaService;
         return locService;
@@ -134,8 +147,10 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
      * Clear all fields value
      */
     private void resetValues() {
-        waveSpectrumChart.drawMetocPointForecast(null);
-        layer.prepare().clear();
+        if (waveSpectrumChart != null)
+            waveSpectrumChart.drawMetocPointForecast(null);
+        if (layer != null)
+            layer.prepare().clear();
 
     }
 
@@ -156,7 +171,7 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
         MetocService metocService = getService(mp);
         if (mp != null && metocService != null) {
             metocService.openMetoc(mp.getSettings());
-            CalendarDateRange dateRange = metocService.getMetocDataset().getCalendarDateRange();
+            CalendarDateRange dateRange = metocService.getGcs().getCalendarDateRange();
             if (timeSelector != null) {
                 if (dateRange != null) {
                     try {
@@ -196,10 +211,18 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
                     .filter(s -> s != null)
                     .filter(s -> (s.getProvider().equals(MetocProviders.LOCAL.label()) && s.getLocalMetocFile() != null))
                     .map(s -> new PointMetocProvider(s))
+                    .filter(distinctByKey(p -> p.getFile()))
+                    .distinct()
                     .collect(Collectors.toList());
         return new ArrayList<PointMetocProvider>();
     }
 
+    // Utility function to filter object in a strem bya a methid
+    public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor)
+    {
+        Map<Object, Boolean> map = new ConcurrentHashMap<>();
+        return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+    }
     /**
      * Update the metoc provider selector
      */
@@ -211,6 +234,7 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
             enableMetoc();
         }
     }
+
     public void selectTime(Date wmsTime) {
         timeSelector.selectByDate(wmsTime);
     }
@@ -218,6 +242,7 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
     public Date getSelectedTime() {
         return (Date) timeSelector.getSelectedItem();
     }
+
     @Override
     public void itemStateChanged(ItemEvent e) {
         Object o = e.getSource();
@@ -264,23 +289,17 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
         }
 
     }
-
     @Override
     public void routesChanged(RoutesUpdateEvent e) {
         if (e.is(RoutesUpdateEvent.METOC_SETTINGS_CHANGED) || e.is(RoutesUpdateEvent.ROUTE_METOC_CHANGED) ||
                 e.is(RoutesUpdateEvent.ROUTE_ADDED)) {
+
             pointMetocProviderSelector1.addProviders(getProviders());
             if (pointMetocProviderSelector1.getModel().getSize() > 0)
                 pointMetocProviderSelector1.setSelectedIndex(0);
             enableMetoc();
             resetValues();
         }
-    }
-
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-
     }
 
     /**
@@ -294,13 +313,14 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
         createUIComponents();
         panel1 = new JPanel();
         panel1.setLayout(new BorderLayout(0, 0));
-        panel1.setMinimumSize(new Dimension(350, 540));
-        panel1.setPreferredSize(new Dimension(350, 540));
+        panel1.setMinimumSize(new Dimension(370, 540));
+        panel1.setPreferredSize(new Dimension(370, 540));
         panel1.setRequestFocusEnabled(false);
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new FormLayout("fill:max(d;4px):noGrow,left:4dlu:noGrow,fill:84px:noGrow,left:4dlu:noGrow,fill:184px:noGrow,fill:d:grow", "center:d:noGrow,top:3dlu:noGrow,center:max(d;4px):noGrow"));
-        panel2.setMinimumSize(new Dimension(350, 70));
-        panel2.setPreferredSize(new Dimension(350, 70));
+        panel2.setMinimumSize(new Dimension(360, 70));
+        panel2.setPreferredSize(new Dimension(360, 70));
+        panel2.setRequestFocusEnabled(false);
         panel1.add(panel2, BorderLayout.NORTH);
         final JLabel label1 = new JLabel();
         Font label1Font = this.$$$getFont$$$(null, Font.BOLD, -1, label1.getFont());
@@ -316,6 +336,10 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
         final JLabel label2 = new JLabel();
         label2.setText("Time");
         panel2.add(label2, cc.xy(3, 3));
+        setValBtn = new JButton();
+        setValBtn.setLabel("Values");
+        setValBtn.setText("Values");
+        panel2.add(setValBtn, cc.xy(6, 3));
         waveSpectrumChart.setAutoscrolls(true);
         waveSpectrumChart.setBackground(new Color(-12828863));
         waveSpectrumChart.setFocusCycleRoot(true);
@@ -354,4 +378,19 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
     }
 
 
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == setValBtn) {
+            if (mpf != null) {
+                SpectrumDialogCommon dialog = new SpectrumDialogCommon(mpf, this);
+                dialog.pack();
+                dialog.setVisible(true);
+            }
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+
+    }
 }

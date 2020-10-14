@@ -52,6 +52,7 @@ import dk.dma.epd.ship.gui.component_panels.SafeHavenComponentPanel;
 import dk.dma.epd.ship.gui.component_panels.ScaleComponentPanel;
 import dk.dma.epd.ship.gui.route.strategic.SendStrategicRouteDialog;
 import dk.dma.epd.ship.settings.EPDGuiSettings;
+import it.toscana.rete.lamma.ship.gui.RoutesConsumptionPanel;
 import it.toscana.rete.lamma.ship.gui.ShipDataDialog;
 import it.toscana.rete.lamma.ship.gui.WMSTimePanel;
 import it.toscana.rete.lamma.ship.gui.MetocPointPanel;
@@ -84,6 +85,7 @@ public class MainFrame extends MainFrameCommon implements IMapFrame {
     private SafeHavenComponentPanel safeHavenPanel;
     private WMSTimePanel wmsTimePanel;
     private MetocPointPanel metocPointPanel;
+    private RoutesConsumptionPanel routesConsumptionPanel;
     private AisDialog aisDialog;
     private SendStrategicRouteDialog sendStrategicRouteDialog;
 
@@ -165,6 +167,7 @@ public class MainFrame extends MainFrameCommon implements IMapFrame {
         safeHavenPanel = new SafeHavenComponentPanel();
         wmsTimePanel = new WMSTimePanel();
         metocPointPanel = new MetocPointPanel();
+        routesConsumptionPanel = new RoutesConsumptionPanel();
         // Unmovable panels
         bottomPanel = new BottomPanel();
 
@@ -205,6 +208,7 @@ public class MainFrame extends MainFrameCommon implements IMapFrame {
         mapHandler.add(safeHavenPanel);
         mapHandler.add(wmsTimePanel);
         mapHandler.add(metocPointPanel);
+        mapHandler.add(routesConsumptionPanel);
         // Create top menubar
         menuBar = new MenuBar();
         this.setJMenuBar(menuBar);
@@ -336,8 +340,7 @@ public class MainFrame extends MainFrameCommon implements IMapFrame {
      */
     public List<DockableComponentPanel> getDockableComponentPanels() {
         return Arrays.asList((DockableComponentPanel) chartPanel, scalePanel, ownShipPanel, gpsPanel, cursorPanel,
-                activeWaypointPanel, aisComponentPanel, nogoPanel, sarPanel, msPntComponentPanel, stccComponentPanel,
-                safeHavenPanel, wmsTimePanel, metocPointPanel);
+                activeWaypointPanel, aisComponentPanel, nogoPanel, sarPanel, msPntComponentPanel, stccComponentPanel, wmsTimePanel, metocPointPanel, routesConsumptionPanel);
     }
 
     /*******************************/

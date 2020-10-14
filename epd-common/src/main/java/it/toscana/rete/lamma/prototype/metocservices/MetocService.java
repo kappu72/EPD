@@ -97,7 +97,7 @@ public class MetocService extends MapHandlerChild {
      * @param metocSettings
      * @return
      */
-    public GridDataset openMetoc(RouteMetocSettings metocSettings) {
+    public synchronized GridDataset openMetoc(RouteMetocSettings metocSettings) {
 
         if (metocDataset == null || !metocDataset.getLocation().equals(metocSettings.getLocalMetocFile())) {
             clearDatasets();
@@ -170,7 +170,7 @@ public class MetocService extends MapHandlerChild {
     }
 
 
-    public MetocForecast routeMetoc(Route route, Date now) throws ShoreServiceException, IOException {
+    public synchronized MetocForecast routeMetoc(Route route, Date now) throws ShoreServiceException, IOException {
 
 
         RouteMetocSettings metocSettings = route.getRouteMetocSettings();
@@ -187,10 +187,6 @@ public class MetocService extends MapHandlerChild {
         openMetoc(metocSettings);
         openGrids();
         Boolean hasPartitions = hasPartitions();
-
-
-        // Si assume che tutti i parametri nel file abbiano i
-        gcs = v_10_grid.getCoordinateSystem();
 
         // medesimi sistemi di coordinate
 
@@ -259,8 +255,8 @@ public class MetocService extends MapHandlerChild {
                 mp.setWindWave(readWindWave(lattice, swhw_grid, mwdw_grid, mwpw_grid));
                 mp.setSwellWave(readSwellComponents(lattice, swhP_grid, mwdP_grid, mwpP_grid));
                 List<Wave> ckList = new ArrayList<Wave>(mp.getSwellWave());
-                ckList.add(mp.getWindWave());
-                if (Math.abs(waveHeightQuadraticSum(ckList) - mp.getMeanWave().getHeight()) <= 0.2) {
+                if(mp.getWindWave() != null ) ckList.add(mp.getWindWave());
+                if (ckList.size() > 0 && Math.abs(waveHeightQuadraticSum(ckList) - mp.getMeanWave().getHeight()) <= 0.2) {
                     mp.setHasPartitions(true);
                 } else {
                     LOG.info("Wave partition doesn't match swh");
@@ -335,6 +331,17 @@ public class MetocService extends MapHandlerChild {
         }
     }
 
+    public GridCoordSystem getGcs() {
+        if(gcs == null) {
+            try {
+                gcs = getGeoGridByName(V_WIND_10).getCoordinateSystem();
+            } catch (ShoreServiceException e) {
+                e.printStackTrace();
+            }
+        }
+        return gcs;
+    }
+
     public boolean hasPartitions() {
         return swhw_grid != null
                 && mwdw_grid != null
@@ -352,17 +359,17 @@ public class MetocService extends MapHandlerChild {
 
     private List<Wave> readSwellComponents(Lattice lattice, List<GeoGrid> finalSwhP_grid, List<GeoGrid> finalMwdP_grid, List<GeoGrid> finalMwpP_grid) {
         List<Wave> comps = new ArrayList<Wave>();
-        for (int ii = 0; ii < finalSwhP_grid.size(); ii++) {
-            try {
+
+        try {
+            for (int ii = 0; ii < finalSwhP_grid.size(); ii++) {
                 Wave v = new Wave(lattice.interpolateValue(finalSwhP_grid.get(ii), true),
                         lattice.interpolateValue(finalMwdP_grid.get(ii), true),
                         lattice.interpolateValue(finalMwpP_grid.get(ii), true));
                 v.sanitize();
                 comps.add(v);
-            } catch (IOException e) {
-                break; // Esco percheè le componenti sono ordinate e se manca una di oridne superiore non dovrebbe esserci quella dopo
             }
-
+        } catch (IOException | NullPointerException e) {
+                e.printStackTrace();
         }
         return comps;
     }
@@ -374,7 +381,7 @@ public class MetocService extends MapHandlerChild {
                     lattice.interpolateValue(mwpw_Grid, true));
             w.sanitize();
             return w;
-        } catch (IOException e) {
+        } catch (IOException | NullPointerException e) {
             return null;
         }
 

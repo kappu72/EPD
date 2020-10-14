@@ -425,7 +425,7 @@ public class RouteManagerPanel extends JPanel implements ActionListener,
      * {@inheritDoc}
      */
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public synchronized void actionPerformed(ActionEvent e) {
         if (e.getSource() == closeBtn) {
             close();
         } else if (e.getSource() == propertiesBtn) {

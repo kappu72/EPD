@@ -33,7 +33,6 @@ public class MouseEventLayer extends GeneralLayer {
     public boolean mouseClicked(MouseEvent evt) {
         if (evt.getButton() == MouseEvent.BUTTON1 && metocPointPanel != null && metocPointPanel.isActive()) {
             graphics.clear();
-            MetocPointForecast mp = null;
             Point2D point = mapBean.getProjection().inverse(evt.getPoint());
             graphics.add(new WpCircle(point.getY(), point.getX(), 0,0,10,10));
             prepare();

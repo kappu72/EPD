@@ -59,12 +59,12 @@ public class RoutesTableModel extends AbstractTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         Route route = routeManager.getRoutes().get(rowIndex);
         switch (columnIndex) {
-        case 0: return Formatter.formatString(route.getName());
-        case 1: return Formatter.formatString(route.getDestination());
-        case 2: return route.isVisible();
-        default:
-            LOG.error("Unknown column " + columnIndex);
-            return new String("");
+            case 0: return Formatter.formatString(route.getName());
+            case 1: return Formatter.formatString(route.getDestination());
+            case 2: return route.isVisible();
+            default:
+                LOG.error("Unknown column " + columnIndex);
+                return new String("");
         }
     }
     

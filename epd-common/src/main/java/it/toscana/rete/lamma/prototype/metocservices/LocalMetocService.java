@@ -12,7 +12,8 @@ public class LocalMetocService extends MetocService {
  * @param metocSettings
  * @return
  */
-public GridDataset openMetoc(RouteMetocSettings metocSettings) {
+@Override
+public synchronized GridDataset openMetoc(RouteMetocSettings metocSettings) {
 
     if (metocDataset == null || !metocDataset.getLocation().equals(metocSettings.getLocalMetocFile())) {
         clearDatasets();

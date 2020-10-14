@@ -299,8 +299,8 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         fcProps.add(skipWind, new GridBagConstraints(3, gridY++, 1, 1, 0.0, 0.0, WEST, NONE, insets1, 0, 0));
         fcProps.add(skipWave, new GridBagConstraints(3, gridY++, 1, 1, 0.0, 0.0, WEST, NONE, insets1, 0, 0));
 
-        
-        // btnCalcConsumption.setEnabled(false);
+
+        btnCalcConsumption.setEnabled(false);
         btnCalcConsumption.addActionListener(this);
         fcProps.add(fixSize(btnCalcConsumption, -1, 20),
                 new GridBagConstraints(4, gridY, 1, 1, 0.0, 0.0, SOUTHEAST, NONE, insets2, 0, 0));
@@ -481,7 +481,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         btnZoomToWp.setEnabled(wpSelected && chartPanel != null);
         btnZoomToRoute.setEnabled(chartPanel != null);
 
-        btnCalcConsumption.setEnabled(metoc != null);
+        enableCalcolous();
 
         // boolean allRowsLocked = checkLockedRows();
 
@@ -659,10 +659,12 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
             }
         });
         routeTableModel.fireTableDataChanged();
-        btnCalcConsumption.setEnabled(true);
+        enableCalcolous();
 
     }
-
+    private void enableCalcolous() {
+        btnCalcConsumption.setEnabled(metoc != null  && route.getRouteFCSettings() != null && route.getRouteFCSettings().getShip() != null);
+    }
     /**
      * Remove fuel consumption info.
      */
@@ -693,8 +695,16 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         ShipConfiguration config = (ShipConfiguration) configurationsSelector.getSelectedItem();
         Boolean usePartitions = waveComponents.isEnabled() && waveComponents.isSelected();
         try {
-            WindresTable cxRes = TableLoader.laodWindres(config.getWindres());
-            WaveresGenericTable cawRes = TableLoader.loadWaveGenericTable(config.getWaveres());
+            WindresTable cxRes = null;
+            WaveresGenericTable cawRes = null;
+            try {
+                cxRes = TableLoader.laodWindres(config.getWindres());
+                cawRes = TableLoader.loadWaveGenericTable(config.getWaveres());
+            } catch (RouteLoadException e) {
+                throw new Exception("Configurazione Tabelle Assente", e);
+            } catch (Exception e) {
+                throw new Exception("Configurazione Tabelle Assente", e);
+            }
 
             // If hullresistance table is configured load it
             HullresTable hullResTable = null;
@@ -721,8 +731,13 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                         return null;
                     }).collect(Collectors.toMap(FuelRateTable::getId, t -> t));
 
-            LinkedList<MetocForecastPoint> metocList = new LinkedList<>(metoc.getForecasts());
-            ;
+            LinkedList<MetocForecastPoint> metocList = null;
+            try {
+                metocList = new LinkedList<>(metoc.getForecasts());
+            } catch (Exception e) {
+                throw new Exception("Metoc non disponibili", e);
+            }
+
             ListIterator<MetocForecastPoint> iter = metocList.listIterator(); // lista metocs
 
             List<Date> etas = route.getEtas(); // Lista delle Date leg
@@ -869,7 +884,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
             totalFuel.setText(Formatter.formatDouble(totalConsumption, 2));
             routeTableModel.fireTableDataChanged();
         } catch (Exception e) {
-            showErrorMessage(e.getMessage(), "Load table error");
+            showErrorMessage(e.getMessage(), "Errore durante il calcolo consumi");
         }
 
     }

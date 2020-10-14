@@ -34,7 +34,7 @@ public class WaveSpectrumChart extends JPanel {
     private ChartPanel chartPanel;
     private JFreeChart chart;
     private DefaultXYZDataset dataset;
-    private int width = 350;
+    private int width = 370;
     private int height = 460;
     private WavePlot plot;
     private static String pattern = "dd/MM/yyyy HH:mm";
@@ -178,7 +178,9 @@ public class WaveSpectrumChart extends JPanel {
                     .concat(Formatter.lonToPrintable(mP.getLon()))));
             chart.addSubtitle(new TextTitle("L.T. "
                     .concat(df.format(mP.getTime()))));
-
+            if(mP.getWindWave() == null && mP.getSwellWave().size() == 0) {
+                chart.addSubtitle(new TextTitle("Partitions N/A"));
+            }
             plot.addCornerTextItem("10m Wind: "
                     .concat(Formatter.formatWindSpeed(mP.getWindSpeed().getForecast()))
                     .concat(" ")

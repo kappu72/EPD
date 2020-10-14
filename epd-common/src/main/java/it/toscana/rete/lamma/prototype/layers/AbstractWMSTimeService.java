@@ -31,13 +31,21 @@ public abstract class AbstractWMSTimeService extends AbstractWMSService {
 
     public AbstractWMSTimeService(String wmsServiceURL) {
         super(wmsServiceURL);
-        this.wmsServiceURL = wmsServiceURL;
+        if(wmsServiceURL.endsWith("?") || wmsServiceURL.contains("?")){
+            this.wmsServiceURL = wmsServiceURL;
+        }else {
+            this.wmsServiceURL = wmsServiceURL.concat("?");
+        }
         df.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
     public AbstractWMSTimeService(String wmsServiceURL, Projection p) {
         super(wmsServiceURL, p);
-        this.wmsServiceURL = wmsServiceURL;
+        if(wmsServiceURL.endsWith("?") || wmsServiceURL.contains("?")){
+            this.wmsServiceURL = wmsServiceURL;
+        }else {
+            this.wmsServiceURL = wmsServiceURL.concat("?");
+        }
         df.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
