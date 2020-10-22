@@ -283,7 +283,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         fcProps.add(fixSize(shipsSelector, 120),
                 new GridBagConstraints(1, gridY++, 1, 1, 0.0, 0.0, WEST, NONE, insets1, 0, 0));
 
-        fcProps.add(new JLabel("Sail Configuration"),
+        fcProps.add(new JLabel("LUT Configuration"),
                 new GridBagConstraints(0, gridY, 1, 1, 0.0, 0.0, WEST, NONE, insets1, 0, 0));
         fcProps.add(fixSize(configurationsSelector, 120),
                 new GridBagConstraints(1, gridY++, 1, 1, 0.0, 0.0, WEST, NONE, insets1, 0, 0));

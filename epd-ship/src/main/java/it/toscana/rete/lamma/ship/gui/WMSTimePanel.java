@@ -8,7 +8,7 @@ public class WMSTimePanel extends WMSTimePanelCommon implements DockableComponen
     @Override
     public String getDockableComponentName() {
         
-        return "WMS Time";
+        return "Profumo WMS Service";
     }
 
     @Override

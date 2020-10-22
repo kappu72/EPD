@@ -16,8 +16,8 @@ public class RoutesConsumtionTableModel extends AbstractTableModel {
     private static final Logger LOG = LoggerFactory.getLogger(RoutesConsumtionTableModel.class);
     public static final String[] COL_NAMES = {
             "Name",
-            "Ton",
-            "Length",
+            "Fuel (ton)",
+            "Length (NM)",
             "Time",
             "Visible"};
 
@@ -31,6 +31,31 @@ public class RoutesConsumtionTableModel extends AbstractTableModel {
     }
     public void addRoutes(java.util.List<Route> routes){
         this.routes=routes;
+        fireTableDataChanged();
+    }
+    public void addRoute(Route route){
+        if(!routes.contains(route)) {
+            this.routes.add(route);
+            fireTableDataChanged();
+        }
+    }
+    public List<Route> getRoutes() {
+        return this.routes;
+    }
+    public void removeRoute( Route r) {
+        this.routes.remove(r);
+        fireTableDataChanged();
+    }
+    public void removeRoutes (int[] rows) {
+        List<Route> l = new ArrayList<Route>();
+        for (int row : rows) {
+            l.add(this.routes.get(row));
+        }
+        l.stream().forEach(routes::remove);
+        fireTableDataChanged();
+    }
+    public void removeAll() {
+        this.routes.clear();
         fireTableDataChanged();
     }
     @Override
@@ -56,9 +81,9 @@ public class RoutesConsumtionTableModel extends AbstractTableModel {
                 case 0:
                     return Formatter.formatString(route.getName());
                 case 1:
-                    return Formatter.formatDouble(calcTotal(route), 2);
+                    return calcTotal(route);
                 case 2:
-                    return Formatter.formatDistNM(route.getRouteDtg());
+                    return route.getRouteDtg();
                 case 3:
                     return Formatter.formatTime(route.getRouteTtg());
                 case 4:

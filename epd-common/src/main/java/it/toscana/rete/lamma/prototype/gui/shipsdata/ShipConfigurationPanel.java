@@ -64,7 +64,7 @@ public class ShipConfigurationPanel extends JPanel implements ActionListener, Sh
 	private ConfigurationsFileSelector windres = new ConfigurationsFileSelector("Windres*");
 	private ConfigurationsFileSelector waveres = new ConfigurationsFileSelector("Waveres Generic*");
 	private ConfigurationsFileSelector waveres_sw = new ConfigurationsFileSelector("Waveres Swell");
-	private ConfigurationsFileSelector waveres_se = new ConfigurationsFileSelector("Waveres Sea");
+	private ConfigurationsFileSelector waveres_se = new ConfigurationsFileSelector("Waveres Wind");
 	private ConfigurationsFileSelector hullres = new ConfigurationsFileSelector("Hull Resitance");
 	private JTextField propName = new JFormattedTextField();
 	private final JLabel lblNewConfigName = new JLabel("New Config. Name");
@@ -79,7 +79,7 @@ public class ShipConfigurationPanel extends JPanel implements ActionListener, Sh
 	
 	ShipConfigurationPanel (ShipData ship) {
 		super();
-		setBorder(new TitledBorder(null, "SaiConfiguration", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		setBorder(new TitledBorder(null, "LUT Configuration", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         setBounds(8, 43, 444, 455);
         setLayout(null);
 		if(ship != null) {

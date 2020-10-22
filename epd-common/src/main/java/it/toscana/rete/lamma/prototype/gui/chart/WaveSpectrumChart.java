@@ -44,6 +44,7 @@ public class WaveSpectrumChart extends JPanel {
         super();
         df = new SimpleDateFormat(pattern);
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        setLayout(new BorderLayout());
         createChart();
     }
 
@@ -69,6 +70,7 @@ public class WaveSpectrumChart extends JPanel {
         NumberAxis periodAxis = new NumberAxis();
 
         periodAxis.setLabel("T[sec]");
+        periodAxis.setTickUnit(new NumberTickUnit(2));
         periodAxis.setRange(0, 13);
         periodAxis.setAxisLineVisible(false);
         periodAxis.setTickMarksVisible(false);
@@ -106,15 +108,17 @@ public class WaveSpectrumChart extends JPanel {
         plot.setRenderer(renderer);
 
 
-        chartPanel = new ChartPanel(chart) {
-            public Dimension getPreferredSize() {
-                return new Dimension(width, height);
-            }
-        };
-
+        chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(new Dimension(-1, -1));
         chartPanel.setMouseZoomable(true);
-        add(chartPanel);
+        add(chartPanel, BorderLayout.CENTER);
 
+    }
+
+    @Override
+    public void setPreferredSize(Dimension preferredSize) {
+        super.setPreferredSize(preferredSize);
+        chartPanel.setPreferredSize(preferredSize);
     }
 
     /**

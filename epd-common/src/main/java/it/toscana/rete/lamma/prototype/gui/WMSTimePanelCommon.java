@@ -14,6 +14,7 @@ import java.util.List;
 import com.bbn.openmap.gui.OMComponentPanel;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -64,7 +65,8 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
 
     public WMSTimePanelCommon() {
         $$$setupUI$$$();
-        add(this.wmsTime);
+        setLayout(new BorderLayout());
+        add(this.wmsTime, BorderLayout.CENTER);
         waveDir.addItemListener(this);
         windSpeedDir.addItemListener(this);
         wavePeriod.addItemListener(this);
@@ -254,15 +256,17 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
     private void $$$setupUI$$$() {
         createUIComponents();
         wmsTime = new JPanel();
-        wmsTime.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
+        wmsTime.setLayout(new GridLayoutManager(3, 1, new Insets(0, 5, 0, 5), -1, -1));
         wmsTime.setAutoscrolls(false);
         wmsTime.setMaximumSize(new java.awt.Dimension(4000, 350));
         wmsTime.setMinimumSize(new java.awt.Dimension(230, 350));
         wmsTime.setOpaque(true);
         wmsTime.setPreferredSize(new java.awt.Dimension(230, 350));
+        wmsTime.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridBagLayout());
-        wmsTime.add(panel1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        wmsTime.add(panel1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, new java.awt.Dimension(-1, 200), 0, false));
+        panel1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JLabel label1 = new JLabel();
         label1.setMaximumSize(new java.awt.Dimension(100, 30));
         label1.setMinimumSize(new java.awt.Dimension(70, 30));
@@ -279,7 +283,7 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
         gbc.anchor = GridBagConstraints.WEST;
         panel1.add(label1, gbc);
         hourSelector.setMaximumRowCount(20);
-        hourSelector.setMaximumSize(new java.awt.Dimension(800, 30));
+        hourSelector.setMaximumSize(new java.awt.Dimension(400, 30));
         hourSelector.setMinimumSize(new java.awt.Dimension(130, 20));
         hourSelector.setOpaque(true);
         hourSelector.setPreferredSize(new java.awt.Dimension(145, 20));
@@ -288,6 +292,7 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
         gbc.gridy = 1;
         gbc.weightx = 2.0;
         gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         panel1.add(hourSelector, gbc);
         showLegend = new JCheckBox();
         showLegend.setPreferredSize(new java.awt.Dimension(72, 30));
@@ -316,16 +321,18 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
         selectedLocalTime = new JLabel();
         selectedLocalTime.setAlignmentX(0.5f);
         selectedLocalTime.setAutoscrolls(false);
+        selectedLocalTime.setMaximumSize(new java.awt.Dimension(250, 16));
         selectedLocalTime.setPreferredSize(new java.awt.Dimension(145, 30));
         selectedLocalTime.setText("Not selected");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(0, 4, 0, 0);
         panel1.add(selectedLocalTime, gbc);
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridBagLayout());
-        wmsTime.add(panel2, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        wmsTime.add(panel2, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new java.awt.Dimension(-1, 200), null, new java.awt.Dimension(-1, 300), 0, false));
         wavePeriod = new JRadioButton();
         wavePeriod.setActionCommand("meanWavePeriod");
         wavePeriod.setText("Mean Wave Period");
@@ -351,7 +358,7 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
         waveHeight = new JRadioButton();
         waveHeight.setActionCommand("meanWaveHeight");
         waveHeight.setSelected(false);
-        waveHeight.setText("Mean Wave Height");
+        waveHeight.setText("Significant Wave Height");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 4;
@@ -421,12 +428,12 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
         gbc.anchor = GridBagConstraints.WEST;
         panel2.add(windSpeedDir, gbc);
         panelLabel = new JLabel();
-        Font panelLabelFont = this.$$$getFont$$$(null, Font.BOLD, 14, panelLabel.getFont());
+        Font panelLabelFont = this.$$$getFont$$$(null, -1, -1, panelLabel.getFont());
         if (panelLabelFont != null) panelLabel.setFont(panelLabelFont);
         panelLabel.setHorizontalAlignment(0);
         panelLabel.setHorizontalTextPosition(0);
         panelLabel.setText("Lamma WMS Metoc");
-        wmsTime.add(panelLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new java.awt.Dimension(147, 42), null, 0, false));
+        wmsTime.add(panelLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         ButtonGroup buttonGroup;
         buttonGroup = new ButtonGroup();
         buttonGroup.add(wavePeriod);

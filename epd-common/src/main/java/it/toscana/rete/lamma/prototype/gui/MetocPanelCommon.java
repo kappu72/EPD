@@ -28,6 +28,7 @@ import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -68,7 +69,8 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
      */
     public MetocPanelCommon() {
         $$$setupUI$$$();
-        add(this.panel1);
+        setLayout(new BorderLayout());
+        add(this.panel1, BorderLayout.CENTER);
         df = new SimpleDateFormat(pattern);
         df.setTimeZone(DateTimeParser.UTC_TZ);
         metocActivecb.addActionListener(new ActionListener() {
@@ -170,28 +172,32 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
         PointMetocProvider mp = (PointMetocProvider) pointMetocProviderSelector1.getSelectedItem();
         MetocService metocService = getService(mp);
         if (mp != null && metocService != null) {
-            metocService.openMetoc(mp.getSettings());
-            CalendarDateRange dateRange = metocService.getGcs().getCalendarDateRange();
-            if (timeSelector != null) {
-                if (dateRange != null) {
-                    try {
-                        Collection<Date> parsed = (Collection<Date>)
-                                dateTimeParser.parse(df.format(dateRange.getStart().toDate())
-                                        .concat("/")
-                                        .concat(df.format(dateRange.getEnd().toDate())
-                                                .concat("/PT1H")));
+            try {
+                metocService.openMetoc(mp.getSettings());
+                CalendarDateRange dateRange = metocService.getGcs().getCalendarDateRange();
+                if (timeSelector != null) {
+                    if (dateRange != null) {
+                        try {
+                            Collection<Date> parsed = (Collection<Date>)
+                                    dateTimeParser.parse(df.format(dateRange.getStart().toDate())
+                                            .concat("/")
+                                            .concat(df.format(dateRange.getEnd().toDate())
+                                                    .concat("/PT1H")));
 
-                        timeSelector.addTimes(new ArrayList<>(parsed));
-                        if (parsed.size() > 0) {
-                            timeSelector.setSelectedIndex(0);
+                            timeSelector.addTimes(new ArrayList<>(parsed));
+                            if (parsed.size() > 0) {
+                                timeSelector.setSelectedIndex(0);
+                            }
+                        } catch (ParseException e) {
+                            e.printStackTrace();
                         }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
+                    } else {
+                        timeSelector.addTimes(new ArrayList<>());
+                        timeSelector.setSelectedIndex(-1);
                     }
-                } else {
-                    timeSelector.addTimes(new ArrayList<>());
-                    timeSelector.setSelectedIndex(-1);
                 }
+            } catch (ShoreServiceException e) {
+                e.printStackTrace();
             }
         }
 
@@ -212,17 +218,18 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
                     .filter(s -> (s.getProvider().equals(MetocProviders.LOCAL.label()) && s.getLocalMetocFile() != null))
                     .map(s -> new PointMetocProvider(s))
                     .filter(distinctByKey(p -> p.getFile()))
+                    .filter(p -> (new File(p.getFile())).exists())
                     .distinct()
                     .collect(Collectors.toList());
         return new ArrayList<PointMetocProvider>();
     }
 
     // Utility function to filter object in a strem bya a methid
-    public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor)
-    {
+    public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
         Map<Object, Boolean> map = new ConcurrentHashMap<>();
         return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
+
     /**
      * Update the metoc provider selector
      */
@@ -289,6 +296,7 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
         }
 
     }
+
     @Override
     public void routesChanged(RoutesUpdateEvent e) {
         if (e.is(RoutesUpdateEvent.METOC_SETTINGS_CHANGED) || e.is(RoutesUpdateEvent.ROUTE_METOC_CHANGED) ||
@@ -317,7 +325,7 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
         panel1.setPreferredSize(new Dimension(370, 540));
         panel1.setRequestFocusEnabled(false);
         final JPanel panel2 = new JPanel();
-        panel2.setLayout(new FormLayout("fill:max(d;4px):noGrow,left:4dlu:noGrow,fill:84px:noGrow,left:4dlu:noGrow,fill:184px:noGrow,fill:d:grow", "center:d:noGrow,top:3dlu:noGrow,center:max(d;4px):noGrow"));
+        panel2.setLayout(new FormLayout("fill:max(d;4px):noGrow,left:4dlu:noGrow,fill:max(d;84px):grow(0.5),left:4dlu:noGrow,fill:max(d;184px):grow(1.5),fill:d:grow(0.5)", "center:d:noGrow,top:3dlu:noGrow,center:max(d;4px):noGrow"));
         panel2.setMinimumSize(new Dimension(360, 70));
         panel2.setPreferredSize(new Dimension(360, 70));
         panel2.setRequestFocusEnabled(false);
@@ -338,15 +346,17 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
         panel2.add(label2, cc.xy(3, 3));
         setValBtn = new JButton();
         setValBtn.setLabel("Values");
+        setValBtn.setMaximumSize(new Dimension(250, 30));
+        setValBtn.setPreferredSize(new Dimension(-1, 30));
         setValBtn.setText("Values");
-        panel2.add(setValBtn, cc.xy(6, 3));
+        panel2.add(setValBtn, new CellConstraints(6, 3, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT, new Insets(0, 5, 0, 5)));
         waveSpectrumChart.setAutoscrolls(true);
         waveSpectrumChart.setBackground(new Color(-12828863));
         waveSpectrumChart.setFocusCycleRoot(true);
         waveSpectrumChart.setMinimumSize(new Dimension(400, 460));
         waveSpectrumChart.setName("");
         waveSpectrumChart.setOpaque(true);
-        waveSpectrumChart.setPreferredSize(new Dimension(350, 460));
+        waveSpectrumChart.setPreferredSize(new Dimension(-1, -1));
         waveSpectrumChart.setToolTipText("Puppamelo");
         panel1.add(waveSpectrumChart, BorderLayout.CENTER);
     }

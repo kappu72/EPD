@@ -1,5 +1,6 @@
 package it.toscana.rete.lamma.prototype.metocservices;
 
+import dk.dma.epd.common.prototype.communication.webservice.ShoreServiceException;
 import dk.dma.epd.common.prototype.model.route.RouteMetocSettings;
 
 import ucar.nc2.dt.grid.GridDataset;
@@ -13,7 +14,7 @@ public class LocalMetocService extends MetocService {
  * @return
  */
 @Override
-public synchronized GridDataset openMetoc(RouteMetocSettings metocSettings) {
+public synchronized GridDataset openMetoc(RouteMetocSettings metocSettings) throws ShoreServiceException {
 
     if (metocDataset == null || !metocDataset.getLocation().equals(metocSettings.getLocalMetocFile())) {
         clearDatasets();

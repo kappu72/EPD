@@ -343,6 +343,7 @@ public class RouteMetocDialog extends JDialog implements ActionListener, FocusLi
         }
 
         private String setLocalFile() {
+                if(localFilePath != null)  fc.setCurrentDirectory(new File(localFilePath));
                 fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 fc.setMultiSelectionEnabled(false);
                 // TODO add more metoc file ext

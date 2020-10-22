@@ -8,7 +8,7 @@ import it.toscana.rete.lamma.ship.layers.MouseEventLayer;
 public class MetocPointPanel extends MetocPanelCommon implements DockableComponentPanel {
     @Override
     public String getDockableComponentName() {
-        return "Metoc Panel";
+        return "Metoc";
     }
 
     @Override

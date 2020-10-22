@@ -81,12 +81,11 @@ public class MetocService extends MapHandlerChild {
         NetcdfDataset.setDefaultEnhanceMode(NetcdfDataset.getEnhanceAll());
     }
 
-    public GridDataset openMetoc(String path) {
+    public GridDataset openMetoc(String path) throws ShoreServiceException{
         try {
             metocDataset = GridDataset.open(path);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new ShoreServiceException("File not found ".concat(path));
         }
         return metocDataset;
     }
@@ -97,7 +96,7 @@ public class MetocService extends MapHandlerChild {
      * @param metocSettings
      * @return
      */
-    public synchronized GridDataset openMetoc(RouteMetocSettings metocSettings) {
+    public synchronized GridDataset openMetoc(RouteMetocSettings metocSettings) throws ShoreServiceException{
 
         if (metocDataset == null || !metocDataset.getLocation().equals(metocSettings.getLocalMetocFile())) {
             clearDatasets();
@@ -418,6 +417,9 @@ public class MetocService extends MapHandlerChild {
      * @throws ShoreServiceException
      */
     private GeoGrid getGeoGridByName(String[] names) throws ShoreServiceException {
+        if(metocDataset == null) {
+            throw new ShoreServiceException("Missing netcdf metoc file: ");
+        }
         for (String name : names) {
             GeoGrid g = metocDataset.findGridByShortName(name);
             if (g != null) {
