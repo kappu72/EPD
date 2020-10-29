@@ -75,16 +75,15 @@ public abstract class AbstractWMSTimeService extends AbstractWMSService {
 
     private String getRequestLayers() {
         return "&LAYERS=" + wmsParams.getLayers().stream()
-                .map(l -> this.getRequestLayer(l))
                 .collect(Collectors.joining(","));
     }
     private String getRequestLayer(String layer) {
-        return WMSMetocLayers.valueOf(layer).layerName();
+        return WMSMetocLayers.get(layer).layerName();
     }
     private String getInterpolation() {
         return "&INTERPOLATIONS=" + wmsParams.getLayers().stream()
                 .map(l -> {
-                    return WMSMetocLayers.valueOf(l).isInterpolate() ? "bilinear" : " ";
+                    return WMSMetocLayers.get(l).isInterpolate() ? "bilinear" : " ";
                 })
                 .collect(Collectors.joining(",")).replace(" ", "");
     }

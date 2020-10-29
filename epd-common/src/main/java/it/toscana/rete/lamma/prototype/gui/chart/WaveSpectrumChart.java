@@ -22,8 +22,7 @@ import javax.swing.*;
 import java.awt.*;
 
 import java.awt.geom.AffineTransform;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.ArrayList;
 import java.util.TimeZone;
 
@@ -70,8 +69,25 @@ public class WaveSpectrumChart extends JPanel {
         NumberAxis periodAxis = new NumberAxis();
 
         periodAxis.setLabel("T[sec]");
-        periodAxis.setTickUnit(new NumberTickUnit(2));
-        periodAxis.setRange(0, 13);
+        periodAxis.setTickUnit(new NumberTickUnit(1));
+        periodAxis.setRange(0, 14);
+       /* periodAxis.setNumberFormatOverride(new NumberFormat() {
+            @Override
+            public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {
+                return null;
+
+            }
+
+            @Override
+            public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos) {
+                return null;
+            }
+
+            @Override
+            public Number parse(String source, ParsePosition parsePosition) {
+                return null;
+            }
+        });*/
         periodAxis.setAxisLineVisible(false);
         periodAxis.setTickMarksVisible(false);
         periodAxis.setTickLabelInsets(new RectangleInsets(0.0, 0.0, 0.0, 0.0));
@@ -86,7 +102,7 @@ public class WaveSpectrumChart extends JPanel {
                 NumberFormat.getNumberInstance());
         renderer.setBaseToolTipGenerator(tooltip);
 
-        renderer.setFillComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
+        renderer.setFillComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f));
 
         for (int i = 0; i < dataset.getSeriesCount(); i++) {
             renderer.setSeriesFilled(i, true); // wind
@@ -194,7 +210,7 @@ public class WaveSpectrumChart extends JPanel {
                     .concat(" ")
                     .concat(Formatter.formatDegrees(mP.getCurrentDirection().getForecast(), 0))
                     );
-            plot.addCornerTextItem("M. Wave: "
+            plot.addCornerTextItem("T. Wave: "
                     .concat(Formatter.formatWave(mP.getMeanWave())));
         }else {
             chart.addSubtitle(new TextTitle("Metoc not available"));

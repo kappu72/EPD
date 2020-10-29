@@ -5,7 +5,7 @@
       <xy x="20" y="24" width="370" height="540"/>
     </constraints>
     <properties>
-      <minimumSize width="370" height="540"/>
+      <minimumSize width="370" height="300"/>
       <preferredSize width="370" height="540"/>
       <requestFocusEnabled value="false"/>
     </properties>
@@ -95,7 +95,14 @@
           <name value=""/>
           <opaque value="true"/>
           <preferredSize width="-1" height="-1"/>
-          <toolTipText value="Puppamelo"/>
+          <requestFocusEnabled value="false"/>
+          <toolTipText value=""/>
+        </properties>
+      </component>
+      <component id="c1fe3" class="it.toscana.rete.lamma.prototype.gui.SpectrumLegend">
+        <constraints border-constraint="East"/>
+        <properties>
+          <background color="-1"/>
         </properties>
       </component>
     </children>

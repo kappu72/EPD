@@ -3,6 +3,7 @@ package it.toscana.rete.lamma.prototype.metocservices;
 import com.bbn.openmap.MapHandlerChild;
 import dk.dma.epd.common.prototype.gui.settings.ISettingsListener;
 import dk.dma.epd.common.prototype.settings.MapSettings;
+import it.toscana.rete.lamma.prototype.layers.WMSMetocLayer;
 import org.geotools.ows.ServiceException;
 import org.geotools.ows.wms.Layer;
 import org.geotools.ows.wms.WMSCapabilities;
@@ -116,7 +117,32 @@ public class WMSClientService extends MapHandlerChild implements ISettingsListen
             }
             return null;
     }
-
+    // Vanno estratti i tempi per uno singolo layer, tanto dovrebbero essere tutti uguali
+    // va pensato un componente che prende questa stringa inizio fine e genera il resto
+    public  Dimension getTimeDimension(String run) {
+        List<Dimension> dim = Arrays.stream(this.getLayers())
+                .filter(layer -> layer.getName().toLowerCase().contains(run.concat(":").concat(WMSMetocLayers.MEAN_WAVE_DIR.layerName()).toLowerCase()))
+                .sorted(new Comparator<Layer>() {
+                    @Override
+                    public int compare(Layer o1, Layer o2) {
+                        return o1.getName().compareTo(o2.getName()) * -1;
+                    }
+                })
+                .map(layer -> layer.getDimension("time"))
+                .collect(Collectors.toList());
+        if(dim.size() > 0) {
+            return dim.get(0);
+        }
+        return null;
+    }
+    public List<String> getWorkspaces() {
+        return Arrays.stream(getLayers())
+                .map(Layer::getName)
+                .filter(n -> n.contains(":") && WMSMetocLayers.get(n.split(":")[1]) != null)
+                .map(n -> n.split(":")[0])
+                .distinct()
+                .collect(Collectors.toList());
+    }
     public String getLayerRun() {
         Optional<Map<String, Dimension>> dim = Arrays.stream(this.getLayers())
                 .filter(layer -> layer.getName().toLowerCase().contains(WMSMetocLayers.MEAN_WAVE_DIR.layerName().toLowerCase()))

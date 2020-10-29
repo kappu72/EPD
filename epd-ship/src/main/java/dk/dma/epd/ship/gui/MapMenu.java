@@ -502,7 +502,17 @@ public class MapMenu extends MapMenuCommon {
         routeLegInsertWaypoint.setRouteLeg(routeLeg);
         routeLegInsertWaypoint.setRouteIndex(routeIndex);
         routeLegInsertWaypoint.setPoint(point);
-        timePanelMenu.setEnabled(false);
+
+        timePanelMenu.setMapBean(mapBean);
+        timePanelMenu.setRouteWaypointIndex(-1);
+        timePanelMenu.setLeg(routeLeg);
+        timePanelMenu.setPoint(point);
+        timePanelMenu.setRouteManager(routeManager);
+        timePanelMenu.setRouteIndex(routeIndex);
+        timePanelMenu.setWmsTimePanel(wmsTimePanel);
+        timePanelMenu.setMetocPanelCommon(metocPanelCommon);
+        timePanelMenu.setEnabled(wmsTimePanel != null && wmsTimePanel.isVisible() || metocPanelCommon != null && metocPanelCommon.isVisible());
+
         add(routeLegInsertWaypoint);
 
         generalRouteMenu(routeIndex);
@@ -547,6 +557,8 @@ public class MapMenu extends MapMenuCommon {
         routeWaypointEditEta.setRouteIndex(routeIndex);
         add(routeWaypointEditEta);
 
+        timePanelMenu.setLeg(null);
+        timePanelMenu.setPoint(null);
         timePanelMenu.setRouteWaypointIndex(routeWaypointIndex);
         timePanelMenu.setRouteManager(routeManager);
         timePanelMenu.setRouteIndex(routeIndex);

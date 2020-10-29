@@ -64,7 +64,7 @@ public class MainFrame extends MainFrameCommon implements IMapFrame {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String TITLE = "EPD-ship " + VersionInfo.getVersion();
+    private static final String TITLE = "OrCa " + VersionInfo.getVersion();
     protected static final int SENSOR_PANEL_WIDTH = 190;
 
     private TopPanel topPanel;

@@ -67,8 +67,7 @@ public class RoutesConsumptionPanelCommon extends OMComponentPanel implements Pr
             }
 
             private void maybeShowPopup(MouseEvent e) {
-                int rowIdx = rcTable.rowAtPoint(e.getPoint());
-
+                int rowIdx = rcTable.convertRowIndexToModel(rcTable.rowAtPoint(e.getPoint()));
                 if (rowIdx != -1) {
                     tablePopUp.show(e.getComponent(),
                             e.getX(), e.getY(), rowIdx);
@@ -154,6 +153,9 @@ public class RoutesConsumptionPanelCommon extends OMComponentPanel implements Pr
                         ((RoutesConsumtionTableModel) rcTable.getModel()).removeRoute(route);
                         routeSelector.removeRoute(route);
                     });
+        }
+        if (e == RoutesUpdateEvent.ROUTE_CHANGED) {
+            ((RoutesConsumtionTableModel) rcTable.getModel()).fireTableDataChanged();
         }
         disableSelect = false;
 

@@ -39,6 +39,9 @@ public enum WMSMetocLayers {
         return interpolate;
     }
     public static WMSMetocLayers get(String layerName) {
+        if(layerName.contains(":")) {
+            return lookup.get(layerName.split(":")[1]);
+        }
         return lookup.get(layerName);
     }
 

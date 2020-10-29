@@ -30,19 +30,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
-import javax.swing.DefaultCellEditor;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -53,6 +41,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
 
+import dk.dma.epd.common.prototype.gui.route.RouteMetocDialog;
+import dk.dma.epd.common.prototype.model.route.*;
 import it.toscana.rete.lamma.prototype.model.tables.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,11 +52,6 @@ import dk.dma.epd.common.Heading;
 import dk.dma.epd.common.prototype.EPD;
 import dk.dma.epd.common.prototype.gui.route.RoutePropertiesDialogCommon.RouteChangeListener;
 import dk.dma.epd.common.prototype.gui.views.ChartPanelCommon;
-import dk.dma.epd.common.prototype.model.route.Route;
-import dk.dma.epd.common.prototype.model.route.RouteLeg;
-import dk.dma.epd.common.prototype.model.route.RouteLoadException;
-import dk.dma.epd.common.prototype.model.route.RouteWaypoint;
-import dk.dma.epd.common.prototype.model.route.RoutesUpdateEvent;
 import dk.dma.epd.common.text.Formatter;
 import dk.frv.enav.common.xml.metoc.MetocForecast;
 import dk.frv.enav.common.xml.metoc.MetocForecastPoint;
@@ -90,7 +75,7 @@ import it.toscana.rete.lamma.utils.Utils;
  * inspired by RoutePropertiedDialogCommon
  */
 public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
-        implements ActionListener, ListSelectionListener, ItemListener, TableModelListener {
+        implements ActionListener, ListSelectionListener, ItemListener, TableModelListener, IRoutesUpdateListener {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(RouteFuelConsumptionPropertiesDialogCommon.class);
@@ -137,6 +122,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
     protected JButton btnActivate = new JButton("Activate");
     private JButton btnExport = new JButton("Export data");
     private JButton btnClose = new JButton("Close");
+    private JButton btnOpenMetoc = new JButton("Metoc Prop.");
     private JCheckBox cbVisible = new JCheckBox("Visible");
 
     private JButton btnCalcConsumption = new JButton("Calc Consumption");
@@ -184,7 +170,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
                 ((RouteFuelConsumptionPropertiesDialogCommon) e.getSource()).clean();
             }
         });
-
+        EPD.getInstance().getRouteManager().addListener(this);
         // check if it has metoc and add a listner to now when metoc changes
         // we doesn't consider if are expired
         metoc = this.route.getMetocForecast();
@@ -194,6 +180,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
 
         setBounds(100, 100, 1000, 450);
         setLocationRelativeTo(parent);
+        this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     }
 
     /** Clean object reference */
@@ -202,6 +189,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         chartPanel = null;
         route = null;
         metoc = null;
+        EPD.getInstance().getRouteManager().removeListener(this);
     }
 
     /***************************************************/
@@ -373,7 +361,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
 
         btnActivate.addActionListener(this);
         btnExport.addActionListener(this);
-
+        btnOpenMetoc.addActionListener(this);
         btnClose.addActionListener(this);
         cbVisible.addActionListener(this);
         getRootPane().setDefaultButton(btnClose);
@@ -382,8 +370,9 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
 
         btnPanel.add(btnActivate, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, WEST, NONE, insets5, 0, 0));
         btnPanel.add(cbVisible, new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0, WEST, NONE, insets5, 0, 0));
-        btnPanel.add(btnExport, new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0, EAST, NONE, insets5, 0, 0));
-        btnPanel.add(btnClose, new GridBagConstraints(5, 0, 1, 1, 1.0, 0.0, EAST, NONE, insets5, 0, 0));
+        btnPanel.add(btnExport, new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0, WEST, NONE, insets5, 0, 0));
+        btnPanel.add(btnOpenMetoc, new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0, WEST, NONE, insets5, 0, 0));
+        btnPanel.add(btnClose, new GridBagConstraints(6, 0, 1, 1, 1.0, 0.0, EAST, NONE, insets5, 0, 0));
     }
 
     /**
@@ -579,7 +568,17 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         } else if (evt.getSource() == btnExport) {
             exportToFile();
             return;
+        }else if (evt.getSource() == btnOpenMetoc) {
+            RouteMetocDialog routeMetocDialog = new RouteMetocDialog(
+                    this,
+                    EPD.getInstance().getRouteManager()
+                   ,
+                    EPD.getInstance().getRouteManager().getRouteIndex(route));
+            routeMetocDialog.setVisible(true);
+            EPD.getInstance().getRouteManager().notifyListeners(RoutesUpdateEvent.METOC_SETTINGS_CHANGED);
+
         }
+
         // Attenzione salva ogni volta che updati un campo forse per nostro
         // scopo sarebbe meglio salvare solo dopo il calcolo
         notifyRouteListeners(RoutesUpdateEvent.ROUTE_CHANGED);
@@ -886,7 +885,7 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
         } catch (Exception e) {
             showErrorMessage(e.getMessage(), "Errore durante il calcolo consumi");
         }
-
+        notifyRouteListeners(RoutesUpdateEvent.ROUTE_CHANGED);
     }
 
     private void showErrorMessage(String txt, String title) {
@@ -1131,4 +1130,11 @@ public class RouteFuelConsumptionPropertiesDialogCommon extends JDialog
 
     }
 
+    @Override
+    public  void routesChanged(RoutesUpdateEvent e) {
+            if(e.is(RoutesUpdateEvent.ROUTE_METOC_CHANGED)) {
+                    metoc = this.route.getMetocForecast();
+                    this.enableCalcolous();
+            }
+    }
 }

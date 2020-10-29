@@ -6,6 +6,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import dk.dma.epd.common.prototype.EPD;
 import dk.dma.epd.common.prototype.communication.webservice.ShoreServiceException;
 import dk.dma.epd.common.prototype.layers.EPDLayerCommon;
+import dk.dma.epd.common.prototype.layers.common.WpCircle;
 import dk.dma.epd.common.prototype.model.route.IRoutesUpdateListener;
 
 import dk.dma.epd.common.prototype.model.route.RoutesUpdateEvent;
@@ -53,6 +54,7 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
     private PointMetocProviderSelector pointMetocProviderSelector1;
     private WMSLayerTimeSelector timeSelector;
     private JButton setValBtn;
+    private SpectrumLegend spectrumLegend;
     protected EPDLayerCommon layer;
 
     private static String pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'";
@@ -101,6 +103,8 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
         waveSpectrumChart = new WaveSpectrumChart();
         pointMetocProviderSelector1 = new PointMetocProviderSelector();
         timeSelector = new WMSLayerTimeSelector();
+        spectrumLegend = new SpectrumLegend();
+        spectrumLegend.setBackground(Color.WHITE);
     }
 
     /**
@@ -129,7 +133,12 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
     }
 
     public void drawMetoc(MetocPointForecast mpf) {
+        PointMetocProvider mp = (PointMetocProvider) pointMetocProviderSelector1.getSelectedItem();
         this.mpf = mpf;
+        layer.prepare().removeIf(o -> !(o instanceof WpCircle));
+        if (mpf.getMeanWave() != null && mpf.getMeanWave().isValid())
+            layer.prepare().add(new PointMetocGraphic(mpf, mp.getSettings(), enavSettings));
+        layer.prepare();
         waveSpectrumChart.drawMetocPointForecast(mpf);
     }
 
@@ -321,7 +330,7 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
         createUIComponents();
         panel1 = new JPanel();
         panel1.setLayout(new BorderLayout(0, 0));
-        panel1.setMinimumSize(new Dimension(370, 540));
+        panel1.setMinimumSize(new Dimension(370, 300));
         panel1.setPreferredSize(new Dimension(370, 540));
         panel1.setRequestFocusEnabled(false);
         final JPanel panel2 = new JPanel();
@@ -357,8 +366,12 @@ public class MetocPanelCommon extends OMComponentPanel implements PropertyChange
         waveSpectrumChart.setName("");
         waveSpectrumChart.setOpaque(true);
         waveSpectrumChart.setPreferredSize(new Dimension(-1, -1));
-        waveSpectrumChart.setToolTipText("Puppamelo");
+        waveSpectrumChart.setRequestFocusEnabled(false);
+        waveSpectrumChart.setToolTipText("");
         panel1.add(waveSpectrumChart, BorderLayout.CENTER);
+        final SpectrumLegend spectrumLegend1 = new SpectrumLegend();
+        spectrumLegend1.setBackground(new Color(-1));
+        panel1.add(spectrumLegend1, BorderLayout.EAST);
     }
 
     /**

@@ -331,7 +331,7 @@
 									<layout factory="predefined" placeholder="dock.single.Profumo\ WMS\ Service">
 										<replacement id="dockablesingle Profumo WMS Service"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>Profumo WMS Service</id>
+											<id>WMS Service</id>
 											<area/>
 										</delegate>
 									</layout>

@@ -41,6 +41,9 @@ public class SpectrumDialogCommon extends JDialog {
     private JFormattedTextField dSwell3;
     private JFormattedTextField dSwell4;
     private JFormattedTextField dSwell5;
+    private JFormattedTextField hTWave;
+    private JFormattedTextField pTWave;
+    private JFormattedTextField dTWave;
     private NumberFormatter heightFormatter;
     private NumberFormatter periodFormatter;
     private NumberFormatter dirFormatter;
@@ -69,16 +72,23 @@ public class SpectrumDialogCommon extends JDialog {
         setBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // va aggiornato il punto
                 metocPanel.drawMetoc(getMetoc());
             }
         });
     }
 
     private void initValues() {
+        // int tot.wave values
+        Wave tWave = mpf.getMeanWave();
+        if (tWave != null && tWave.isValid()) {
+            hTWave.setValue(tWave.getHeight());
+            pTWave.setValue(tWave.getPeriod());
+            dTWave.setValue(tWave.getDirection());
+        }
         if (!mpf.getHasPartitions()) {
             return;
         }
-        ;
         Wave w = mpf.getWindWave();
         if (w != null) {
             hWind.setValue(w.getHeight());
@@ -100,7 +110,13 @@ public class SpectrumDialogCommon extends JDialog {
     }
 
     public MetocPointForecast getMetoc() {
-        if (hWind.getValue() != null && pWind.getValue() != null && hWind.getValue() != null) {
+        if (hTWave.getValue() != null && pTWave.getValue() != null && dTWave.getValue() != null) {
+            mpf.setMeanWave(new Wave((double) hTWave.getValue(), (double) dTWave.getValue(), (double) pTWave.getValue()));
+        } else {
+            mpf.setWindWave(null);
+        }
+
+        if (hWind.getValue() != null && pWind.getValue() != null && dWind.getValue() != null) {
             mpf.setWindWave(new Wave((double) hWind.getValue(), (double) dWind.getValue(), (double) pWind.getValue()));
         } else {
             mpf.setWindWave(null);
@@ -136,7 +152,7 @@ public class SpectrumDialogCommon extends JDialog {
         setBtn.setText("Set wave spectrum values");
         panel2.add(setBtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
-        panel3.setLayout(new GridLayoutManager(7, 4, new Insets(0, 0, 0, 0), -1, -1));
+        panel3.setLayout(new GridLayoutManager(8, 4, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label1 = new JLabel();
         label1.setText("Swell 3");
@@ -147,7 +163,7 @@ public class SpectrumDialogCommon extends JDialog {
         panel3.add(hSwell3, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(60, 20), null, 0, false));
         panel3.add(hSwell2, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(60, 20), null, 0, false));
         final JLabel label3 = new JLabel();
-        label3.setText("Heigth");
+        label3.setText("Height");
         panel3.add(label3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 16), null, 0, false));
         final JLabel label4 = new JLabel();
         label4.setText("Dir");
@@ -184,6 +200,12 @@ public class SpectrumDialogCommon extends JDialog {
         panel3.add(dSwell3, new GridConstraints(4, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(60, 20), null, 0, false));
         panel3.add(dSwell4, new GridConstraints(5, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(60, 20), null, 0, false));
         panel3.add(dSwell5, new GridConstraints(6, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(60, 20), null, 0, false));
+        final JLabel label10 = new JLabel();
+        label10.setText("Tot.Wave");
+        panel3.add(label10, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel3.add(hTWave, new GridConstraints(7, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(60, 20), null, 0, false));
+        panel3.add(pTWave, new GridConstraints(7, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(60, 20), null, 0, false));
+        panel3.add(dTWave, new GridConstraints(7, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(60, 20), null, 0, false));
     }
 
     /**
@@ -210,8 +232,9 @@ public class SpectrumDialogCommon extends JDialog {
         periodFormatter.setMaximum(20.0);
         periodFormatter.setMinimum(0.1);
 
-
+        // height
         hWind = new JFormattedTextField(heightFormatter);
+
         hSwell1 = new JFormattedTextField(heightFormatter);
         swellInputs[0][0] = hSwell1;
         hSwell2 = new JFormattedTextField(heightFormatter);
@@ -222,9 +245,11 @@ public class SpectrumDialogCommon extends JDialog {
         swellInputs[3][0] = hSwell4;
         hSwell5 = new JFormattedTextField(heightFormatter);
         swellInputs[4][0] = hSwell5;
+        hTWave = new JFormattedTextField(heightFormatter);
 
-
+        // directions
         dWind = new JFormattedTextField(dirFormatter);
+
         dSwell1 = new JFormattedTextField(dirFormatter);
         swellInputs[0][2] = dSwell1;
         dSwell2 = new JFormattedTextField(dirFormatter);
@@ -236,7 +261,11 @@ public class SpectrumDialogCommon extends JDialog {
         dSwell5 = new JFormattedTextField(dirFormatter);
         swellInputs[4][2] = dSwell5;
 
+        dTWave = new JFormattedTextField(dirFormatter);
+
+        // period
         pWind = new JFormattedTextField(periodFormatter);
+
         pSwell1 = new JFormattedTextField(periodFormatter);
         swellInputs[0][1] = pSwell1;
         pSwell2 = new JFormattedTextField(periodFormatter);
@@ -247,7 +276,8 @@ public class SpectrumDialogCommon extends JDialog {
         swellInputs[3][1] = pSwell4;
         pSwell5 = new JFormattedTextField(periodFormatter);
         swellInputs[4][1] = pSwell5;
-        // TODO: place custom component creation code here;
+
+        pTWave = new JFormattedTextField(periodFormatter);
 
     }
 

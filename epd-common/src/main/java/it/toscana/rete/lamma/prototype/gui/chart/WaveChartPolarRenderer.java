@@ -191,12 +191,14 @@ public class WaveChartPolarRenderer extends DefaultPolarItemRenderer {
         Color c;
         if(!Double.isNaN(height) && height > 0.1) {
             c = lookupHeightColor(height);
+            c = new Color(c.getRed(), c.getGreen(), c.getBlue(), 204);
         }else {
              c = new Color(0000, true);
         }
         LegendItem legendItem = super.getLegendItem(series);
         if (legendItem != null) {
             legendItem.setLineVisible(false);
+
             legendItem.setFillPaint(c);
             legendItem.setShape(scaleShape(legendItem.getShape(), 2));
         }
@@ -281,6 +283,51 @@ public class WaveChartPolarRenderer extends DefaultPolarItemRenderer {
             }
         }
     }
+
+
+
+        /**
+         * Draw the radial gridlines - the rings.
+         *
+         * @param g2  the drawing surface ({@code null} not permitted).
+         * @param plot  the plot ({@code null} not permitted).
+         * @param radialAxis  the radial axis ({@code null} not permitted).
+         * @param ticks  the ticks ({@code null} not permitted).
+         * @param dataArea  the data area.
+         */
+        @Override
+        public void drawRadialGridLines(Graphics2D g2, PolarPlot plot,
+                ValueAxis radialAxis, List ticks, Rectangle2D dataArea) {
+
+            Args.nullNotPermitted(radialAxis, "radialAxis");
+            g2.setFont(radialAxis.getTickLabelFont());
+            g2.setPaint(plot.getRadiusGridlinePaint());
+            g2.setStroke(plot.getRadiusGridlineStroke());
+
+            double centerValue;
+            if (radialAxis.isInverted()) {
+                centerValue = radialAxis.getUpperBound();
+            } else {
+                centerValue = radialAxis.getLowerBound();
+            }
+            Point center = plot.translateToJava2D(0, centerValue, radialAxis, dataArea);
+
+            Iterator iterator = ticks.iterator();
+            while (iterator.hasNext()) {
+                NumberTick tick = (NumberTick) iterator.next();
+                double angleDegrees = plot.isCounterClockwise()
+                        ? plot.getAngleOffset() : -plot.getAngleOffset();
+                Point p = plot.translateToJava2D(angleDegrees,  tick.getNumber().doubleValue(), radialAxis, dataArea);
+                int r = p.x - center.x;
+                int upperLeftX = center.x - r;
+                int upperLeftY = center.y - r;
+                int d = 2 * r;
+                Ellipse2D ring = new Ellipse2D.Double(upperLeftX, upperLeftY, d, d);
+                g2.setPaint(plot.getRadiusGridlinePaint());
+                g2.draw(ring);
+            }
+        }
+
     private boolean isAngleLabelVisible(double tickVal) {
         for(int i = 0; i< tickAngle.length; i++) {
             if(tickAngle[i] == tickVal)

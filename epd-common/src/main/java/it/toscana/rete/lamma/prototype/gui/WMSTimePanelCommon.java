@@ -52,6 +52,7 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
     private JCheckBox windDir;
     private JCheckBox currentDir;
     private JLabel selectedLocalTime;
+    private WMSRUNSelector wmsRUNSelector;
     private WMSClientService wmsService;
     private DateTimeParser dateTimeParser = new DateTimeParser();
     private LammaMetocWMSConfig wmsConfig;
@@ -73,6 +74,7 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
         waveHeight.addItemListener(this);
         windGust.addItemListener(this);
         hourSelector.addItemListener(this);
+        wmsRUNSelector.addItemListener(this);
         showLayer.addItemListener(this);
         showLegend.addItemListener(this);
         windSpeed.addItemListener(this);
@@ -93,6 +95,7 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
     private void createUIComponents() {
 
         hourSelector = new WMSLayerTimeSelector(new ArrayList<>());
+        wmsRUNSelector = new WMSRUNSelector(new ArrayList<>());
     }
 
     // Update time selector time series and select first element if present
@@ -142,29 +145,30 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
     // Return current wms layers selected
     private List<String> getLayersPram() {
         List<String> newLayers = new ArrayList<>();
+        String ws = wmsRUNSelector.isEnabled() && wmsRUNSelector.getSelectedIndex() != -1 ? ((String) wmsRUNSelector.getSelectedItem()).concat(":") : "";
         if (waveHeight.isSelected()) {
-            newLayers.add(WMSMetocLayers.MEAN_WAVE_HEIGHT.name());
+            newLayers.add(ws.concat(WMSMetocLayers.MEAN_WAVE_HEIGHT.layerName()));
         } else if (wavePeriod.isSelected()) {
-            newLayers.add(WMSMetocLayers.MEAN_WAVE_PERIOD.name());
+            newLayers.add(ws.concat(WMSMetocLayers.MEAN_WAVE_PERIOD.layerName()));
         } else if (windSpeed.isSelected()) {
-            newLayers.add(WMSMetocLayers.WIND_SPEED.name());
+            newLayers.add(ws.concat(WMSMetocLayers.WIND_SPEED.layerName()));
         } else if (currentSpeed.isSelected()) {
-            newLayers.add(WMSMetocLayers.CURRENT_SPEED.name());
+            newLayers.add(ws.concat(WMSMetocLayers.CURRENT_SPEED.layerName()));
         } else if (windGust.isSelected()) {
-            newLayers.add(WMSMetocLayers.WIND_GUST.name());
+            newLayers.add(ws.concat(WMSMetocLayers.WIND_GUST.layerName()));
         }
 
         if (waveDir.isSelected()) {
-            newLayers.add(WMSMetocLayers.MEAN_WAVE_DIR.name());
+            newLayers.add(ws.concat(WMSMetocLayers.MEAN_WAVE_DIR.layerName()));
         }
         if (windSpeedDir.isSelected()) {
-            newLayers.add(WMSMetocLayers.WIND_SPEED_DIR.name());
+            newLayers.add(ws.concat(WMSMetocLayers.WIND_SPEED_DIR.layerName()));
         }
         if (windDir.isSelected()) {
-            newLayers.add(WMSMetocLayers.WIND_DIR.name());
+            newLayers.add(ws.concat(WMSMetocLayers.WIND_DIR.layerName()));
         }
         if (currentDir.isSelected()) {
-            newLayers.add(WMSMetocLayers.CURRENT_DIR.name());
+            newLayers.add(ws.concat(WMSMetocLayers.CURRENT_DIR.layerName()));
         }
 
         return newLayers;
@@ -189,7 +193,14 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
         if (obj instanceof WMSClientService) {
             wmsService = (WMSClientService) obj;
             if (wmsService.isInitialized()) {
-                updateTimes(wmsService.getTimeDimension());
+                List<String> runs = wmsService.getWorkspaces();
+                if (runs.size() > 0) {
+                    wmsRUNSelector.setEnabled(true);
+                    wmsRUNSelector.addRUNS(runs);
+                } else {
+                    wmsRUNSelector.setEnabled(false);
+                    updateTimes(wmsService.getTimeDimension());
+                }
             }
             wmsService.addPropertyChangeListener("wmsServer", this);
             wmsService.addPropertyChangeListener("wmsUrl", this);
@@ -217,6 +228,10 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
                 selectedLocalTime.setText(df.format(hourSelector.getSelectedItem()));
             else selectedLocalTime.setText("");
         }
+        if (o == wmsRUNSelector) {
+            if (wmsRUNSelector.getSelectedIndex() != -1)
+                updateTimes(wmsService.getTimeDimension((String) wmsRUNSelector.getSelectedItem()));
+        }
 
     }
 
@@ -226,7 +241,14 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
         switch (property) {
             case "wmsServer":
                 if (wmsService != null && wmsService.isInitialized()) {
-                    updateTimes(wmsService.getTimeDimension());
+                    List<String> runs = wmsService.getWorkspaces();
+                    if (runs.size() > 0) {
+                        wmsRUNSelector.setEnabled(true);
+                        wmsRUNSelector.addRUNS(runs);
+                    } else {
+                        wmsRUNSelector.setEnabled(false);
+                        updateTimes(wmsService.getTimeDimension());
+                    }
                 }
             case "wmsUrl": {
                 showLayer.setSelected(false);
@@ -277,7 +299,7 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
         GridBagConstraints gbc;
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridy = 2;
         gbc.weightx = 0.3;
         gbc.weighty = 1.0;
         gbc.anchor = GridBagConstraints.WEST;
@@ -289,7 +311,7 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
         hourSelector.setPreferredSize(new java.awt.Dimension(145, 20));
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 1;
+        gbc.gridy = 2;
         gbc.weightx = 2.0;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -315,7 +337,7 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
         label2.setText("L.T.");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.WEST;
         panel1.add(label2, gbc);
         selectedLocalTime = new JLabel();
@@ -326,10 +348,21 @@ public class WMSTimePanelCommon extends OMComponentPanel implements PropertyChan
         selectedLocalTime.setText("Not selected");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(0, 4, 0, 0);
         panel1.add(selectedLocalTime, gbc);
+        final JLabel label3 = new JLabel();
+        label3.setText("WORKSP.");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        panel1.add(label3, gbc);
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        panel1.add(wmsRUNSelector, gbc);
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridBagLayout());
         wmsTime.add(panel2, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, new java.awt.Dimension(-1, 200), null, new java.awt.Dimension(-1, 300), 0, false));

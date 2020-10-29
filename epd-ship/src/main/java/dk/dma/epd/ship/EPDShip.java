@@ -104,7 +104,7 @@ import net.maritimecloud.core.id.MmsiId;
  * Starts up components, bean context and GUI.
  * 
  */
-public final class EPDShip extends EPD implements IOwnShipListener {
+public class EPDShip extends EPD implements IOwnShipListener {
 
     private static Logger LOG;
 
@@ -158,14 +158,14 @@ public final class EPDShip extends EPD implements IOwnShipListener {
      * @param path
      *            the home path to use
      */
-    private EPDShip(String path) throws IOException {
+    public EPDShip(String path) throws IOException {
         super();
 
         if (!StringUtils.isEmpty(path)) {
             homePath = Paths.get(path);
 
             try {
-                optionalTitle = " - " + path.split("epd-ship")[1];
+                optionalTitle = " - " + path.split("OrCa")[1];
             } catch (Exception e) {
 
             }
@@ -757,7 +757,7 @@ public final class EPDShip extends EPD implements IOwnShipListener {
             // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
             Properties props = new Properties();
-            props.put("logoString", "EPD-Ship");
+            props.put("logoString", "OrCa");
             props.put("backgroundPattern", "false");
             props.put("textAntiAliasingMode", "TEXT_ANTIALIAS_VBGR");
             // props.put("menuOpaque", "true");
@@ -816,7 +816,7 @@ public final class EPDShip extends EPD implements IOwnShipListener {
 
         pluginLoader.closePlugins();
 
-        LOG.info("Closing EPD-ship");
+        LOG.info("Closing OrCa");
         this.restart = restart;
         System.exit(restart ? 2 : 0);
 

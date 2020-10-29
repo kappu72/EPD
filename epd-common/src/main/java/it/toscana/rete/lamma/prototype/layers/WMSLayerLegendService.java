@@ -46,7 +46,7 @@ public final class WMSLayerLegendService extends SingleWMSTimeService {
                 // Image maskedImage = transformWhiteToTransparent(image);
                 Mercator pp = (Mercator) p;
                 // Va sistemata la posizione dei vari layers
-                //Filter list to get other legend heigh
+                //Filter list to get other legend height
                 int  yOffset = 0;
                 for(int i = 0; i< wmsList.size(); i++) {
                     OMGraphic g = wmsList.get(i);

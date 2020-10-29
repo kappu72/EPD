@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 /**
  * Wave parameters 
- * heigth m 
+ * height m
  * period s
  * direction °
  * uvDirection used for average calculus with module = 1;
